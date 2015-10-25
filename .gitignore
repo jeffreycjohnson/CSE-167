@@ -26,6 +26,10 @@
 *.out
 *.app
 
+# Visual Studio
+*.sdf
+*.opensdf
+
 # Dependencies
 Dependencies/*
 x64/*
