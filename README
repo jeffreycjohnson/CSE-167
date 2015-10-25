@@ -1,0 +1,6 @@
+# Setup #
+* Download, extract, and build (if necessary) the latest GLFW, GLM, and GLEW to the Dependencies directory.
+* Make sure the subdirectories for each dependency don't have version numbers in them.
+* Copy the .lib and .dll files to the main Dependencies directory
+* Make sure the dependency direcories are structured like Dependencies\glm\* and not Dependencies\glm\glm\*
+* Build both debug and release versions of GLWF (name the debug version glfw3_d.lib) and copy the .pdb too
