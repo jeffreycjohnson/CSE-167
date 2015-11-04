@@ -160,6 +160,7 @@
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\Component.cpp" />
     <ClCompile Include="source\Framebuffer.cpp" />
+    <ClCompile Include="source\GameObject.cpp" />
     <ClCompile Include="source\Input.cpp" />
     <ClCompile Include="source\Light.cpp" />
     <ClCompile Include="source\Main.cpp" />
@@ -170,12 +171,14 @@
     <ClCompile Include="source\Texture.cpp" />
     <ClCompile Include="source\Transform.cpp" />
     <ClCompile Include="source\Util.cpp" />
+    <ClCompile Include="source\WebWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\include\Camera.h" />
     <ClInclude Include="source\include\Component.h" />
     <ClInclude Include="source\include\ForwardDecs.h" />
     <ClInclude Include="source\include\Framebuffer.h" />
+    <ClInclude Include="source\include\GameObject.h" />
     <ClInclude Include="source\include\Input.h" />
     <ClInclude Include="source\include\Light.h" />
     <ClInclude Include="source\include\Material.h" />
@@ -184,6 +187,7 @@
     <ClInclude Include="source\include\Shader.h" />
     <ClInclude Include="source\include\Texture.h" />
     <ClInclude Include="source\include\Transform.h" />
+    <ClInclude Include="source\include\WebWindow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

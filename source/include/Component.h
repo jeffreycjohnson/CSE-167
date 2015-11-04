@@ -5,7 +5,12 @@
 
 class Component
 {
-    
+	public:
+		GameObject* gameObject;
+
+		void setGameObject(GameObject* go) {
+			gameObject = go;
+		}
 };
 
 #endif

@@ -1,5 +1,9 @@
 #include "ForwardDecs.h"
 #include "glfw3.h"
+#include "gtc/matrix_inverse.hpp""
+#include <iostream>
+#include <gtx/string_cast.hpp>
+#include "Renderer.h"
 
 int main()
 {
@@ -15,7 +19,16 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-    GLFWwindow* window = glfwCreateWindow(1600, 800, "CSE 167 Final Project", nullptr, nullptr);
+	int width = 1600;
+	int height = 900;
+
+	//const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+    GLFWwindow* window = glfwCreateWindow(width, height, "CSE 167 Final Project", nullptr, nullptr);
+
+	//set callbacks
+	//glfwSetWindowFocusCallback(window, window_focus_callback);
+	//void window_focus_callback(GLFWwindow* window, int focused)
+
     if (!window)
     {
         LOG("Window creation failed");
@@ -26,4 +39,29 @@ int main()
 
     glewExperimental = GL_TRUE;
     glewInit();
+	glfwSwapInterval(1);
+	Renderer renderer;
+	renderer.init(width, height);
+
+	//window events
+	glfwSetFramebufferSizeCallback(window, Renderer::framebuffer_size_callback);
+	glfwSetWindowFocusCallback(window, Renderer::window_focus_callback);
+
+	glfwSetKeyCallback(window, Renderer::key_callback);
+
+	//mouse events
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	glfwSetCursorPosCallback(window, Renderer::cursor_position_callback);
+	glfwSetMouseButtonCallback(window, Renderer::mouse_button_callback); //note - if presses aren't working, try sticky mouse mode
+	glfwSetScrollCallback(window, Renderer::scroll_callback);
+
+	while (!glfwWindowShouldClose(window))
+	{
+		renderer.loop();
+
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
+	glfwDestroyWindow(window);
+	glfwTerminate();
 }

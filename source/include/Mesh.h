@@ -2,10 +2,30 @@
 #define INCLUDE_MESH_H
 
 #include "ForwardDecs.h"
+#include "Component.h"
+#include <vector>
+#include <unordered_map>
 
-class Mesh
+struct MeshData {
+	int vertDataHandle;
+	int indexHandle;
+	int indexSize;
+	//BoundingBox boundingBox;
+};
+
+class Mesh : public Component
 {
-    
+	public:
+		static std::unordered_map<std::string, MeshData> meshMap;
+
+		std::string filename;
+
+		Mesh(std::string);
+		~Mesh();
+
+		void loadObjFile(std::string);
+
+		void draw();
 };
 
 #endif

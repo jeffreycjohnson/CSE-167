@@ -10,6 +10,7 @@
 class Camera;
 class Component;
 class Framebuffer;
+class GameObject;
 class Input;
 class Light;
 class Material;

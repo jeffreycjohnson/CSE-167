@@ -129,6 +129,7 @@ Shader::~Shader()
     glDeleteProgram(id);
 }
 
+//TODO should we pre-extract these into a map?
 Shader::Uniform Shader::operator[](const std::string& name)
 {
     return Uniform(id, glGetUniformLocation(id, name.c_str()));
