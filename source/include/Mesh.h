@@ -7,8 +7,7 @@
 #include <unordered_map>
 
 struct MeshData {
-	int vertDataHandle;
-	int indexHandle;
+	int vaoHandle;
 	int indexSize;
 	//BoundingBox boundingBox;
 };
@@ -25,7 +24,7 @@ class Mesh : public Component
 
 		void loadObjFile(std::string);
 
-		void draw();
+		void draw(glm::mat4);
 };
 
 #endif

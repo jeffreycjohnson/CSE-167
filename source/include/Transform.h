@@ -11,7 +11,7 @@ class Transform
 {
 	public:
 		//parent Transform
-		std::weak_ptr<Transform> parent;
+		Transform* parent = 0;
 
 		//child Transforms
 		std::vector<std::shared_ptr<Transform>> children;
@@ -73,14 +73,14 @@ class Transform
 		 */
 		glm::mat4 getTransformMatrix() {
 			if (transformMatrixDirty) {
-				auto parentPtr = parent.lock();
-				transformMatrix = (parentPtr) ? parentPtr->getTransformMatrix() : glm::mat4(1.0f);
+				transformMatrix = glm::mat4(1.0f);
 				transformMatrix = glm::translate(transformMatrix, position);
 				transformMatrix *= ((glm::mat4)rotation);
 				transformMatrix = glm::scale(transformMatrix, scaleFactor);
 				transformMatrixDirty = false;
 			}
-			return transformMatrix;
+			glm::mat4 parMat = (parent)? parent->getTransformMatrix() : glm::mat4(1.f);
+			return  parMat * transformMatrix;
 		}
 
 		/**

@@ -20,40 +20,16 @@ Mesh::Mesh(std::string filename) : filename(filename) {
 Mesh::~Mesh() {
 
 }
-#define printOpenGLError() printOglError(__FILE__, __LINE__)
-
-int printOglError(char *file, int line)
-{
-
-	GLenum glErr;
-	int    retCode = 0;
-
-	glErr = glGetError();
-	if (glErr != GL_NO_ERROR)
-	{
-		printf("glError in file %s @ line %d: %s\n",
-			file, line, gluErrorString(glErr));
-		retCode = 1;
-	}
-	return retCode;
-}
 
 
-void Mesh::draw() {
+void Mesh::draw(glm::mat4 cameraMat) {
 	MeshData& currentEntry = meshMap.at(filename);
 	Shader& currentShader = Renderer::getCurrentShader();
-	printOpenGLError("A", 2);
-	//TODO check if vertex data has already been set
-	int stride = FLOAT_SIZE * 6;
-	glBindBuffer(GL_ARRAY_BUFFER, currentEntry.vertDataHandle);
-	glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, (GLvoid*)0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, false, stride, (GLvoid*) (FLOAT_SIZE * 3));
 
-	//TODO load textures
+	glBindVertexArray(currentEntry.vaoHandle);
 
-	currentShader[MV_MATRIX] = gameObject->transform.getTransformMatrix();
+	currentShader[MV_MATRIX] = cameraMat * gameObject->transform.getTransformMatrix();
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, currentEntry.indexHandle);
 
 	glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
 }
@@ -191,6 +167,14 @@ void Mesh::loadObjFile(std::string filename) {
 	glm::vec3 center(minX + (maxX - minX) / 2.0, minY + (maxY - minY) / 2.0, minZ + (maxZ - minZ) / 2.0);
 	glm::vec3 size((maxX - minX) / 2.0, (maxY - minY) / 2.0, (maxZ - minZ) / 2.0);
 
+
+
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+	glEnableVertexAttribArray(glGetAttribLocation(Renderer::getCurrentShader().id, "aPosition"));
+	glEnableVertexAttribArray(glGetAttribLocation(Renderer::getCurrentShader().id, "aNormal"));
+
 	GLuint meshBuffer[2];
 	glGenBuffers(2, meshBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, meshBuffer[0]);
@@ -199,11 +183,18 @@ void Mesh::loadObjFile(std::string filename) {
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshBuffer[1]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexArray.size() * sizeof(int), &(indexArray[0]), GL_STATIC_DRAW);
+
+
+	int stride = FLOAT_SIZE * 6;
+	glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, (GLvoid*)0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, false, stride, (GLvoid*)(FLOAT_SIZE * 3));
+
 	
+	//meshData.vertDataHandle = meshBuffer[0];
+	//meshData.indexHandle = meshBuffer[1];
 
 	MeshData meshData;
-	meshData.vertDataHandle = meshBuffer[0];
-	meshData.indexHandle = meshBuffer[1];
+	meshData.vaoHandle = vao;
 	meshData.indexSize = indexArray.size();
 	meshMap[filename] = meshData;
 

@@ -20,6 +20,7 @@ class Renderer
 		static Shader& getCurrentShader();
 
 		static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+		static void resize(int width, int height);
 		static void window_focus_callback(GLFWwindow* window, int focused);
 
 		//glfwSetScrollCallback(window, scroll_callback);

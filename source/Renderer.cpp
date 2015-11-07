@@ -1,10 +1,15 @@
 #include "Renderer.h"
 
 #include "Mesh.h"
-
+#include "Camera.h"
+#include <memory>
 
 Shader* Renderer::currentShader;
 Mesh* meshComp;
+
+Mesh* test2;
+GameObject dragon;
+Camera* camera = new Camera();
 
 double lastTime;
 
@@ -24,21 +29,27 @@ void Renderer::init(int window_width, int window_height) {
 
 	currentShader->use();
 
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-	glEnableVertexAttribArray(glGetAttribLocation(currentShader->id, "aPosition"));
-	glEnableVertexAttribArray(glGetAttribLocation(currentShader->id, "aNormal"));
-
 //	scene.addChild(BoxObject);
 	meshComp = new Mesh("bunny.obj");
-	scene.addComponent(meshComp);
 	scene.transform.translate(0, 0, -10);
-	scene.transform.scale(2);
+	//scene.transform.scale(2);
 
-	glm::mat4 perspective = glm::perspective((float)(atan(1)*4.0f/3.0f), width/(float)height, .1f, 100.f);
-	glViewport(0, 0, 1600, 800);
-	(*currentShader)["uP_Matrix"] = perspective;
+	scene.addChild(*camera);
+
+	GameObject* tmp = new GameObject();
+	tmp->addComponent(meshComp);
+
+	scene.addChild(*tmp);
+
+	camera->transform.translate(0, 0, 10);
+
+	test2 = new Mesh("hat.obj");
+	dragon.addComponent(test2);
+	dragon.transform.translate(5, 3, -10);
+	dragon.transform.scale(2);
+
+
+	Renderer::resize(width, height);
 
 	lastTime = glfwGetTime();
 }
@@ -47,7 +58,10 @@ void Renderer::loop() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	float dt = glfwGetTime() - lastTime;
 	scene.transform.rotate(glm::angleAxis(0.01f, glm::vec3(0, 1, 0)));
-	meshComp->draw();
+	meshComp->gameObject->transform.rotate(glm::angleAxis(0.01f, glm::vec3(0, 1, 0)));
+	meshComp->draw(camera->getCameraMatrix());
+	test2->draw(camera->getCameraMatrix());
+	//camera.transform.translate(0.01, 0, 0);//.rotate(glm::angleAxis(.01f, glm::vec3(0, 1, 0)));
 }
 
 Shader& Renderer::getCurrentShader() {
@@ -58,9 +72,13 @@ Shader& Renderer::getCurrentShader() {
 
 void Renderer::framebuffer_size_callback(GLFWwindow* window, int window_width, int window_height)
 {
-/*	width = window_width;
-	height = window_height;
-	glViewport(0, 0, width, height);*/
+	Renderer::resize(window_width, window_height);
+}
+
+void Renderer::resize(int width, int height) {
+	glm::mat4 perspective = glm::perspective((float)(atan(1)*4.0f / 3.0f), width / (float)height, .1f, 100.f);
+	glViewport(0, 0, width, height);
+	(Renderer::getCurrentShader())["uP_Matrix"] = perspective;
 }
 
 void Renderer::window_focus_callback(GLFWwindow* window, int focused)
