@@ -11,11 +11,15 @@ Mesh* test2;
 GameObject dragon;
 Camera* camera = new Camera();
 
+GPUData Renderer::gpuData;
+
 double lastTime;
 
 void Renderer::init(int window_width, int window_height) {
 	width = window_width;
 	height = window_height;
+
+	gpuData.vaoHandle = -1;
 
 	//Set Enables
 	glEnable(GL_DEPTH_TEST);
@@ -29,21 +33,36 @@ void Renderer::init(int window_width, int window_height) {
 
 	currentShader->use();
 
+	GLuint hatTex = SOIL_load_OGL_texture
+		(
+			"C:/Users/AccipiterChalybs/Documents/GitHub/CSE-167/assets/hat_tex.png",
+			SOIL_LOAD_AUTO,
+			SOIL_CREATE_NEW_ID,
+			SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
+		);
+	if (0 == hatTex)
+	{
+		printf("SOIL loading error: '%s'\n", SOIL_last_result());
+	}
+	glActiveTexture(GL_TEXTURE0);
+//	glBindTexture(GL_TEXTURE_2D, hatTex);
+
 //	scene.addChild(BoxObject);
-	meshComp = new Mesh("bunny.obj");
+	meshComp = new Mesh("assets/bunny.obj");
 	scene.transform.translate(0, 0, -10);
-	//scene.transform.scale(2);
+	scene.transform.scale(2);
 
 	scene.addChild(*camera);
 
 	GameObject* tmp = new GameObject();
 	tmp->addComponent(meshComp);
+	tmp->transform.scale(2);
 
 	scene.addChild(*tmp);
 
 	camera->transform.translate(0, 0, 10);
 
-	test2 = new Mesh("hat.obj");
+	test2 = new Mesh("assets/hat.obj");
 	dragon.addComponent(test2);
 	dragon.transform.translate(5, 3, -10);
 	dragon.transform.scale(2);
@@ -76,8 +95,9 @@ void Renderer::framebuffer_size_callback(GLFWwindow* window, int window_width, i
 }
 
 void Renderer::resize(int width, int height) {
-	glm::mat4 perspective = glm::perspective((float)(atan(1)*4.0f / 3.0f), width / (float)height, .1f, 100.f);
 	glViewport(0, 0, width, height);
+
+	glm::mat4 perspective = glm::perspective((float)(atan(1)*4.0f / 3.0f), width / (float)height, .1f, 100.f);
 	(Renderer::getCurrentShader())["uP_Matrix"] = perspective;
 }
 

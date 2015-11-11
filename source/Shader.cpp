@@ -65,16 +65,17 @@ void Shader::Uniform::operator=(const glm::mat4& val)
 
 static bool compile(const std::string& file, GLuint shader)
 {
-    std::ifstream data(file);
+    std::ifstream data(file, std::ios::binary);
     data.seekg(0, data.end);
-    auto length = data.tellg();
+    int length = data.tellg();
     data.seekg(0, data.beg);
-    char * buffer = new char[length];
+    char * buffer = new char[length+1];
     data.read(buffer, length);
     data.close();
+	buffer[length] = '\0';
 
     glShaderSource(shader, 1, &buffer, nullptr);
-    delete buffer;
+    delete[] buffer;
     glCompileShader(shader);
     GLint status;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
@@ -82,7 +83,7 @@ static bool compile(const std::string& file, GLuint shader)
     {
         char errbuf[512];
         glGetShaderInfoLog(shader, 512, nullptr, errbuf);
-        LOG(static_cast<const char *>(errbuf));
+        LOG((static_cast<const char *>(errbuf)));
         return true;;
     }
     return false;

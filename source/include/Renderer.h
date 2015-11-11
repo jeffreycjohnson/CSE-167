@@ -6,6 +6,11 @@
 #include "Shader.h"
 
 #include "glfw3.h"
+#include "SOIL.h"
+
+struct GPUData {
+	int vaoHandle;
+};
 
 class Renderer
 {
@@ -14,6 +19,7 @@ class Renderer
 
 		GameObject scene;
 		static Shader* currentShader;
+		static GPUData gpuData;
 
 		void init(int w, int h);
 		void loop();

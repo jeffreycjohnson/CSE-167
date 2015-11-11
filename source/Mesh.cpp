@@ -8,7 +8,17 @@
 
 #include "Renderer.h"
 
+#include <assimp/Importer.hpp>      // C++ importer interface
+#include <assimp/scene.h>           // Output data structure
+#include <assimp/postprocess.h>		// Post processing flags
+
+
 #define FLOAT_SIZE 4
+#define POSITION_COUNT 3
+#define NORMAL_COUNT 3
+#define TEX_COORD_COUNT 2
+
+
 #define MV_MATRIX "uMV_Matrix"
 
 std::unordered_map<std::string, MeshData> Mesh::meshMap;
@@ -26,10 +36,12 @@ void Mesh::draw(glm::mat4 cameraMat) {
 	MeshData& currentEntry = meshMap.at(filename);
 	Shader& currentShader = Renderer::getCurrentShader();
 
-	glBindVertexArray(currentEntry.vaoHandle);
+	if (Renderer::gpuData.vaoHandle != currentEntry.vaoHandle) {
+		glBindVertexArray(currentEntry.vaoHandle);
+		Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
+	}
 
 	currentShader[MV_MATRIX] = cameraMat * gameObject->transform.getTransformMatrix();
-
 
 	glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
 }
@@ -66,114 +78,52 @@ void Mesh::loadObjFile(std::string filename) {
 	std::vector<float> megaArray;
 	std::vector<int> indexArray;
 
-	std::ifstream infile(filename);
-	std::string line;
-	std::vector<std::string> tokens;
-	std::string token;
 
-	std::vector<glm::vec3>tmpVertices;
-	std::vector<glm::vec3>tmpNormals;
-	std::unordered_map<std::string, int> faceMap;
-	int currentIndex = 0;
-	int optimization = 0;
+	Assimp::Importer importer;
 
-	int lineNum = 0;
-
-	float minX, minY, minZ, maxX, maxY, maxZ;
-	minX = minY = minZ = std::numeric_limits<float>::max();
-	maxX = maxY = maxZ = std::numeric_limits<float>::max() * -1;
+	const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
 
 
-	std::cout << "Starting parse..." << std::endl;
-
-	//While all your lines are belong to us
-	while (std::getline(infile, line))
-	{
-
-		//Progress
-		if (++lineNum % 10000 == 0)
-			std::cout << "At line " << lineNum << std::endl;
-
-		//Split a line into tokens by delimiting it on spaces
-		//"Er Mah Gerd" becomes ["Er", "Mah", "Gerd"]
-		tokens.clear();
-		tokens = split(line, ' ', tokens);
-
-		if (tokens.size() == 0) continue;
-
-		//If first token is a v then it gots to be a vertex
-		if (tokens.at(0).compare("v") == 0)
-		{
-			//Parse the vertex line
-			float x = std::stof(tokens.at(1));
-			float y = std::stof(tokens.at(2));
-			float z = std::stof(tokens.at(3));
-
-			if (x < minX) minX = x;
-			if (y < minY) minY = y;
-			if (z < minZ) minZ = z;
-
-			if (x > maxX) maxX = x;
-			if (y > maxY) maxY = y;
-			if (z > maxZ) maxZ = z;
-
-			tmpVertices.push_back(glm::vec3(x, y, z));
-
-		}
-		else if (tokens.at(0).compare("vn") == 0)
-		{
-			//Parse the normal line
-			float a = std::stof(tokens.at(1));
-			float b = std::stof(tokens.at(2));
-			float c = std::stof(tokens.at(3));
-			tmpNormals.push_back(glm::normalize(glm::vec3(a, b, c)));
-		}
-		else if (tokens.at(0).compare("f") == 0)
-		{
-			for (int i = 0; i < 3; ++i) {
-				std::string currentString = tokens.at(i + 1);
-				auto entry = faceMap.find(currentString);
-				if (entry != faceMap.end()) {
-					optimization++;
-					indexArray.push_back((*entry).second);
-					continue;
-				}
-
-				std::vector<std::string> index_tokens;
-				index_tokens = split(tokens.at(i + 1), '/', index_tokens);
-
-				int vertIndex = std::stoi(index_tokens[0]) - 1;
-				int normalIndex = std::stoi(index_tokens[2]) - 1;
-
-				glm::vec3 vertData = tmpVertices.at(vertIndex);
-				for (int dataIndex = 0; dataIndex < 3; ++dataIndex) {
-					megaArray.push_back(vertData[dataIndex]);
-				}
-
-				glm::vec3 normalData = tmpNormals.at(normalIndex);
-				for (int dataIndex = 0; dataIndex < 3; ++dataIndex) {
-					megaArray.push_back(normalData[dataIndex]);
-				}
-
-				faceMap[currentString] = currentIndex;
-				indexArray.push_back(currentIndex++);
-			}
-
-		}
-
+	if (!scene) {
+		//TODO report error
+		exit(0);
 	}
 
+	//TODO expand to multiple objects
+	const aiMesh* mesh = scene->mMeshes[0];
 
-	glm::vec3 center(minX + (maxX - minX) / 2.0, minY + (maxY - minY) / 2.0, minZ + (maxZ - minZ) / 2.0);
-	glm::vec3 size((maxX - minX) / 2.0, (maxY - minY) / 2.0, (maxZ - minZ) / 2.0);
+	bool enabledTexCoord[8];
+	for (int t = 0; t < 8; ++t) {
+		enabledTexCoord[t] = mesh->HasTextureCoords(t);
+	}
 
-
+	for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
+		for (int p = 0; p < POSITION_COUNT; ++p) {
+			megaArray.push_back(mesh->mVertices[i][p]);
+		}
+		for (int p = 0; p < NORMAL_COUNT; ++p) {
+			megaArray.push_back(mesh->mNormals[i][p]);
+		}
+		if (enabledTexCoord[0]) {
+			for (int p = 0; p < TEX_COORD_COUNT; ++p) {
+				megaArray.push_back(mesh->mTextureCoords[0][i][p]);
+			}
+		}
+	}
+	for (unsigned int f = 0; f < mesh->mNumFaces; ++f) {
+		for (int p = 0; p < 3; ++p) {
+			indexArray.push_back(mesh->mFaces[f].mIndices[p]);
+		}
+	}
 
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 	glEnableVertexAttribArray(glGetAttribLocation(Renderer::getCurrentShader().id, "aPosition"));
 	glEnableVertexAttribArray(glGetAttribLocation(Renderer::getCurrentShader().id, "aNormal"));
+	if (enabledTexCoord[0]) {
+		glEnableVertexAttribArray(glGetAttribLocation(Renderer::getCurrentShader().id, "aTexCoord"));
+	}
 
 	GLuint meshBuffer[2];
 	glGenBuffers(2, meshBuffer);
@@ -185,9 +135,10 @@ void Mesh::loadObjFile(std::string filename) {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexArray.size() * sizeof(int), &(indexArray[0]), GL_STATIC_DRAW);
 
 
-	int stride = FLOAT_SIZE * 6;
+	int stride = FLOAT_SIZE * (POSITION_COUNT + NORMAL_COUNT + ((enabledTexCoord[0]) ? TEX_COORD_COUNT : 0));
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, (GLvoid*)0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, stride, (GLvoid*)(FLOAT_SIZE * 3));
+	if (enabledTexCoord[0])	glVertexAttribPointer(2, 2, GL_FLOAT, false, stride, (GLvoid*)(FLOAT_SIZE * 6));
 
 	
 	//meshData.vertDataHandle = meshBuffer[0];
