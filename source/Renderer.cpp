@@ -14,10 +14,9 @@ int Renderer::height = 0;
 
 Shader* Renderer::currentShader;
 GameObject Renderer::scene;
-Mesh* meshComp;
 
 Mesh* test2;
-GameObject hat;
+GameObject hat, bunny;
 Camera* camera = new Camera();
 
 GPUData Renderer::gpuData;
@@ -60,25 +59,21 @@ void Renderer::init(int window_width, int window_height) {
 	fboTest = new Framebuffer(512, 512, 2, false);
 
 
-//	scene.addChild(BoxObject);
-    loadScene("assets/bunny.obj");
-	meshComp = new Mesh("assets/bunny.obj");
 	scene.transform.translate(0, 0, -10);
 	scene.transform.scale(2);
 
 	scene.addChild(*camera);
 
-	GameObject* tmp = new GameObject();
-	tmp->addComponent(meshComp);
-	tmp->transform.scale(2);
+    loadScene("assets/bunny.obj");
+    bunny.addComponent(new Mesh("assets/bunny.obj"));
+    bunny.transform.scale(2);
 
-	scene.addChild(*tmp);
+	scene.addChild(bunny);
 
 	camera->transform.translate(0, 0, 10);
 
     loadScene("assets/hat.obj");
-	test2 = new Mesh("assets/hat.obj");
-	hat.addComponent(test2);
+	hat.addComponent(new Mesh("assets/hat.obj"));
 	hat.transform.translate(5, 3, -10);
 	hat.transform.scale(5);
 
@@ -101,14 +96,14 @@ void Renderer::loop() {
 
 	glBindTexture(GL_TEXTURE_2D, hatTex);
 	scene.transform.rotate(glm::angleAxis(0.01f, glm::vec3(0, 1, 0)));
-	meshComp->gameObject->transform.rotate(glm::angleAxis(0.01f, glm::vec3(0, 1, 0)));
-    (*currentShader)[MV_MATRIX] = camera->getCameraMatrix() * meshComp->gameObject->transform.getTransformMatrix();
-	meshComp->draw();
+	bunny.transform.rotate(glm::angleAxis(0.01f, glm::vec3(0, 1, 0)));
+    (*currentShader)[MV_MATRIX] = camera->getCameraMatrix() * bunny.transform.getTransformMatrix();
+	bunny.getComponent<Mesh>()->draw();
 
 	glBindTexture(GL_TEXTURE_2D, hatTex);
 
-    (*currentShader)[MV_MATRIX] = camera->getCameraMatrix() * test2->gameObject->transform.getTransformMatrix();
-	test2->draw();
+    (*currentShader)[MV_MATRIX] = camera->getCameraMatrix() * hat.transform.getTransformMatrix();
+	hat.getComponent<Mesh>()->draw();
 
 	fboTest->unbind();
 

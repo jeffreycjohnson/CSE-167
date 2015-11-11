@@ -12,7 +12,7 @@ class Transform
 		Transform* parent = nullptr;
 
 		//child Transforms
-		std::vector<std::shared_ptr<Transform>> children;
+		std::vector<Transform*> children;
 
 		//Position - vector
 		glm::vec3 position;

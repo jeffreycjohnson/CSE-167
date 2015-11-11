@@ -8,11 +8,7 @@
 class GameObject
 {
 public:
-	GameObject();
-	~GameObject();
-
 	Transform transform;
-
 
     template<typename T>
     void GameObject::addComponent(T* c) {
