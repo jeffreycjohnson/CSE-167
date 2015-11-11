@@ -3,6 +3,11 @@
 #include "Mesh.h"
 #include "Camera.h"
 #include <memory>
+#include "Framebuffer.h"
+
+
+int Renderer::width = 0;
+int Renderer::height = 0;
 
 Shader* Renderer::currentShader;
 Mesh* meshComp;
@@ -14,6 +19,9 @@ Camera* camera = new Camera();
 GPUData Renderer::gpuData;
 
 double lastTime;
+
+Framebuffer* fboTest;
+GLuint hatTex;
 
 void Renderer::init(int window_width, int window_height) {
 	width = window_width;
@@ -33,19 +41,20 @@ void Renderer::init(int window_width, int window_height) {
 
 	currentShader->use();
 
-	GLuint hatTex = SOIL_load_OGL_texture
+	hatTex = SOIL_load_OGL_texture
 		(
 			"C:/Users/AccipiterChalybs/Documents/GitHub/CSE-167/assets/hat_tex.png",
 			SOIL_LOAD_AUTO,
 			SOIL_CREATE_NEW_ID,
 			SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
 		);
-	if (0 == hatTex)
-	{
-		printf("SOIL loading error: '%s'\n", SOIL_last_result());
-	}
+
+
 	glActiveTexture(GL_TEXTURE0);
-//	glBindTexture(GL_TEXTURE_2D, hatTex);
+	glBindTexture(GL_TEXTURE_2D, hatTex);
+
+	fboTest = new Framebuffer(512, 512, 2, false);
+
 
 //	scene.addChild(BoxObject);
 	meshComp = new Mesh("assets/bunny.obj");
@@ -65,7 +74,7 @@ void Renderer::init(int window_width, int window_height) {
 	test2 = new Mesh("assets/hat.obj");
 	dragon.addComponent(test2);
 	dragon.transform.translate(5, 3, -10);
-	dragon.transform.scale(2);
+	dragon.transform.scale(5);
 
 
 	Renderer::resize(width, height);
@@ -74,13 +83,30 @@ void Renderer::init(int window_width, int window_height) {
 }
 
 void Renderer::loop() {
+	glClearColor(0, 0, .25f, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	float dt = glfwGetTime() - lastTime;
+
+
+	GLuint buffersToDraw[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	fboTest->bind(2, buffersToDraw);
+
+	glClearColor(1, 1, 0, 1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glBindTexture(GL_TEXTURE_2D, hatTex);
 	scene.transform.rotate(glm::angleAxis(0.01f, glm::vec3(0, 1, 0)));
 	meshComp->gameObject->transform.rotate(glm::angleAxis(0.01f, glm::vec3(0, 1, 0)));
 	meshComp->draw(camera->getCameraMatrix());
+
+	glBindTexture(GL_TEXTURE_2D, hatTex);
+
 	test2->draw(camera->getCameraMatrix());
-	//camera.transform.translate(0.01, 0, 0);//.rotate(glm::angleAxis(.01f, glm::vec3(0, 1, 0)));
+
+	fboTest->unbind();
+
+	fboTest->blitFramebuffer(0, 0, 0, 512, 512);
+	fboTest->blitFramebuffer(1, 10+512, 0, 512, 512);
 }
 
 Shader& Renderer::getCurrentShader() {

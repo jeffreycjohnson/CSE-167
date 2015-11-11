@@ -18,6 +18,10 @@
 #define NORMAL_COUNT 3
 #define TEX_COORD_COUNT 2
 
+#define VERTEX_ATTRIB_LOCATION 0
+#define NORMAL_ATTRIB_LOCATION 1
+#define TEX_COORD_0_ATTRIB_LOCATION 2
+
 
 #define MV_MATRIX "uMV_Matrix"
 
@@ -119,10 +123,11 @@ void Mesh::loadObjFile(std::string filename) {
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
-	glEnableVertexAttribArray(glGetAttribLocation(Renderer::getCurrentShader().id, "aPosition"));
-	glEnableVertexAttribArray(glGetAttribLocation(Renderer::getCurrentShader().id, "aNormal"));
+
+	glEnableVertexAttribArray(VERTEX_ATTRIB_LOCATION);
+	glEnableVertexAttribArray(NORMAL_ATTRIB_LOCATION);
 	if (enabledTexCoord[0]) {
-		glEnableVertexAttribArray(glGetAttribLocation(Renderer::getCurrentShader().id, "aTexCoord"));
+		glEnableVertexAttribArray(TEX_COORD_0_ATTRIB_LOCATION);
 	}
 
 	GLuint meshBuffer[2];
@@ -140,7 +145,7 @@ void Mesh::loadObjFile(std::string filename) {
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, stride, (GLvoid*)(FLOAT_SIZE * 3));
 	if (enabledTexCoord[0])	glVertexAttribPointer(2, 2, GL_FLOAT, false, stride, (GLvoid*)(FLOAT_SIZE * 6));
 
-	
+
 	//meshData.vertDataHandle = meshBuffer[0];
 	//meshData.indexHandle = meshBuffer[1];
 

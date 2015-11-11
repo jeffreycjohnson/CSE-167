@@ -10,12 +10,13 @@
 
 struct GPUData {
 	int vaoHandle;
+	int textureSlot[20];
 };
 
 class Renderer
 {
 	public:
-		int width, height;
+		static int width, height;
 
 		GameObject scene;
 		static Shader* currentShader;
@@ -24,6 +25,9 @@ class Renderer
 		void init(int w, int h);
 		void loop();
 		static Shader& getCurrentShader();
+
+		static int getWindowWidth() { return width; }
+		static int getWindowHeight() { return height; }
 
 		static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 		static void resize(int width, int height);
