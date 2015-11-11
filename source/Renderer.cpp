@@ -1,19 +1,23 @@
 #include "Renderer.h"
-
 #include "Mesh.h"
 #include "Camera.h"
-#include <memory>
 #include "Framebuffer.h"
+#include <SOIL.h>
+#include <gtc/matrix_transform.inl>
+
+
+#define MV_MATRIX "uMV_Matrix"
 
 
 int Renderer::width = 0;
 int Renderer::height = 0;
 
 Shader* Renderer::currentShader;
+GameObject Renderer::scene;
 Mesh* meshComp;
 
 Mesh* test2;
-GameObject dragon;
+GameObject hat;
 Camera* camera = new Camera();
 
 GPUData Renderer::gpuData;
@@ -43,7 +47,7 @@ void Renderer::init(int window_width, int window_height) {
 
 	hatTex = SOIL_load_OGL_texture
 		(
-			"C:/Users/AccipiterChalybs/Documents/GitHub/CSE-167/assets/hat_tex.png",
+			"assets/hat_tex.png",
 			SOIL_LOAD_AUTO,
 			SOIL_CREATE_NEW_ID,
 			SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
@@ -57,6 +61,7 @@ void Renderer::init(int window_width, int window_height) {
 
 
 //	scene.addChild(BoxObject);
+    loadScene("assets/bunny.obj");
 	meshComp = new Mesh("assets/bunny.obj");
 	scene.transform.translate(0, 0, -10);
 	scene.transform.scale(2);
@@ -71,11 +76,11 @@ void Renderer::init(int window_width, int window_height) {
 
 	camera->transform.translate(0, 0, 10);
 
+    loadScene("assets/hat.obj");
 	test2 = new Mesh("assets/hat.obj");
-	dragon.addComponent(test2);
-	dragon.transform.translate(5, 3, -10);
-	dragon.transform.scale(5);
-
+	hat.addComponent(test2);
+	hat.transform.translate(5, 3, -10);
+	hat.transform.scale(5);
 
 	Renderer::resize(width, height);
 
@@ -85,7 +90,7 @@ void Renderer::init(int window_width, int window_height) {
 void Renderer::loop() {
 	glClearColor(0, 0, .25f, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	float dt = glfwGetTime() - lastTime;
+	double dt = glfwGetTime() - lastTime;
 
 
 	GLuint buffersToDraw[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
@@ -97,11 +102,13 @@ void Renderer::loop() {
 	glBindTexture(GL_TEXTURE_2D, hatTex);
 	scene.transform.rotate(glm::angleAxis(0.01f, glm::vec3(0, 1, 0)));
 	meshComp->gameObject->transform.rotate(glm::angleAxis(0.01f, glm::vec3(0, 1, 0)));
-	meshComp->draw(camera->getCameraMatrix());
+    (*currentShader)[MV_MATRIX] = camera->getCameraMatrix() * meshComp->gameObject->transform.getTransformMatrix();
+	meshComp->draw();
 
 	glBindTexture(GL_TEXTURE_2D, hatTex);
 
-	test2->draw(camera->getCameraMatrix());
+    (*currentShader)[MV_MATRIX] = camera->getCameraMatrix() * test2->gameObject->transform.getTransformMatrix();
+	test2->draw();
 
 	fboTest->unbind();
 
@@ -112,8 +119,6 @@ void Renderer::loop() {
 Shader& Renderer::getCurrentShader() {
 	return *currentShader;
 }
-
-
 
 void Renderer::framebuffer_size_callback(GLFWwindow* window, int window_width, int window_height)
 {

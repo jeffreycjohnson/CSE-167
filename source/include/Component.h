@@ -6,9 +6,11 @@
 class Component
 {
 	public:
-		GameObject* gameObject;
+        virtual ~Component() = default;
 
-		void setGameObject(GameObject* go) {
+        GameObject* gameObject;
+
+		virtual void setGameObject(GameObject* go) {
 			gameObject = go;
 		}
 };

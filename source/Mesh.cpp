@@ -1,11 +1,6 @@
 #include "Mesh.h"
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <fstream>
 #include "GameObject.h"
 #include "Shader.h"
-
 #include "Renderer.h"
 
 #include <assimp/Importer.hpp>      // C++ importer interface
@@ -22,13 +17,10 @@
 #define NORMAL_ATTRIB_LOCATION 1
 #define TEX_COORD_0_ATTRIB_LOCATION 2
 
-
-#define MV_MATRIX "uMV_Matrix"
-
 std::unordered_map<std::string, MeshData> Mesh::meshMap;
 
-Mesh::Mesh(std::string filename) : filename(filename) {
-	loadObjFile(filename);
+Mesh::Mesh(std::string name) : name(name) {
+    if (Mesh::meshMap.find(name) == Mesh::meshMap.end()) throw;
 }
 
 Mesh::~Mesh() {
@@ -36,61 +28,32 @@ Mesh::~Mesh() {
 }
 
 
-void Mesh::draw(glm::mat4 cameraMat) {
-	MeshData& currentEntry = meshMap.at(filename);
-	Shader& currentShader = Renderer::getCurrentShader();
+void Mesh::draw() {
+	MeshData& currentEntry = meshMap.at(name);
 
 	if (Renderer::gpuData.vaoHandle != currentEntry.vaoHandle) {
 		glBindVertexArray(currentEntry.vaoHandle);
 		Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
 	}
 
-	currentShader[MV_MATRIX] = cameraMat * gameObject->transform.getTransformMatrix();
-
 	glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
 }
 
-
-
-
-
-//Split functions from the interwebs
-//http://stackoverflow.com/questions/236129/split-a-string-in-c
-std::vector<std::string>& split(const std::string &s, char delim, std::vector<std::string> &elems)
-{
-	std::stringstream ss(s);
-	std::string item;
-	while (std::getline(ss, item, delim))
-	{
-		elems.push_back(item);
-	}
-	return elems;
-}
-
-std::vector<std::string> split(const std::string &s, char delim)
-{
-	std::vector<std::string> elems;
-	split(s, delim, elems);
-	return elems;
-}
-
-void Mesh::loadObjFile(std::string filename) {
-	if (meshMap.find(filename) != meshMap.end()) {
-		return;
-	}
-
+GameObject loadScene(const std::string& filename) {
 	std::vector<float> megaArray;
 	std::vector<int> indexArray;
-
-
 	Assimp::Importer importer;
 
-	const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
-
+	const aiScene* scene = importer.ReadFile(filename,
+        aiProcess_Triangulate | aiProcess_GenNormals |
+        aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality |
+        aiProcess_RemoveRedundantMaterials | aiProcess_FindInvalidData |
+        aiProcess_GenUVCoords | aiProcess_TransformUVCoords |
+        aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace);
 
 	if (!scene) {
-		//TODO report error
-		exit(0);
+        LOG(importer.GetErrorString());
+        throw;
 	}
 
 	//TODO expand to multiple objects
@@ -145,14 +108,16 @@ void Mesh::loadObjFile(std::string filename) {
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, stride, (GLvoid*)(FLOAT_SIZE * 3));
 	if (enabledTexCoord[0])	glVertexAttribPointer(2, 2, GL_FLOAT, false, stride, (GLvoid*)(FLOAT_SIZE * 6));
 
-
-	//meshData.vertDataHandle = meshBuffer[0];
-	//meshData.indexHandle = meshBuffer[1];
-
 	MeshData meshData;
 	meshData.vaoHandle = vao;
-	meshData.indexSize = indexArray.size();
-	meshMap[filename] = meshData;
+	meshData.indexSize = static_cast<GLsizei>(indexArray.size());
+    std::string name = filename;
+    if (std::string("") != mesh->mName.C_Str())
+        name = mesh->mName.C_Str();
 
+    Mesh::meshMap[name] = meshData;
+
+    GameObject ret;
+    ret.addComponent(new Mesh(name));
+    return ret;
 }
-

@@ -1,5 +1,6 @@
 #include "Framebuffer.h"
 #include "Renderer.h"
+#include <gtc/matrix_transform.hpp>
 
 Framebuffer::Framebuffer(int w, int h, int numColorTextures, bool accessibleDepth) : width(w), height(h), numColorTex(numColorTextures), accessibleDepth(accessibleDepth) {
 	glGenFramebuffers(1, &id);

@@ -1,6 +1,7 @@
 #include "Camera.h"
-#include "gtc/matrix_inverse.hpp"
-#include <iostream>
+#include <gtc/matrix_inverse.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <glm.hpp>
 
 glm::mat4 Camera::getCameraMatrix() {
 	//glm::affineInverse seems to have a bug with inverting scales atm (fixed in git, but not in lastest stable release), so we need to remove the scale manually

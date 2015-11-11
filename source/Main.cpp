@@ -1,9 +1,6 @@
 #include "ForwardDecs.h"
-#include "glfw3.h"
-#include "gtc/matrix_inverse.hpp""
-#include <iostream>
-#include <gtx/string_cast.hpp>
 #include "Renderer.h"
+#include <glfw3.h>
 
 int main()
 {
@@ -41,8 +38,7 @@ int main()
     glewExperimental = GL_TRUE;
     glewInit();
 	glfwSwapInterval(1);
-	Renderer renderer;
-	renderer.init(width, height);
+	Renderer::init(width, height);
 
 	//window events
 	glfwSetFramebufferSizeCallback(window, Renderer::framebuffer_size_callback);
@@ -58,7 +54,7 @@ int main()
 
 	while (!glfwWindowShouldClose(window))
 	{
-		renderer.loop();
+		Renderer::loop();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

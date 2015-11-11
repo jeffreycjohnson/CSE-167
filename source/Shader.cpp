@@ -67,7 +67,7 @@ static bool compile(const std::string& file, GLuint shader)
 {
     std::ifstream data(file, std::ios::binary);
     data.seekg(0, data.end);
-    int length = data.tellg();
+    int length = static_cast<int>(data.tellg());
     data.seekg(0, data.beg);
     char * buffer = new char[length+1];
     data.read(buffer, length);

@@ -3,12 +3,14 @@
 
 #include "ForwardDecs.h"
 #include "Component.h"
-#include <vector>
 #include <unordered_map>
 
+// returns the root game object of the file, with all children correctly added
+GameObject loadScene(const std::string& filename);
+
 struct MeshData {
-	int vaoHandle;
-	int indexSize;
+	GLuint vaoHandle;
+    GLsizei indexSize;
 	//BoundingBox boundingBox;
 };
 
@@ -17,14 +19,12 @@ class Mesh : public Component
 	public:
 		static std::unordered_map<std::string, MeshData> meshMap;
 
-		std::string filename;
-
-		Mesh(std::string);
+        std::string name;
+    
+        Mesh(std::string);
 		~Mesh();
 
-		void loadObjFile(std::string);
-
-		void draw(glm::mat4);
+		void draw();
 };
 
 #endif
