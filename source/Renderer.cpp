@@ -16,7 +16,8 @@ Shader* Renderer::currentShader;
 GameObject Renderer::scene;
 
 Mesh* test2;
-GameObject hat, bunny;
+GameObject *hat, *bunny, *bagel;
+GameObject* turret;
 Camera* camera = new Camera();
 
 GPUData Renderer::gpuData;
@@ -24,7 +25,9 @@ GPUData Renderer::gpuData;
 double lastTime;
 
 Framebuffer* fboTest;
-GLuint hatTex;
+GLuint hatTex, turretTex, bagelTex;
+
+float tmp = 0;
 
 void Renderer::init(int window_width, int window_height) {
 	width = window_width;
@@ -51,31 +54,53 @@ void Renderer::init(int window_width, int window_height) {
 			SOIL_CREATE_NEW_ID,
 			SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
 		);
+	turretTex = SOIL_load_OGL_texture
+		(
+			"assets/turret_tex.png",
+			SOIL_LOAD_AUTO,
+			SOIL_CREATE_NEW_ID,
+			SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
+			);
+	bagelTex = SOIL_load_OGL_texture
+		(
+			"assets/bagel_everything_tex.png",
+			SOIL_LOAD_AUTO,
+			SOIL_CREATE_NEW_ID,
+			SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
+			);
 
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, hatTex);
 
-	fboTest = new Framebuffer(512, 512, 2, false);
+	fboTest = new Framebuffer(900, 900, 2, false);
 
 
 	scene.transform.translate(0, 0, -10);
 	scene.transform.scale(2);
 
-	scene.addChild(*camera);
+	//scene.addChild(*camera);
 
-    loadScene("assets/bunny.obj");
-    bunny.addComponent(new Mesh("assets/bunny.obj"));
-    bunny.transform.scale(2);
+    bunny = loadScene("assets/bunny.obj");
+    bunny->transform.scale(2);
+	bunny->transform.translate(-2, 0, 0);
+	scene.addChild(*bunny);
 
-	scene.addChild(bunny);
+	camera->transform.translate(0, 0, 20);
 
-	camera->transform.translate(0, 0, 10);
+    turret = loadScene("assets/turret.dae");
+	turret->transform.translate(-1, -2, 5);
+	//turret->transform.rotate(glm::angleAxis(atanf(1)/3, glm::vec3(0, 1, 0)));
 
-    loadScene("assets/hat.obj");
-	hat.addComponent(new Mesh("assets/hat.obj"));
-	hat.transform.translate(5, 3, -10);
-	hat.transform.scale(5);
+	hat = loadScene("assets/hat.obj");
+	hat->transform.translate(0,1,0);
+	hat->transform.scale(5);
+	bunny->addChild(*hat);
+
+	bagel = loadScene("assets/bagel.obj");
+	bagel->transform.scale(10);
+	bagel->transform.translate(-5, 7, -10);
+	scene.addChild(*bagel);
 
 	Renderer::resize(width, height);
 
@@ -94,25 +119,62 @@ void Renderer::loop() {
 	glClearColor(1, 1, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glBindTexture(GL_TEXTURE_2D, hatTex);
 	scene.transform.rotate(glm::angleAxis(0.01f, glm::vec3(0, 1, 0)));
-	bunny.transform.rotate(glm::angleAxis(0.01f, glm::vec3(0, 1, 0)));
-    (*currentShader)[MV_MATRIX] = camera->getCameraMatrix() * bunny.transform.getTransformMatrix();
-	bunny.getComponent<Mesh>()->draw();
+
 
 	glBindTexture(GL_TEXTURE_2D, hatTex);
+	bunny->draw();
 
-    (*currentShader)[MV_MATRIX] = camera->getCameraMatrix() * hat.transform.getTransformMatrix();
-	hat.getComponent<Mesh>()->draw();
+	glBindTexture(GL_TEXTURE_2D, hatTex);
+	hat->draw();
+
+
+	glBindTexture(GL_TEXTURE_2D, bagelTex);
+	bagel->draw();
+
+	glBindTexture(GL_TEXTURE_2D, turretTex);
+	turret->draw();
+
+
+	turret->transform.translate(0.2f*sin(tmp+=0.05f), 0, 0);
+
+	////Turret targeting code
+	glm::vec3 target = bagel->transform.getWorldPosition();
+
+
+	glm::vec3 turretNormal = glm::normalize(glm::vec3(turret->transform.getTransformMatrix() * glm::vec4(0, 0, 1, 0)));
+	glm::vec3 turretX = glm::normalize(glm::vec3(turret->transform.getTransformMatrix() * glm::vec4(1, 0, 0, 0)));
+	glm::vec3 turretZ = glm::cross(turretX, turretNormal);
+
+	glm::mat3 turretBasis(turretX, turretNormal, turretZ);
+
+
+	glm::vec3 turretPos(turret->transform.getWorldPosition());
+	glm::vec3 diff;
+	diff.x = target.x - turretPos.x;
+	diff.y = target.y - turretPos.y;
+	diff.z = target.z - turretPos.z;
+
+	diff = turretBasis * diff;
+	float yaw = atan2f(diff.x, diff.z);
+	float pitch = -atan2f(diff.y, sqrtf(diff.x*diff.x + diff.z*diff.z));
+
+	turret->transform.children[0]->children[0]->setRotate(glm::angleAxis(yaw, glm::vec3(0, 0, 1)));
+	turret->transform.children[0]->children[0]->children[0]->setRotate(glm::angleAxis(pitch, glm::vec3(1, 0, 0)));
+	////-----------
 
 	fboTest->unbind();
 
-	fboTest->blitFramebuffer(0, 0, 0, 512, 512);
-	fboTest->blitFramebuffer(1, 10+512, 0, 512, 512);
+	fboTest->blitFramebuffer(0, 0, 0, 900, 900);
+	fboTest->blitFramebuffer(1, 10+900, 0, 900, 900);
 }
 
 Shader& Renderer::getCurrentShader() {
 	return *currentShader;
+}
+
+void Renderer::setModelMatrix(glm::mat4 transform) {
+	(*currentShader)[MV_MATRIX] = camera->getCameraMatrix() * transform;
 }
 
 void Renderer::framebuffer_size_callback(GLFWwindow* window, int window_width, int window_height)

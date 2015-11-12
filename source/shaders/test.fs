@@ -10,7 +10,7 @@ uniform sampler2D colorTex;
 
 void main () {
   vec3 normalColor = 0.5*normalize(vNormal) + vec3(0.5,0.5,0.5);
-  vec3 color = texture(colorTex, vTexCoord).rgb * vec3(0.5, 0.5, 0.9);
+  vec3 color = texture(colorTex, vTexCoord).rgb * vec3(0.9, 0.9, 1.1);
   frag_color = vec4(color, 1.0);
   normal = vec4(normalColor, 1.0);
 }

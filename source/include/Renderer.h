@@ -23,6 +23,8 @@ class Renderer
 		static void loop();
 		static Shader& getCurrentShader();
 
+		static void setModelMatrix(glm::mat4 transform);
+
 		static int getWindowWidth() { return width; }
 		static int getWindowHeight() { return height; }
 

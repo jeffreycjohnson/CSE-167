@@ -29,6 +29,11 @@ void Transform::rotate(glm::quat& diff) {
     rotation *= diff;
 }
 
+void Transform::setRotate(glm::quat& diff) {
+	rotation = glm::quat();
+	rotate(diff);
+}
+
 /**
 * Scale
 */
@@ -53,4 +58,10 @@ glm::mat4 Transform::getTransformMatrix() {
     }
     glm::mat4 parMat = (parent) ? parent->getTransformMatrix() : glm::mat4(1.f);
     return  parMat * transformMatrix;
+}
+
+glm::vec4 originPoint(0, 0, 0, 1);
+
+glm::vec3 Transform::getWorldPosition() {
+	return glm::vec3(getTransformMatrix() * originPoint);
 }

@@ -39,25 +39,11 @@ void Mesh::draw() {
 	glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
 }
 
-GameObject loadScene(const std::string& filename) {
+
+void loadMesh(std::string name, const aiMesh* mesh) {
+
 	std::vector<float> megaArray;
 	std::vector<int> indexArray;
-	Assimp::Importer importer;
-
-	const aiScene* scene = importer.ReadFile(filename,
-        aiProcess_Triangulate | aiProcess_GenNormals |
-        aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality |
-        aiProcess_RemoveRedundantMaterials | aiProcess_FindInvalidData |
-        aiProcess_GenUVCoords | aiProcess_TransformUVCoords |
-        aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace);
-
-	if (!scene) {
-        LOG(importer.GetErrorString());
-        throw;
-	}
-
-	//TODO expand to multiple objects
-	const aiMesh* mesh = scene->mMeshes[0];
 
 	bool enabledTexCoord[8];
 	for (int t = 0; t < 8; ++t) {
@@ -111,13 +97,66 @@ GameObject loadScene(const std::string& filename) {
 	MeshData meshData;
 	meshData.vaoHandle = vao;
 	meshData.indexSize = static_cast<GLsizei>(indexArray.size());
-    std::string name = filename;
-    if (std::string("") != mesh->mName.C_Str())
-        name = mesh->mName.C_Str();
+	//std::string name = filename;
+	//name = name + std::to_string(i);
 
-    Mesh::meshMap[name] = meshData;
+	if (std::string("") != mesh->mName.C_Str())
+		name = mesh->mName.C_Str();
 
-    GameObject ret;
-    ret.addComponent(new Mesh(name));
-    return ret;
+	Mesh::meshMap[name] = meshData;
+}
+
+int counter = 0;
+
+GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string filename) {
+	GameObject* nodeObject = new GameObject();
+	
+	//add mesh to this object
+	aiVector3D pos;
+	aiVector3D scale;
+	aiQuaternion rotate;
+
+	currentNode->mTransformation.Decompose(scale, rotate, pos);
+	
+	nodeObject->transform.scale(scale.x);
+	nodeObject->transform.translate(pos.x, pos.y, pos.z);
+	nodeObject->transform.rotate(glm::quat(rotate.w, rotate.x, rotate.y, rotate.z));
+
+	if (currentNode->mNumMeshes > 0) {
+		std::string name = currentNode->mName.C_Str();
+		if (name == "defaultobject") name = filename + std::to_string(counter);
+
+		if (Mesh::meshMap.find(name) == Mesh::meshMap.end()) {
+			int meshIndex = *currentNode->mMeshes;
+			loadMesh(name, scene->mMeshes[meshIndex]);
+		}
+		
+		nodeObject->addComponent(new Mesh(name));
+	}
+
+	//load child objects
+	for (int c = 0; c < currentNode->mNumChildren; ++c) {
+		nodeObject->addChild(*parseNode(scene, currentNode->mChildren[c], filename));
+	}
+	return nodeObject;
+}
+
+GameObject* loadScene(const std::string& filename) {
+	Assimp::Importer importer;
+
+	const aiScene* scene = importer.ReadFile(filename,
+        aiProcess_Triangulate | aiProcess_GenNormals |
+        aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality |
+        aiProcess_RemoveRedundantMaterials | aiProcess_FindInvalidData |
+        aiProcess_GenUVCoords | aiProcess_TransformUVCoords |
+        aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace);
+
+	if (!scene) {
+        LOG(importer.GetErrorString());
+        throw;
+	}
+
+	GameObject* retScene = parseNode(scene, scene->mRootNode, filename);
+
+    return retScene;
 }

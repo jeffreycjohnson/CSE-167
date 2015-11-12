@@ -10,6 +10,9 @@ class GameObject
 public:
 	Transform transform;
 
+	GameObject();
+	~GameObject();
+
     template<typename T>
     void GameObject::addComponent(T* c) {
         removeComponent<T>();
@@ -43,6 +46,8 @@ public:
     }
 
     void addChild(GameObject& go);
+
+	void draw();
 
 protected:
     std::vector<Component*> componentList;

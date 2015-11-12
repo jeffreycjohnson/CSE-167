@@ -4,8 +4,9 @@
 #include "ForwardDecs.h"
 #include <gtc/quaternion.hpp>
 #include <vector>
+#include "Component.h"
 
-class Transform
+class Transform : public Component
 {
 	public:
 		//parent Transform
@@ -40,6 +41,7 @@ class Transform
 		 * -Transform Dirty
 		 * -Normals Dirty
 		 */
+		void setRotate(glm::quat& rotation);
         void rotate(glm::quat& diff);
 
 		/**
@@ -53,6 +55,8 @@ class Transform
 		 * -uses parent's matrix as well
 		 */
         glm::mat4 getTransformMatrix();
+
+		glm::vec3 getWorldPosition();
 };
 
 #endif
