@@ -3,21 +3,31 @@
 #include "Camera.h"
 #include "Framebuffer.h"
 #include <SOIL.h>
+#include "stb_image.h"
 #include <gtc/matrix_transform.inl>
+#include "Skybox.h"
 
 
-#define MV_MATRIX "uMV_Matrix"
+#define MODEL_MATRIX "uM_Matrix"
+#define VIEW_MATRIX "uV_Matrix"
 
 
 int Renderer::width = 0;
 int Renderer::height = 0;
 
 Shader* Renderer::currentShader;
+#define SHADER_COUNT 3
+#define REGULAR_SHADER 0
+#define FORWARD_PBR_SHADER 1
+#define SKYBOX_SHADER 2
+Shader* shaderList[SHADER_COUNT];
+
 GameObject Renderer::scene;
 
 Mesh* test2;
-GameObject *hat, *bunny, *bagel;
+GameObject *hat, *bunny, *bagel, *barrel;
 GameObject* turret;
+GameObject *tankTop, *tankBot;
 Camera* camera = new Camera();
 
 GPUData Renderer::gpuData;
@@ -25,9 +35,131 @@ GPUData Renderer::gpuData;
 double lastTime;
 
 Framebuffer* fboTest;
-GLuint hatTex, turretTex, bagelTex;
+GLuint hatTex, turretTex, bagelTex, skyboxTex;
+GLuint barrelTex, barrelTex_Mat;
+GLuint tankTexTop, tankTexBot, tankSpecTop, tankSpecBot;
 
 float tmp = 0;
+
+glm::mat4 irradianceMatrix[3];
+
+#define CUBE_FACES 6
+#define SH_COUNT 9
+void loadIrradiance(std::string imageFiles[6]) {
+	//for each cube map
+	glm::vec3 irradiance[9];
+	float* currentImage;
+	int currentWidth;
+	int currentHeight;
+	int channels;
+	static float shConst[9] = { 0.282095, 0.488603, 0.488603, 0.488603, 1.092548, 1.092548, 1.092548, 0.315392, 0.546274 };
+
+	float xVal, yVal, zVal;
+
+	for (int m = 0; m < CUBE_FACES; ++m) {
+		//load image
+		//currentImage = SOIL_load_image(imageFiles[m].c_str(), &currentWidth, &currentHeight, &channels, SOIL_LOAD_AUTO);
+		currentImage = stbi_loadf(imageFiles[m].c_str(), &currentWidth, &currentHeight, &channels, 0);
+
+		for (int y = 0; y < currentHeight; ++y) {
+			float yPercent = y / (float) currentHeight;
+
+			for (int x = 0; x < currentWidth; ++x) {
+				float xPercent = x / (float)currentWidth;
+				
+				switch (m) {
+				case 0: //rt
+					xVal = 1;
+					yVal = 2*yPercent - 1;
+					zVal = -(2*xPercent - 1);
+					break;
+				case 1: //lf
+					xVal = -1;
+					yVal = 2 * yPercent - 1;
+					zVal = 2 * xPercent - 1;
+					break;
+				case 2: //up
+					xVal = 2 * xPercent - 1;
+					yVal = 1;
+					zVal = -(2 * yPercent - 1);
+					break;
+				case 3: //dn
+					xVal = 2 * xPercent - 1;
+					yVal = -1;
+					zVal = 2 * yPercent - 1;
+					break;
+				case 4: //bk
+					xVal = -(2 * xPercent - 1);
+					yVal = 2 * yPercent - 1;
+					zVal = -1;
+					break;
+				case 5: //ft
+					xVal = (2 * xPercent - 1);
+					yVal = 2 * yPercent - 1;
+					zVal = 1;
+					break;
+				}
+
+				float mag = sqrt(xVal*xVal + yVal*yVal + zVal * zVal);
+				xVal /= mag;
+				yVal /= mag;
+				zVal /= mag;
+				
+				float theta = acos(zVal / sqrt(xVal*xVal + yVal*yVal + zVal*zVal));
+
+				float currentSH;
+				for (int shIndex = 0; shIndex < SH_COUNT; ++shIndex) {
+					switch (shIndex) {
+						case 0: //0,0
+							currentSH = shConst[shIndex];
+							break;
+						case 1: //1,-1
+							currentSH = shConst[shIndex] * yVal;
+							break;
+						case 2: //1,0
+							currentSH = shConst[shIndex] * zVal;
+							break;
+						case 3: //1,1
+							currentSH = shConst[shIndex] * xVal;
+							break;
+						case 4: //2, -2
+							currentSH = shConst[shIndex] * xVal * yVal;
+							break;
+						case 5: //2, -1
+							currentSH = shConst[shIndex] * yVal * zVal;
+							break;
+						case 6: //2, 0
+							currentSH = shConst[shIndex] * (3 * zVal*zVal - 1);
+							break;
+						case 7: //2, 1
+							currentSH = shConst[shIndex] * xVal * zVal;
+							break;
+						case 8: //2, 2
+							currentSH = shConst[shIndex] * (xVal*xVal - yVal*yVal);
+							break;
+					}
+					for (int c = 0; c < 3; ++c) {
+						irradiance[shIndex][c] +=  (currentSH * sin(theta) / (CUBE_FACES*currentWidth*currentHeight)) * (currentImage[(x + y*currentWidth)*channels + c]);
+					}
+				}
+			}
+		}
+		free(currentImage);
+	}
+
+	float c1 = 0.429043;
+	float c2 = 0.511664;
+	float c3 = 0.743125;
+	float c4 = 0.886227;
+	float c5 = 0.247708;
+
+	for (int c = 0; c < 3; ++c) {
+		irradianceMatrix[c] = glm::mat4(c1*irradiance[8][c], c1*irradiance[4][c], c1*irradiance[7][c], c2*irradiance[3][c],
+			c1*irradiance[4][c], -c1*irradiance[8][c], c1*irradiance[5][c], c2*irradiance[1][c],
+			c1*irradiance[7][c], c1*irradiance[5][c], c3*irradiance[6][c], c2*irradiance[2][c],
+			c2*irradiance[3][c], c2*irradiance[1][c], c2*irradiance[2][c], c4*irradiance[0][c] - c5*irradiance[6][c]);
+	}
+}
 
 void Renderer::init(int window_width, int window_height) {
 	width = window_width;
@@ -41,10 +173,23 @@ void Renderer::init(int window_width, int window_height) {
 	glCullFace(GL_BACK);
 	glClearColor(0, 0, .25, 1);
 
-	currentShader = new Shader(
-		"source/shaders/test.vs", "source/shaders/test.fs"
+	shaderList[REGULAR_SHADER] = new Shader(
+		"source/shaders/forward_pbr.vert", "source/shaders/forward_pbr.frag"
 		);
 
+
+	shaderList[FORWARD_PBR_SHADER] = new Shader(
+		"source/shaders/forward_pbr.vert", "source/shaders/forward_pbr.frag"
+		);
+
+	(*shaderList[FORWARD_PBR_SHADER])["matTex"] = 2;
+
+	shaderList[SKYBOX_SHADER] = new Shader(
+		"source/shaders/skybox.vert", "source/shaders/skybox.frag"
+		);
+
+	currentShader = shaderList[REGULAR_SHADER];
+	
 	currentShader->use();
 
 	hatTex = SOIL_load_OGL_texture
@@ -70,23 +215,96 @@ void Renderer::init(int window_width, int window_height) {
 			);
 
 
+	barrelTex = SOIL_load_OGL_texture
+		(
+			"assets/WoodenBarrel/barrel_tex.png",
+			SOIL_LOAD_AUTO,
+			SOIL_CREATE_NEW_ID,
+			SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
+			);
+
+	barrelTex_Mat = SOIL_load_OGL_texture
+		(
+			"assets/WoodenBarrel/barrel_spec.png",
+			SOIL_LOAD_AUTO,
+			SOIL_CREATE_NEW_ID,
+			SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
+			);
+
+
+
+	tankTexTop = SOIL_load_OGL_texture
+		(
+			"assets/hover_tank/hoverTank1_top_tex.png",
+			SOIL_LOAD_AUTO,
+			SOIL_CREATE_NEW_ID,
+			SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
+			);
+	tankTexBot = SOIL_load_OGL_texture
+		(
+			"assets/hover_tank/hoverTank1_bot_tex.png",
+			SOIL_LOAD_AUTO,
+			SOIL_CREATE_NEW_ID,
+			SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
+			);
+	tankSpecTop = SOIL_load_OGL_texture
+		(
+			"assets/hover_tank/hoverTank1_top_spec.png",
+			SOIL_LOAD_AUTO,
+			SOIL_CREATE_NEW_ID,
+			SOIL_FLAG_MIPMAPS | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
+			);
+	tankSpecBot = SOIL_load_OGL_texture
+		(
+			"assets/hover_tank/hoverTank1_bot_spec.png",
+			SOIL_LOAD_AUTO,
+			SOIL_CREATE_NEW_ID,
+			SOIL_FLAG_MIPMAPS | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
+			);
+
+
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+	skyboxTex = SOIL_load_OGL_cubemap
+		(
+			"assets/grace/grace_px.hdr",
+			"assets/grace/grace_nx.hdr",
+			"assets/grace/grace_py.hdr",
+			"assets/grace/grace_ny.hdr",
+			"assets/grace/grace_pz.hdr",
+			"assets/grace/grace_nz.hdr",
+			SOIL_LOAD_AUTO,
+			SOIL_CREATE_NEW_ID,
+			SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB
+			);
+
+	std::string cubeFilenames[6] = {
+		"assets/grace/grace_px.hdr",
+		"assets/grace/grace_nx.hdr",
+		"assets/grace/grace_py.hdr",
+		"assets/grace/grace_ny.hdr",
+		"assets/grace/grace_pz.hdr",
+		"assets/grace/grace_nz.hdr" };
+	loadIrradiance(cubeFilenames);
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, hatTex);
 
-	fboTest = new Framebuffer(900, 900, 2, false);
+	fboTest = new Framebuffer(1800, 1800, 2, false);
 
 
-	scene.transform.translate(0, 0, -10);
-	scene.transform.scale(2);
+	scene.transform.translate(0, 0, 0);
+	//scene.transform.scale(2);
 
-	//scene.addChild(*camera);
+	scene.addChild(*camera);
 
     bunny = loadScene("assets/bunny.obj");
     bunny->transform.scale(2);
-	bunny->transform.translate(-2, 0, 0);
-	scene.addChild(*bunny);
+	bunny->transform.translate(-2, 0, -10);
+	//scene.addChild(*bunny);
 
 	camera->transform.translate(0, 0, 20);
+	//camera->transform.rotate(glm::angleAxis(atanf(1), glm::vec3(-1, 0, 0)));
 
     turret = loadScene("assets/turret.dae");
 	turret->transform.translate(-1, -2, 5);
@@ -98,9 +316,15 @@ void Renderer::init(int window_width, int window_height) {
 	bunny->addChild(*hat);
 
 	bagel = loadScene("assets/bagel.obj");
-	bagel->transform.scale(10);
-	bagel->transform.translate(-5, 7, -10);
-	scene.addChild(*bagel);
+	bagel->transform.scale(20);
+	//bagel->transform.translate(-5, 7, -10);
+	//scene.addChild(*bagel);
+
+	barrel = loadScene("assets/sphere.obj");
+	barrel->transform.scale(1);
+
+	tankBot = loadScene("assets/hover_tank/hoverTank1_bot.obj");
+	tankTop = loadScene("assets/hover_tank/hoverTank1_top.obj");
 
 	Renderer::resize(width, height);
 
@@ -112,6 +336,9 @@ void Renderer::loop() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	double dt = glfwGetTime() - lastTime;
 
+	currentShader = shaderList[FORWARD_PBR_SHADER];
+	currentShader->use();
+	(*currentShader)["cameraPos"] = camera->transform.getWorldPosition();
 
 	GLuint buffersToDraw[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 	fboTest->bind(2, buffersToDraw);
@@ -119,9 +346,27 @@ void Renderer::loop() {
 	glClearColor(1, 1, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	scene.transform.rotate(glm::angleAxis(0.01f, glm::vec3(0, 1, 0)));
+	scene.transform.rotate(glm::angleAxis(0.003f, glm::vec3(0, 1, 0)));
+	//camera->transform.rotate(glm::angleAxis(-0.004f, glm::vec3(-1, 0, 0)));
+
+	//TODO REMOVE
+	currentShader = shaderList[FORWARD_PBR_SHADER];
+	currentShader->use();
+
+	for (int x = 0; x < 8; ++x) {
+		for (int y = 0; y < 8; ++y) {
+			float xDist = 2 * (x - 3.5);
+			float yDist = 2 * (y - 3.5);
+			barrel->transform.translate(xDist, yDist, 0);
+			(*shaderList[FORWARD_PBR_SHADER])["testMetal"] = x/7.0f;
+			(*shaderList[FORWARD_PBR_SHADER])["testRough"] = y/7.0f;
+			barrel->draw();
+			barrel->transform.translate(-xDist, -yDist, 0);
+		}
+	}
 
 
+	/*
 	glBindTexture(GL_TEXTURE_2D, hatTex);
 	bunny->draw();
 
@@ -131,9 +376,52 @@ void Renderer::loop() {
 
 	glBindTexture(GL_TEXTURE_2D, bagelTex);
 	bagel->draw();
+	*/
 
+	/*
+	glActiveTexture(GL_TEXTURE0 + 2);
+	glBindTexture(GL_TEXTURE_2D, tankSpecBot);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, tankTexBot);
+	tankBot->draw();
+
+	glActiveTexture(GL_TEXTURE0 + 2);
+	glBindTexture(GL_TEXTURE_2D, tankSpecTop);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, tankTexTop);
+	tankTop->draw();
+
+
+
+	glActiveTexture(GL_TEXTURE0 + 2);
+	glBindTexture(GL_TEXTURE_2D, turretTex);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, turretTex);
 	turret->draw();
+	*/
+
+
+	(*shaderList[FORWARD_PBR_SHADER])["uLightData[0]"] = glm::vec4(5*sin(tmp), 0, 4, 1);
+	(*shaderList[FORWARD_PBR_SHADER])["uLightData[1]"] = glm::vec4(1, 1, 1, 10);
+	(*shaderList[FORWARD_PBR_SHADER])["irradiance[0]"] = irradianceMatrix[0];
+	(*shaderList[FORWARD_PBR_SHADER])["irradiance[1]"] = irradianceMatrix[1];
+	(*shaderList[FORWARD_PBR_SHADER])["irradiance[2]"] = irradianceMatrix[2];
+	(*shaderList[FORWARD_PBR_SHADER])["environment"] = 5;
+	(*shaderList[FORWARD_PBR_SHADER])["environment_mipmap"] = 8.0f;
+	glActiveTexture(GL_TEXTURE0 + 5);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
+
+
+	currentShader = shaderList[SKYBOX_SHADER];
+	currentShader->use();
+
+	glDepthFunc(GL_LEQUAL); //needed for skybox to overwrite blank z-buffer values
+	(*currentShader)[VIEW_MATRIX] = camera->getCameraMatrix();
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
+	Skybox::draw();
+
+	currentShader = shaderList[REGULAR_SHADER];
+	currentShader->use();
 
 
 	turret->transform.translate(0.2f*sin(tmp+=0.05f), 0, 0);
@@ -174,7 +462,8 @@ Shader& Renderer::getCurrentShader() {
 }
 
 void Renderer::setModelMatrix(glm::mat4 transform) {
-	(*currentShader)[MV_MATRIX] = camera->getCameraMatrix() * transform;
+	(*currentShader)[MODEL_MATRIX] = transform;
+	(*currentShader)[VIEW_MATRIX] = camera->getCameraMatrix();
 }
 
 void Renderer::framebuffer_size_callback(GLFWwindow* window, int window_width, int window_height)
@@ -186,7 +475,9 @@ void Renderer::resize(int width, int height) {
 	glViewport(0, 0, width, height);
 
 	glm::mat4 perspective = glm::perspective((float)(atan(1)*4.0f / 3.0f), width / (float)height, .1f, 100.f);
-	(Renderer::getCurrentShader())["uP_Matrix"] = perspective;
+	for (Shader* shader : shaderList) {
+		(*shader)["uP_Matrix"] = perspective;
+	}
 }
 
 void Renderer::window_focus_callback(GLFWwindow* window, int focused)

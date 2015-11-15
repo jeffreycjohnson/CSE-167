@@ -8,8 +8,9 @@ Shader::Uniform::Uniform(GLint program, GLint location)
 {
     if(program == -1 || location == -1)
     {
+		CHECK_ERROR();
         LOG("Invalid Uniform Location");
-        throw;
+    //    throw;
     }
 }
 

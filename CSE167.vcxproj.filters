@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{b86542ff-74a8-43be-8801-208f8725c59b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Shader.cpp">
@@ -60,6 +63,9 @@
     <ClCompile Include="source\WebWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\Skybox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\include\Camera.h">
@@ -104,5 +110,22 @@
     <ClInclude Include="source\include\WebWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\include\Skybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="source\shaders\forward_pbr.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="source\shaders\forward_pbr.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="source\shaders\skybox.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="source\shaders\skybox.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
