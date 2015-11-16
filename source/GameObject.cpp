@@ -27,3 +27,15 @@ void GameObject::draw() {
 		(child->gameObject)->draw();
 	}
 }
+
+void GameObject::update(float deltaTime)
+{
+    for(auto object : transform.children)
+    {
+        object->gameObject->update(deltaTime);
+    }
+    for (auto component : componentList)
+    {
+        component->update(deltaTime);
+    }
+}

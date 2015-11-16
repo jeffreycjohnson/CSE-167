@@ -6,13 +6,11 @@
 class Component
 {
 	public:
-        virtual ~Component() = default;
-
         GameObject* gameObject;
 
-		virtual void setGameObject(GameObject* go) {
-			gameObject = go;
-		}
+        virtual ~Component() = default;
+        virtual void update(float deltaTime);
+        virtual void setGameObject(GameObject* go);
 };
 
 #endif

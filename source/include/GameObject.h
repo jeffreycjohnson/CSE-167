@@ -48,7 +48,7 @@ public:
     void addChild(GameObject& go);
 
 	void draw();
-
+    void update(float deltaTime);
 protected:
     std::vector<Component*> componentList;
 };
