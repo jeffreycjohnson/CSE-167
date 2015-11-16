@@ -7,6 +7,11 @@
 
 #include <glfw3.h>
 
+#define SHADER_COUNT 3
+#define REGULAR_SHADER 0
+#define FORWARD_PBR_SHADER 1
+#define SKYBOX_SHADER 2
+
 struct GPUData {
 	int vaoHandle;
 	int textureSlot[20];
@@ -15,13 +20,15 @@ struct GPUData {
 class Renderer
 {
 	public:
-		static GameObject scene;
 		static Shader* currentShader;
+		static Camera* camera;
 		static GPUData gpuData;
 
 		static void init(int w, int h);
 		static void loop();
 		static Shader& getCurrentShader();
+		static Shader* getShader(int shaderId);
+		static void switchShader(int shaderId);
 
 		static void setModelMatrix(glm::mat4 transform);
 
