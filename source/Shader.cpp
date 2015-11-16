@@ -1,6 +1,5 @@
 #include "Shader.h"
 #include <fstream>
-#include <iostream>
 #include "gtc/type_ptr.hpp"
 
 Shader::Uniform::Uniform(GLint program, GLint location)
@@ -90,16 +89,63 @@ static bool compile(const std::string& file, GLuint shader)
     return false;
 }
 
-Shader::Shader(const std::string& vertex, const std::string& fragment)
-    : id(glCreateProgram())
+Shader::Shader(const std::string& vertex, const std::string& fragment, bool autoReload)
+    : vertexFile(vertex), fragFile(fragment), autoReload(autoReload)
 {
+    reload();
+}
+
+Shader::~Shader()
+{
+    glDeleteProgram(id);
+}
+
+//TODO should we pre-extract these into a map?
+Shader::Uniform Shader::operator[](const std::string& name)
+{
+    return Uniform(id, glGetUniformLocation(id, name.c_str()));
+}
+
+void Shader::use()
+{
+    reloadTimer++;
+    if(reloadTimer % 30) reload();
+    glUseProgram(id);
+}
+
+void Shader::reload()
+{
+    if (id != -1 && !autoReload) return;
+    else if(id == -1 || autoReload)
+    {
+        bool reload = false;
+        auto t = last_write_time(path(vertexFile));
+        if (vertFileTime != t)
+        {
+            reload = true;
+            vertFileTime = t;
+        }
+        t = last_write_time(path(fragFile));
+        if (fragFileTime != t)
+        {
+            reload = true;
+            fragFileTime = t;
+        }
+        if (!reload) return;
+    }
+    CHECK_ERROR();
+
+    if(id != -1) glDeleteProgram(id);
+    CHECK_ERROR();
+
+    id = glCreateProgram();
     auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
     auto fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     CHECK_ERROR();
 
-    if (compile(vertex, vertexShader)) throw vertex;
+    if (compile(vertexFile, vertexShader)) throw vertexFile;
     glAttachShader(id, vertexShader);
-    if (compile(fragment, fragmentShader)) throw fragment;
+    if (compile(fragFile, fragmentShader)) throw fragFile;
     glAttachShader(id, fragmentShader);
 
     glLinkProgram(id);
@@ -124,20 +170,4 @@ Shader::Shader(const std::string& vertex, const std::string& fragment)
         LOG(static_cast<const char *>(errbuf));
         throw;
     }
-}
-
-Shader::~Shader()
-{
-    glDeleteProgram(id);
-}
-
-//TODO should we pre-extract these into a map?
-Shader::Uniform Shader::operator[](const std::string& name)
-{
-    return Uniform(id, glGetUniformLocation(id, name.c_str()));
-}
-
-void Shader::use() const
-{
-    glUseProgram(id);
 }

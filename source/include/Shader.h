@@ -2,6 +2,8 @@
 #define INCLUDE_SHADER_H
 
 #include "ForwardDecs.h"
+#include <experimental/filesystem>
+#include <map>
 
 class Shader
 {
@@ -26,13 +28,22 @@ private:
     };
 
 public:
-    Shader(const std::string& vertex, const std::string& fragment);
+    Shader(const std::string& vertex, const std::string& fragment, bool autoReload = true);
     ~Shader();
 
     Uniform operator[](const std::string& name);
-    void use() const;
+    void use();
+    void reload();
 
-    const GLint id;
+    GLint id = -1;
+    bool autoReload;
+
+private:
+    int reloadTimer = 0;
+    std::string vertexFile, fragFile;
+    typedef std::experimental::filesystem::file_time_type file_time_type;
+    typedef std::experimental::filesystem::path path;
+    file_time_type vertFileTime, fragFileTime;
 };
 
 #endif
