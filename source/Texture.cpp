@@ -1,14 +1,21 @@
 #include "Texture.h"
+#include <SOIL/SOIL.h>
 
 Texture::Texture(std::string filename) {
-	glGenTextures(1, &textureHandle);
+    textureHandle = SOIL_load_OGL_texture(filename.c_str(),
+        SOIL_LOAD_AUTO,
+        SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_TEXTURE_REPEATS);
 	glBindTexture(GL_TEXTURE_2D, textureHandle);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	glGenerateMipmap(GL_TEXTURE_2D);
+
+    GLfloat anisoAmt = 0.0f;
+    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &anisoAmt);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisoAmt);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
+    CHECK_ERROR();
 }
 
 void Texture::loadTextureFile(std::string filename) {
@@ -19,4 +26,5 @@ void Texture::bindTexture(int slot) {
 	int textureSlot = GL_TEXTURE0 + slot;
 	glActiveTexture(textureSlot);
 	glBindTexture(GL_TEXTURE_2D, textureHandle);
+    CHECK_ERROR();
 }

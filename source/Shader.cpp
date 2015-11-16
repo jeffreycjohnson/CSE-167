@@ -133,10 +133,8 @@ void Shader::reload()
         }
         if (!reload) return;
     }
-    CHECK_ERROR();
 
     if(id != -1) glDeleteProgram(id);
-    CHECK_ERROR();
 
     id = glCreateProgram();
     auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -151,6 +149,7 @@ void Shader::reload()
     glLinkProgram(id);
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+    CHECK_ERROR();
 
     GLint status;
     glGetProgramiv(id, GL_LINK_STATUS, &status);
@@ -170,4 +169,5 @@ void Shader::reload()
         LOG(static_cast<const char *>(errbuf));
         throw;
     }
+    CHECK_ERROR();
 }
