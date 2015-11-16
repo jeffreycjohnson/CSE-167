@@ -33,6 +33,7 @@ uniform vec4 uLightData[2*lightCount];
 //tmp variables to set the metalness and roughness instead of a texture
 uniform float testMetal;
 uniform float testRough;
+uniform bool useTextures = false;
 
 
 
@@ -102,12 +103,10 @@ vec3 SpecularBRDF(vec3 lightColor, vec3 normal, vec3 view, vec3 lightDir, float 
 //generates sample directions, sets up the values, calls the BRDF, then accumulates resulting colors
 vec3 SpecularEnvMap(vec3 normal, vec3 view, float a, vec3 F0) {
 	vec3 color = vec3(0,0,0);
-	normal = normalize(normal);
-	view = normalize(view);
 	for (int s=0; s<sample_count; ++s) {
 		vec2 xi = Hammersley(s, sample_count);
-		vec3 sample_normal = normalize(GGX_Sample(xi, normal, a));
-		vec3 lightDir =  normalize(reflect(-view, sample_normal));
+		vec3 sample_normal = GGX_Sample(xi, normal, a);
+		vec3 lightDir =  reflect(-view, sample_normal);
 		vec3 lightColor = textureLod(environment, lightDir, a*environment_mipmap).xyz;
 		color += SpecularBRDF(lightColor, normal, view, lightDir, a, F0);
 	}
@@ -122,9 +121,11 @@ void main () {
   vec2 mat = texture(matTex, vTexCoord).ra;
 
   //Test values - remove these for objects with textures
-  mat.r = testMetal;
-  mat.y = testRough;
-  albedo = vec3(0.2, 0.2, 0.95);
+  if (!useTextures) {
+	  mat.r = testMetal;
+	  mat.y = testRough;
+	  albedo = vec3(0.2, 0.2, 0.95);
+  }
   //end test values-------------------------------------
 
 

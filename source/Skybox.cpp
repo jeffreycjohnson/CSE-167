@@ -2,6 +2,8 @@
 #include "Renderer.h"
 #include <SOIL.h>
 #include "stb_image.h" //note - can get this file from SOIL2 - just put in an include folder in Dependencies for now
+#include "Renderer.h"
+#include "Camera.h"
 
 #define FLOAT_SIZE 4
 #define POSITION_COUNT 3
@@ -50,6 +52,10 @@ void Skybox::draw() {
 	if (!loaded) {
 		load();
 	}
+
+
+	Renderer::switchShader(SKYBOX_SHADER);
+	(*Renderer::getShader(SKYBOX_SHADER))["uV_Matrix"] = Renderer::camera->getCameraMatrix();
 
 	if (Renderer::gpuData.vaoHandle != meshData.vaoHandle) {
 		glBindVertexArray(meshData.vaoHandle);
