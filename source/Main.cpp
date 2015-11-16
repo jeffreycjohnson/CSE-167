@@ -35,6 +35,8 @@ private:
     float oldTime, prevTime, delta, frames;
 };
 
+extern GameObject scene;
+
 int main()
 {
     FrameTimer timer(2.5f);
@@ -89,7 +91,7 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
         timer.tick();
-        Renderer::scene.update(timer.deltaTime);
+        scene.update(timer.deltaTime);
 		Renderer::loop();
 
 		glfwSwapBuffers(window);

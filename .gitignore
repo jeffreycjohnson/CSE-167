@@ -29,6 +29,7 @@
 # Visual Studio
 *.sdf
 *.opensdf
+*.suo
 
 # Dependencies
 Dependencies/*
