@@ -125,7 +125,7 @@ void TestSceneHawk::loop() {
 	Renderer::switchShader(FORWARD_PBR_SHADER);
 	(*Renderer::getShader(FORWARD_PBR_SHADER))["cameraPos"] = Renderer::camera->transform.getWorldPosition();
 
-	(*Renderer::getShader(FORWARD_PBR_SHADER))["uLightData[0]"] = glm::vec4(5 * sin(tmp), 0, 4, 1);
+	(*Renderer::getShader(FORWARD_PBR_SHADER))["uLightData[0]"] = glm::vec4(5 * sin(tmp), 5 * cos(tmp), 4, 1);
 	(*Renderer::getShader(FORWARD_PBR_SHADER))["uLightData[1]"] = glm::vec4(1, 1, 1, 10);
 
 	for (int x = 0; x < 8; ++x) {

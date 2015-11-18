@@ -74,41 +74,36 @@ float GGX_Visibility(float dotProduct, float k) {
 
 float GGX_D(float dotNH, float a) {
 	float a2 = a*a;
-	float bot = (dotNH * dotNH * (a - 1.0) + 1.0);
+	float bot = (dotNH * dotNH * (a2 - 1.0) + 1.0);
 	return (a2) / (PI * bot * bot);
 }
 
-vec3 SpecularBRDF(vec3 lightColor, vec3 normal, vec3 view, vec3 lightDir, float a, vec3 F0) {
+vec3 SpecularBRDF(vec3 lightColor, vec3 normal, vec3 view, vec3 lightDir, float a, vec3 F0, float d) {
 		vec3 halfVec = normalize(view + lightDir);
 		
 		float dotNL = clamp(dot(normal, lightDir), 0.0, 1.0);
-
-		if (dotNL < 0.0) {
-			return vec3(0,0,0);
-		}
 
 		float dotNV = clamp(dot(normal, view), 0.0, 1.0);
 		float dotLH = clamp(dot(lightDir, halfVec), 0.0, 1.0);
 		float dotNH = clamp(dot(normal, halfVec), 0.0, 1.0);
 
-		vec3 F = F0 + (vec3(1,1,1)-F0) * pow(1-dotLH, 5);
+		vec3 F = F0 + (vec3(1,1,1)-F0) * clamp(pow(1-dotLH, 5), 0.0, 1.0);
 
 		float k = a;
 		float G = GGX_Visibility(dotNV, k) * GGX_Visibility(dotNL, k);
-		float D = GGX_D(dotNH, a);
 
-		return 2*F * lightColor * (D * G * dotNL);
+		return F * lightColor * (G * dotNL);
 }
 
 //generates sample directions, sets up the values, calls the BRDF, then accumulates resulting colors
 vec3 SpecularEnvMap(vec3 normal, vec3 view, float a, vec3 F0) {
 	vec3 color = vec3(0,0,0);
+	vec3 lightDir_Main =  reflect(-view, normal);
 	for (int s=0; s<sample_count; ++s) {
 		vec2 xi = Hammersley(s, sample_count);
-		vec3 sample_normal = GGX_Sample(xi, normal, a);
-		vec3 lightDir =  reflect(-view, sample_normal);
+		vec3 lightDir = GGX_Sample(xi, lightDir_Main, a);
 		vec3 lightColor = textureLod(environment, lightDir, a*environment_mipmap).xyz;
-		color += SpecularBRDF(lightColor, normal, view, lightDir, a, F0);
+		color += SpecularBRDF(lightColor, normal, view, lightDir, a, F0, 0);
 	}
 	color /= sample_count;
 	return color;
@@ -160,7 +155,11 @@ void main () {
 
 	float power = uLightData[2*i+1].w / (lightDist * lightDist);
     diffuseLight = diffuseLight + vec3(0.2,0.2,0.2) * (uLightData[2*i+1].xyz * (clamp(dot(lightDir, normal) * power, 0.0, 1.0)));
-	specColor += SpecularBRDF(uLightData[2*i+1].xyz, normal, view, lightDir, a, F0) * power;
+	
+	vec3 halfVec = normalize(view + lightDir);
+	float dotNH = clamp(dot(normal, halfVec), 0.0, 1.0);
+
+	specColor += GGX_D(dotNH, a) * SpecularBRDF(uLightData[2*i+1].xyz, normal, view, lightDir, a, F0, 1) * power;
   }
 
   vec3 diffuseColor = ((1.0-mat.r) * albedo) * diffuseLight;
