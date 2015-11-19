@@ -85,11 +85,10 @@ vec3 SpecularBRDF(vec3 lightColor, vec3 normal, vec3 view, vec3 lightDir, float 
 
 		float dotNV = clamp(dot(normal, view), 0.0, 1.0);
 		float dotLH = clamp(dot(lightDir, halfVec), 0.0, 1.0);
-		float dotNH = clamp(dot(normal, halfVec), 0.0, 1.0);
 
-		vec3 F = F0 + (vec3(1,1,1)-F0) * clamp(pow(1-dotLH, 5), 0.0, 1.0);
+		vec3 F = F0 + (vec3(1,1,1)-F0) * pow(1-dotLH, 5);
 
-		float k = a;
+		float k = clamp(a+.36, 0, 1);
 		float G = GGX_Visibility(dotNV, k) * GGX_Visibility(dotNL, k);
 
 		return F * lightColor * (G * dotNL);
@@ -151,10 +150,18 @@ void main () {
   for (int i=0; i < lightCount; ++i) {
     vec3 lightDir =  (uLightData[2*i] - vPosition).xyz;
     float lightDist = length(lightDir);
-    lightDir /= lightDist;
 
-	float power = uLightData[2*i+1].w / (lightDist * lightDist);
-    diffuseLight = diffuseLight + vec3(0.2,0.2,0.2) * (uLightData[2*i+1].xyz * (clamp(dot(lightDir, normal) * power, 0.0, 1.0)));
+	//Spherical light algorithm from http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf
+	float sphereRadius = uLightData[2*i].w;
+	vec3 reflectedRay = reflect(-view, normal);
+	vec3 centerToRay = dot(lightDir, reflectedRay) * reflectedRay - lightDir;
+	lightDir = normalize(lightDir + centerToRay * clamp(sphereRadius / length(centerToRay), 0.0, 1.0));
+	//todo normalize based on sphere size
+
+
+
+	float power = uLightData[2*i+1].w / (lightDist * lightDist + 1);
+    diffuseLight = diffuseLight + (uLightData[2*i+1].xyz * (clamp(dot(lightDir, normal) * power, 0.0, 1.0)));
 	
 	vec3 halfVec = normalize(view + lightDir);
 	float dotNH = clamp(dot(normal, halfVec), 0.0, 1.0);

@@ -120,12 +120,23 @@ TestSceneHawk::TestSceneHawk()
 }
 
 void TestSceneHawk::loop() {
+
+
 	scene.transform.rotate(glm::angleAxis(0.003f, glm::vec3(0, 1, 0)));
 	
 	Renderer::switchShader(FORWARD_PBR_SHADER);
 	(*Renderer::getShader(FORWARD_PBR_SHADER))["cameraPos"] = Renderer::camera->transform.getWorldPosition();
 
-	(*Renderer::getShader(FORWARD_PBR_SHADER))["uLightData[0]"] = glm::vec4(5 * sin(tmp), 5 * cos(tmp), 4, 1);
+
+	barrel->transform.translate(5 * sin(tmp), 5 * cos(tmp), 4);
+	(*Renderer::getShader(FORWARD_PBR_SHADER))["testMetal"] = 0 / 7.0f;
+	(*Renderer::getShader(FORWARD_PBR_SHADER))["testRough"] = 0 / 7.0f;
+	barrel->transform.scaleFactor *= 1 + sin(tmp / 5.f); //glm::vec3(2*sin(tmp / 5.f), 2 * sin(tmp / 5.f), 2 * sin(tmp / 5.f));
+	barrel->draw();
+	barrel->transform.scaleFactor = glm::vec3(1,1,1);
+	barrel->transform.translate(-5 * sin(tmp), -5 * cos(tmp), -4);
+
+	(*Renderer::getShader(FORWARD_PBR_SHADER))["uLightData[0]"] = glm::vec4(5 * sin(tmp), 5 * cos(tmp), 4, 1+sin(tmp/5.f));
 	(*Renderer::getShader(FORWARD_PBR_SHADER))["uLightData[1]"] = glm::vec4(1, 1, 1, 10);
 
 	for (int x = 0; x < 8; ++x) {
