@@ -28,6 +28,8 @@ private:
     };
 
 public:
+    friend class Material;
+
     Shader(const std::string& vertex, const std::string& fragment, bool autoReload = true);
     ~Shader();
 

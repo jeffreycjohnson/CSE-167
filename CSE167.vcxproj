@@ -159,6 +159,7 @@
   <ItemGroup>
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\Component.cpp" />
+    <ClCompile Include="source\DeferrerdPass.cpp" />
     <ClCompile Include="source\Framebuffer.cpp" />
     <ClCompile Include="source\GameObject.cpp" />
     <ClCompile Include="source\Input.cpp" />
@@ -186,6 +187,7 @@
     <ClInclude Include="source\include\Material.h" />
     <ClInclude Include="source\include\Mesh.h" />
     <ClInclude Include="source\include\Renderer.h" />
+    <ClInclude Include="source\include\RenderPass.h" />
     <ClInclude Include="source\include\Shader.h" />
     <ClInclude Include="source\include\Skybox.h" />
     <ClInclude Include="source\include\TestSceneHawk.h" />

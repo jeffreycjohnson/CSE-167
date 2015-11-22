@@ -2,7 +2,7 @@
 #define INCLUDE_RENDERER_H
 
 #include "ForwardDecs.h"
-#include "GameObject.h"
+#include "RenderPass.h"
 #include "Shader.h"
 
 #include <glfw3.h>
@@ -23,6 +23,7 @@ class Renderer
 		static Shader* currentShader;
 		static Camera* camera;
 		static GPUData gpuData;
+        static std::list<RenderPass*> passes;
 
 		static void init(int w, int h);
 		static void loop();

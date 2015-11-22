@@ -1,5 +1,7 @@
 #include "ForwardDecs.h"
 #include "Renderer.h"
+#include "GameObject.h"
+#include "Material.h"
 #include <glfw3.h>
 #include <iostream>
 
@@ -75,7 +77,8 @@ int main()
     glewInit();
 	glfwSwapInterval(1);
 	Renderer::init(width, height);
-
+    Material m(new Shader("", ""));
+    m["test"] = 2.0f;
 	//window events
 	glfwSetFramebufferSizeCallback(window, Renderer::framebuffer_size_callback);
 	glfwSetWindowFocusCallback(window, Renderer::window_focus_callback);
