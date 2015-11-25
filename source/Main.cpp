@@ -2,6 +2,8 @@
 #include "Renderer.h"
 #include "GameObject.h"
 #include "Material.h"
+#include "Input.h"
+#include "Timer.h"
 #include <glfw3.h>
 #include <iostream>
 
@@ -77,8 +79,10 @@ int main()
     glewInit();
 	glfwSwapInterval(1);
 	Renderer::init(width, height);
-    Material m(new Shader("", ""));
-    m["test"] = 2.0f;
+	Input::init(window);
+	Timer::init();
+    //Material m(new Shader("", ""));
+    //m["test"] = 2.0f;
 	//window events
 	glfwSetFramebufferSizeCallback(window, Renderer::framebuffer_size_callback);
 	glfwSetWindowFocusCallback(window, Renderer::window_focus_callback);
@@ -89,12 +93,14 @@ int main()
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	glfwSetCursorPosCallback(window, Renderer::cursor_position_callback);
 	glfwSetMouseButtonCallback(window, Renderer::mouse_button_callback); //note - if presses aren't working, try sticky mouse mode
-	glfwSetScrollCallback(window, Renderer::scroll_callback);
+	glfwSetScrollCallback(window, Input::scroll_callback);
 
 	while (!glfwWindowShouldClose(window))
 	{
         timer.tick();
         scene.update(timer.deltaTime);
+		Input::update();
+		Timer::update();
 		Renderer::loop();
 
 		glfwSwapBuffers(window);

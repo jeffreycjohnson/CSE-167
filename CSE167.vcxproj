@@ -166,12 +166,14 @@
     <ClCompile Include="source\Light.cpp" />
     <ClCompile Include="source\Main.cpp" />
     <ClCompile Include="source\Material.cpp" />
+    <ClCompile Include="source\MathFunc.cpp" />
     <ClCompile Include="source\Mesh.cpp" />
     <ClCompile Include="source\Renderer.cpp" />
     <ClCompile Include="source\Shader.cpp" />
     <ClCompile Include="source\Skybox.cpp" />
     <ClCompile Include="source\TestSceneHawk.cpp" />
     <ClCompile Include="source\Texture.cpp" />
+    <ClCompile Include="source\Timer.cpp" />
     <ClCompile Include="source\Transform.cpp" />
     <ClCompile Include="source\Util.cpp" />
     <ClCompile Include="source\WebWindow.cpp" />
@@ -185,6 +187,7 @@
     <ClInclude Include="source\include\Input.h" />
     <ClInclude Include="source\include\Light.h" />
     <ClInclude Include="source\include\Material.h" />
+    <ClInclude Include="source\include\MathFunc.h" />
     <ClInclude Include="source\include\Mesh.h" />
     <ClInclude Include="source\include\Renderer.h" />
     <ClInclude Include="source\include\RenderPass.h" />
@@ -192,6 +195,7 @@
     <ClInclude Include="source\include\Skybox.h" />
     <ClInclude Include="source\include\TestSceneHawk.h" />
     <ClInclude Include="source\include\Texture.h" />
+    <ClInclude Include="source\include\Timer.h" />
     <ClInclude Include="source\include\Transform.h" />
     <ClInclude Include="source\include\WebWindow.h" />
   </ItemGroup>
