@@ -7,7 +7,7 @@
 
 enum AxisType
 {
-	X, Y, SCROLL
+	X, Y, SCROLL_X, SCROLL_Y
 };
 
 enum Joystick // Wraps GLFW's Joystick enum, but adds JOYSTICK_ALL as an option
@@ -24,7 +24,7 @@ enum InputType
 
 enum InputState
 {
-	IDLE, BUTTON_DOWN, PRESSED, BUTTON_UP
+	UNDEFINED = -1, IDLE, BUTTON_UP, BUTTON_DOWN, PRESSED
 };
 
 struct GLFWinput // Used to determine which input type it is and what GLFW enum value it maps to
@@ -39,6 +39,7 @@ struct Button
 	bool edge;
 	float value;
 	float startTime;
+	float startValue;
 };
 
 struct InputData // User created input maps
@@ -68,6 +69,8 @@ private:
 
 	static void changeState(std::unordered_map<int, Button>::iterator, int);
 	static float getAxisHelper(GLFWinput, InputData);
+	static InputState getButtonHelper(std::string);
+	static InputState GLFWInputToState(GLFWinput);
 
 public:
 	static std::unordered_map<std::string, InputData> inputs; // Finds custom named inputs
@@ -83,6 +86,10 @@ public:
 	static glm::vec2 mousePosition();
 
 	static float getAxis(std::string name);
+	static bool getButtonDown(std::string name);
+	static bool getButton(std::string name);
+	static bool getButtonUp(std::string name);
+	static bool getButtonIdle(std::string name);
 
 	static bool getKeyDown(std::string button);
 	static bool getKey(std::string button);

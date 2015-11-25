@@ -131,11 +131,11 @@ void Input::init(GLFWwindow* win)
 
 	// Add custom inputs
 	InputData data;
-	data.name = "horizontal";
-	data.positiveButton = "d";
-	data.negativeButton = "a";
-	data.altPositiveButton = "joystick button 11";
-	data.altNegativeButton = "joystick button 13";
+	data.name = "yaw";
+	data.positiveButton = "e";
+	data.negativeButton = "q";
+	data.altPositiveButton = "right";
+	data.altNegativeButton = "left";
 	data.joystick = Joystick::JOYSTICK_1;
 	data.axis = AxisType::X;
 	data.dead = 0.1f;
@@ -143,16 +143,22 @@ void Input::init(GLFWwindow* win)
 	data.invert = false;
 	addInput(data);
 
-	data.name = "vertical";
-	data.positiveButton = "w";
-	data.negativeButton = "s";
-	data.altPositiveButton = "up";
-	data.altNegativeButton = "down";
+	data.name = "pitch";
+	data.positiveButton = "s";
+	data.negativeButton = "w";
+	data.altPositiveButton = "down";
+	data.altNegativeButton = "up";
+	data.joystick = Joystick::JOYSTICK_1;
+	data.axis = AxisType::SCROLL_Y;
+	addInput(data);
+
+	data.name = "roll";
+	data.positiveButton = "d";
+	data.negativeButton = "a";
+	data.altPositiveButton = "";
+	data.altNegativeButton = "";
 	data.joystick = Joystick::JOYSTICK_3;
-	data.axis = AxisType::Y;
-	data.dead = 0.1f;
-	data.sensitivity = 0.25f;
-	data.invert = true;
+	data.axis = AxisType::X;
 	addInput(data);
 }
 
@@ -160,8 +166,6 @@ void Input::update()
 {
 	// POSSIBLE RACE CONDITION WITH LOW FPS: Input key down and key up before the next frame loses input!
 	// Solution: Use a queue and change the update function to use callbacks
-
-	cout << getAxis("vertical") << endl;
 
 	int count;
 	const unsigned char* joystickArray = glfwGetJoystickButtons(0, &count); // Only deal with single controllers for now
@@ -188,9 +192,6 @@ void Input::update()
 		}
 	}
 
-	if (scrollBuff != scrollAmount && (abs(scrollAmount.x) > 0 || abs(scrollAmount.y) > 0))
-		cout << "Scroll: x = " << scrollAmount.x << ", y = " << scrollAmount.y << endl;
-
 	scrollAmount = scrollBuff;
 	scrollBuff.x = 0;
 	scrollBuff.y = 0;
@@ -204,13 +205,11 @@ void Input::changeState(unordered_map<int, Button>::iterator it, int newValue)
 		{
 			it->second.edge = false;
 			it->second.state = InputState::PRESSED;
-			it->second.startTime = (float)Timer::time();
 		}
 		else if (it->second.state == InputState::BUTTON_UP)
 		{
 			it->second.edge = false;
 			it->second.state = InputState::IDLE;
-			it->second.startTime = (float)Timer::time();
 		}
 	}
 	else
@@ -220,12 +219,14 @@ void Input::changeState(unordered_map<int, Button>::iterator it, int newValue)
 			it->second.edge = true;
 			it->second.state = InputState::BUTTON_DOWN;
 			it->second.startTime = (float)Timer::time();
+			it->second.startValue = it->second.value;
 		}
 		else if (it->second.state == InputState::PRESSED && newValue == GLFW_RELEASE) // PRESSED to IDLE edge
 		{
 			it->second.edge = true;
 			it->second.state = InputState::BUTTON_UP;
 			it->second.startTime = (float)Timer::time();
+			it->second.startValue = it->second.value;
 		}
 	}
 }
@@ -260,7 +261,15 @@ float Input::getAxis(std::string name)
 	int count;
 	const float* axisArray = glfwGetJoystickAxes(0, &count); // Only deal with single controllers for now
 
-	if (count > 0)
+	if (data.axis == AxisType::SCROLL_X)
+	{
+		joystick = scrollAmount.x;
+	}
+	else if (data.axis == AxisType::SCROLL_Y)
+	{
+		joystick = scrollAmount.y;
+	}
+	else if (count > 0)
 	{
 		if (data.joystick == Joystick::JOYSTICK_ALL)
 		{
@@ -270,9 +279,9 @@ float Input::getAxis(std::string name)
 					joystick = axisArray[i];
 			}
 		}
-		else if (data.axis != AxisType::SCROLL && data.joystick + data.axis < count)
+		else if (data.joystick * 2 + data.axis < count)
 		{
-			joystick = axisArray[data.joystick + data.axis];
+			joystick = axisArray[data.joystick * 2 + data.axis];
 		}
 	}
 
@@ -298,12 +307,12 @@ float Input::getAxisHelper(GLFWinput in, InputData data)
 		Button button = keyboardMap[in.id];
 		if (button.state == InputState::BUTTON_DOWN || button.state == InputState::PRESSED)
 		{
-			keyboardMap[in.id].value = MathFunc::Lerp(button.value, 1, (float)(Timer::time() - button.startTime) / data.sensitivity);
+			keyboardMap[in.id].value = MathFunc::Lerp(button.startValue, 1, (float)(Timer::time() - button.startTime) / data.sensitivity);
 			return keyboardMap[in.id].value;
 		}
 		else if (button.state == InputState::BUTTON_UP || button.state == InputState::IDLE)
 		{
-			keyboardMap[in.id].value = MathFunc::Lerp(button.value, 0, (float)(Timer::time() - button.startTime) / data.sensitivity);
+			keyboardMap[in.id].value = MathFunc::Lerp(button.startValue, 0, (float)(Timer::time() - button.startTime) / data.sensitivity);
 			return keyboardMap[in.id].value;
 		}
 	}
@@ -312,12 +321,12 @@ float Input::getAxisHelper(GLFWinput in, InputData data)
 		Button button = mouseMap[in.id];
 		if (button.state == InputState::BUTTON_DOWN || button.state == InputState::PRESSED)
 		{
-			mouseMap[in.id].value = MathFunc::Lerp(button.value, 1, (float)(Timer::time() - button.startTime) / data.sensitivity);
+			mouseMap[in.id].value = MathFunc::Lerp(button.startValue, 1, (float)(Timer::time() - button.startTime) / data.sensitivity);
 			return mouseMap[in.id].value;
 		}
 		else if (button.state == InputState::BUTTON_UP || button.state == InputState::IDLE)
 		{
-			mouseMap[in.id].value = MathFunc::Lerp(button.value, 0, (float)(Timer::time() - button.startTime) / data.sensitivity);
+			mouseMap[in.id].value = MathFunc::Lerp(button.startValue, 0, (float)(Timer::time() - button.startTime) / data.sensitivity);
 			return mouseMap[in.id].value;
 		}
 	}
@@ -326,16 +335,73 @@ float Input::getAxisHelper(GLFWinput in, InputData data)
 		Button button = joystickMap[in.id];
 		if (button.state == InputState::BUTTON_DOWN || button.state == InputState::PRESSED)
 		{
-			joystickMap[in.id].value = MathFunc::Lerp(button.value, 1, (float)(Timer::time() - button.startTime) / data.sensitivity);
+			joystickMap[in.id].value = MathFunc::Lerp(button.startValue, 1, (float)(Timer::time() - button.startTime) / data.sensitivity);
 			return joystickMap[in.id].value;
 		}
 		else if (button.state == InputState::BUTTON_UP || button.state == InputState::IDLE)
 		{
-			joystickMap[in.id].value = MathFunc::Lerp(button.value, 0, (float)(Timer::time() - button.startTime) / data.sensitivity);
+			joystickMap[in.id].value = MathFunc::Lerp(button.startValue, 0, (float)(Timer::time() - button.startTime) / data.sensitivity);
 			return joystickMap[in.id].value;
 		}
 	}
 	return 0;
+}
+
+bool Input::getButtonDown(std::string name)
+{
+	return getButtonHelper(name) == InputState::BUTTON_DOWN;
+}
+
+bool Input::getButton(std::string name)
+{
+	return getButtonHelper(name) == InputState::PRESSED;
+}
+
+bool Input::getButtonUp(std::string name)
+{
+	return getButtonHelper(name) == InputState::BUTTON_UP;
+}
+
+bool Input::getButtonIdle(std::string name)
+{
+	return getButtonHelper(name) == InputState::IDLE;
+}
+
+InputState Input::getButtonHelper(std::string name)
+{
+	InputData data = inputs[name];
+	InputState pos = GLFWInputToState(inputMap[data.positiveButton]);
+	InputState neg = GLFWInputToState(inputMap[data.negativeButton]);
+	InputState altpos = GLFWInputToState(inputMap[data.altPositiveButton]);
+	InputState altneg = GLFWInputToState(inputMap[data.altNegativeButton]);
+
+	if (neg > pos)
+		pos = neg;
+	if (altpos > pos)
+		pos = altpos;
+	if (altneg > pos)
+		pos = altneg;
+
+	return pos;
+}
+
+InputState Input::GLFWInputToState(GLFWinput in)
+{
+	if (in.id == 0)
+		return InputState::UNDEFINED;
+
+	if (in.type == InputType::KEYBOARD)
+	{
+		return keyboardMap[in.id].state;
+	}
+	else if (in.type == InputType::MOUSE)
+	{
+		return mouseMap[in.id].state;
+	}
+	else // Joystick
+	{
+		return joystickMap[in.id].state;
+	}
 }
 
 // ------------ Basic Input Functions ------------ 
