@@ -2,6 +2,7 @@
 #include "Timer.h"
 #include "MathFunc.h"
 #include <iostream>
+#include <SOIL/SOIL.h>
 
 using namespace std;
 
@@ -137,9 +138,21 @@ void Input::init(GLFWwindow* win)
 	data.altNegativeButton = "joystick button 13";
 	data.joystick = Joystick::JOYSTICK_1;
 	data.axis = AxisType::X;
-	data.dead = 0.1;
-	data.sensitivity = 0.25;
+	data.dead = 0.1f;
+	data.sensitivity = 0.25f;
 	data.invert = false;
+	addInput(data);
+
+	data.name = "vertical";
+	data.positiveButton = "w";
+	data.negativeButton = "s";
+	data.altPositiveButton = "up";
+	data.altNegativeButton = "down";
+	data.joystick = Joystick::JOYSTICK_3;
+	data.axis = AxisType::Y;
+	data.dead = 0.1f;
+	data.sensitivity = 0.25f;
+	data.invert = true;
 	addInput(data);
 }
 
@@ -148,7 +161,7 @@ void Input::update()
 	// POSSIBLE RACE CONDITION WITH LOW FPS: Input key down and key up before the next frame loses input!
 	// Solution: Use a queue and change the update function to use callbacks
 
-	cout << getAxis("horizontal") << endl;
+	cout << getAxis("vertical") << endl;
 
 	int count;
 	const unsigned char* joystickArray = glfwGetJoystickButtons(0, &count); // Only deal with single controllers for now
@@ -170,7 +183,8 @@ void Input::update()
 		else if (it->second.type == InputType::JOYSTICK)
 		{
 			// TODO: Add joystick support
-			changeState(joystickMap.find(it->second.id), joystickArray[it->second.id]);
+			if (count > 0)
+				changeState(joystickMap.find(it->second.id), joystickArray[it->second.id]);
 		}
 	}
 
@@ -190,13 +204,13 @@ void Input::changeState(unordered_map<int, Button>::iterator it, int newValue)
 		{
 			it->second.edge = false;
 			it->second.state = InputState::PRESSED;
-			it->second.startTime = Timer::time();
+			it->second.startTime = (float)Timer::time();
 		}
 		else if (it->second.state == InputState::BUTTON_UP)
 		{
 			it->second.edge = false;
 			it->second.state = InputState::IDLE;
-			it->second.startTime = Timer::time();
+			it->second.startTime = (float)Timer::time();
 		}
 	}
 	else
@@ -205,13 +219,13 @@ void Input::changeState(unordered_map<int, Button>::iterator it, int newValue)
 		{
 			it->second.edge = true;
 			it->second.state = InputState::BUTTON_DOWN;
-			it->second.startTime = Timer::time();
+			it->second.startTime = (float)Timer::time();
 		}
 		else if (it->second.state == InputState::PRESSED && newValue == GLFW_RELEASE) // PRESSED to IDLE edge
 		{
 			it->second.edge = true;
 			it->second.state = InputState::BUTTON_UP;
-			it->second.startTime = Timer::time();
+			it->second.startTime = (float)Timer::time();
 		}
 	}
 }
@@ -256,9 +270,9 @@ float Input::getAxis(std::string name)
 					joystick = axisArray[i];
 			}
 		}
-		else if (data.joystick < count)
+		else if (data.axis != AxisType::SCROLL && data.joystick + data.axis < count)
 		{
-			joystick = axisArray[data.joystick];
+			joystick = axisArray[data.joystick + data.axis];
 		}
 	}
 
@@ -284,12 +298,12 @@ float Input::getAxisHelper(GLFWinput in, InputData data)
 		Button button = keyboardMap[in.id];
 		if (button.state == InputState::BUTTON_DOWN || button.state == InputState::PRESSED)
 		{
-			keyboardMap[in.id].value = MathFunc::Lerp(button.value, 1, (Timer::time() - button.startTime) / data.sensitivity);
+			keyboardMap[in.id].value = MathFunc::Lerp(button.value, 1, (float)(Timer::time() - button.startTime) / data.sensitivity);
 			return keyboardMap[in.id].value;
 		}
 		else if (button.state == InputState::BUTTON_UP || button.state == InputState::IDLE)
 		{
-			keyboardMap[in.id].value = MathFunc::Lerp(button.value, 0, (Timer::time() - button.startTime) / data.sensitivity);
+			keyboardMap[in.id].value = MathFunc::Lerp(button.value, 0, (float)(Timer::time() - button.startTime) / data.sensitivity);
 			return keyboardMap[in.id].value;
 		}
 	}
@@ -298,12 +312,12 @@ float Input::getAxisHelper(GLFWinput in, InputData data)
 		Button button = mouseMap[in.id];
 		if (button.state == InputState::BUTTON_DOWN || button.state == InputState::PRESSED)
 		{
-			mouseMap[in.id].value = MathFunc::Lerp(button.value, 1, (Timer::time() - button.startTime) / data.sensitivity);
+			mouseMap[in.id].value = MathFunc::Lerp(button.value, 1, (float)(Timer::time() - button.startTime) / data.sensitivity);
 			return mouseMap[in.id].value;
 		}
 		else if (button.state == InputState::BUTTON_UP || button.state == InputState::IDLE)
 		{
-			mouseMap[in.id].value = MathFunc::Lerp(button.value, 0, (Timer::time() - button.startTime) / data.sensitivity);
+			mouseMap[in.id].value = MathFunc::Lerp(button.value, 0, (float)(Timer::time() - button.startTime) / data.sensitivity);
 			return mouseMap[in.id].value;
 		}
 	}
@@ -312,12 +326,12 @@ float Input::getAxisHelper(GLFWinput in, InputData data)
 		Button button = joystickMap[in.id];
 		if (button.state == InputState::BUTTON_DOWN || button.state == InputState::PRESSED)
 		{
-			joystickMap[in.id].value = MathFunc::Lerp(button.value, 1, (Timer::time() - button.startTime) / data.sensitivity);
+			joystickMap[in.id].value = MathFunc::Lerp(button.value, 1, (float)(Timer::time() - button.startTime) / data.sensitivity);
 			return joystickMap[in.id].value;
 		}
 		else if (button.state == InputState::BUTTON_UP || button.state == InputState::IDLE)
 		{
-			joystickMap[in.id].value = MathFunc::Lerp(button.value, 0, (Timer::time() - button.startTime) / data.sensitivity);
+			joystickMap[in.id].value = MathFunc::Lerp(button.value, 0, (float)(Timer::time() - button.startTime) / data.sensitivity);
 			return joystickMap[in.id].value;
 		}
 	}
@@ -369,6 +383,22 @@ bool Input::getMouseIdle(string button)
 
 // ------------ Cursor Functions ------------ 
 
+bool Input::setCursor(string filename, int width, int height, int xhot, int yhot)
+{
+	unsigned char* file = SOIL_load_image(filename.c_str(), &width, &height, 0, SOIL_LOAD_AUTO);
+	if (file == nullptr)
+	{
+		return false;
+	}
+
+	GLFWimage image;
+	image.pixels = file;
+	image.width = width;
+	image.height = height;
+
+	return setCursor(&image, xhot, yhot);
+}
+
 bool Input::setCursor(const GLFWimage* image, int xhot, int yhot)
 {
 	GLFWcursor* tmp = glfwCreateCursor(image, xhot, yhot);
@@ -378,8 +408,8 @@ bool Input::setCursor(const GLFWimage* image, int xhot, int yhot)
 	}
 	else
 	{
+		glfwSetCursor(window, tmp);
 		cursor = tmp;
-		glfwDestroyCursor(tmp);
 		return true;
 	}
 }
@@ -393,6 +423,7 @@ bool Input::setCursor(int standardCursor)
 	}
 	else
 	{
+		glfwSetCursor(window, tmp);
 		cursor = tmp;
 		glfwDestroyCursor(tmp);
 		return true;

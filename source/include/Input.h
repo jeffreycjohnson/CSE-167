@@ -2,7 +2,6 @@
 #define INCLUDE_INPUT_H
 
 #include "ForwardDecs.h"
-
 #include <unordered_map>
 #include <glfw3.h>
 
@@ -96,7 +95,8 @@ public:
 	static bool getMouseIdle(std::string button);
 
 	// Cursor functions
-	static bool setCursor(const GLFWimage* image, int xhot = 0, int yhot = 0);
+	static bool setCursor(std::string, int, int, int = 0, int = 0);
+	static bool setCursor(const GLFWimage*, int = 0, int = 0);
 	static bool setCursor(int standardCursor);
 	static void hideCursor();
 	static void showCursor();

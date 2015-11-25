@@ -7,43 +7,11 @@
 #include <glfw3.h>
 #include <iostream>
 
-class FrameTimer
-{
-public:
-    explicit FrameTimer(float delta)
-        : fps(0), deltaTime(0.0f), oldTime(0.0f), prevTime(0.0f), delta(delta), frames(0)
-    {
-        oldTime = static_cast<float>(glfwGetTime());
-    }
-
-    void tick()
-    {
-        float time = static_cast<float>(glfwGetTime());
-        deltaTime = time - prevTime;
-        prevTime = time;
-        frames++;
-        if (time - oldTime > delta)
-        {
-            std::cout << (time - oldTime) / frames * 1000 << " ms (";
-            std::cout << frames / (time - oldTime) << " fps)" << std::endl;
-            fps = static_cast<int>(frames / (time - oldTime) + 0.5f);
-            oldTime = time;
-            frames = 0;
-        }
-    }
-
-    int fps;
-    float deltaTime;
-
-private:
-    float oldTime, prevTime, delta, frames;
-};
-
 extern GameObject scene;
 
 int main()
 {
-    FrameTimer timer(2.5f);
+	Timer::init(2.5f);
     if (!glfwInit())
     {
         LOG("GLFW failed to initialize");
@@ -80,7 +48,7 @@ int main()
 	glfwSwapInterval(1);
 	Renderer::init(width, height);
 	Input::init(window);
-	Timer::init();
+	Input::setCursor("assets/cursor/cursor.png", 32, 32);
     //Material m(new Shader("", ""));
     //m["test"] = 2.0f;
 	//window events
@@ -97,8 +65,7 @@ int main()
 
 	while (!glfwWindowShouldClose(window))
 	{
-        timer.tick();
-        scene.update(timer.deltaTime);
+        scene.update(Timer::deltaTime());
 		Input::update();
 		Timer::update();
 		Renderer::loop();
