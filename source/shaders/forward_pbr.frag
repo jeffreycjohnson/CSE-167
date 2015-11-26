@@ -3,6 +3,8 @@ precision mediump float;
 in vec4 vPosition;
 in vec3 vNormal;
 in vec2 vTexCoord;
+in vec3 vTangent;
+in vec3 vBitangent;
 
 layout(location = 0) out vec4 frag_color;
 layout(location = 1) out vec4 frag_normal;
@@ -16,6 +18,7 @@ uniform mat4 irradiance[3]; //matrices from the calculated SH corresponding to t
 
 uniform sampler2D colorTex; //color texture - rgb: color | a: unused
 uniform sampler2D matTex; //material texture - r: metalness | gb: unused | a:roughness
+uniform sampler2D normalTex; //normal texture - rgb: normal | a: unused
 uniform samplerCube environment; //the environment cubemap to sample reflections from
 
 
@@ -118,12 +121,13 @@ void main () {
   if (!useTextures) {
 	  mat.r = testMetal;
 	  mat.y = testRough;
-	  albedo = vec3(0.2, 0.2, 0.95);
+	  albedo = vec3(0.2, 0.2, 0.75);
   }
   //end test values-------------------------------------
 
 
-  vec3 normal = normalize(vNormal);
+  vec3 normal_tangent = 2*texture(normalTex, vTexCoord).rgb - 1;
+  vec3 normal = normalize(vTangent * normal_tangent.x + vBitangent * normal_tangent.y + vNormal * normal_tangent.z);
   vec3 view = normalize(cameraPos - vPosition.xyz);
 
 
@@ -170,8 +174,10 @@ void main () {
   }
 
   vec3 diffuseColor = ((1.0-mat.r) * albedo) * diffuseLight;
+  vec3 color = diffuseColor + specColor;
+  
 
-  frag_color = vec4(diffuseColor + specColor, 1.0);
+  frag_color = vec4(color, 1.0);
   frag_normal = vec4(normal, 1.0);
   frag_material = vec4(mat, 1.0, 1.0);
 }

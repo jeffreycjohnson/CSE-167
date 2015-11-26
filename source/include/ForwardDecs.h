@@ -7,6 +7,7 @@
 #include "glm.hpp"
 #include "glew.h"
 
+class Animation;
 class Camera;
 class Component;
 class Framebuffer;

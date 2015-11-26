@@ -7,10 +7,11 @@
 
 #include <glfw3.h>
 
-#define SHADER_COUNT 3
-#define REGULAR_SHADER 0
+#define SHADER_COUNT 4
+#define FORWARD_PBR_SHADER_ANIM 0
 #define FORWARD_PBR_SHADER 1
 #define SKYBOX_SHADER 2
+#define FBO_HDR 3
 
 struct GPUData {
 	int vaoHandle;

@@ -14,12 +14,19 @@ struct MeshData {
 	//BoundingBox boundingBox;
 };
 
+struct BoneData {
+	std::vector<glm::mat4> boneBindArray;
+	std::unordered_map<std::string, int> boneMap;
+};
+
 class Mesh : public Component
 {
 	public:
 		static std::unordered_map<std::string, MeshData> meshMap;
+		static std::unordered_map<std::string, BoneData> boneIdMap;
 
         std::string name;
+		Animation* animationRoot;
     
         Mesh(std::string);
 		~Mesh();
