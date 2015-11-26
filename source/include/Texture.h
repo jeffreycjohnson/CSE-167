@@ -13,7 +13,7 @@ class Texture
 
 		void loadTextureFile(std::string filename);
 
-		void bindTexture(int slot);
+		void bindTexture(int slot) const;
 
 
 };

@@ -2,7 +2,6 @@
 #include "Mesh.h"
 #include "Camera.h"
 #include "Framebuffer.h"
-#include <SOIL.h>
 #include <gtc/matrix_transform.inl>
 #include "Skybox.h"
 #include "TestSceneHawk.h"
@@ -21,6 +20,8 @@ Shader* shaderList[SHADER_COUNT];
 Camera* Renderer::camera = new Camera();
 
 GPUData Renderer::gpuData;
+
+std::list<RenderPass*> Renderer::passes;
 
 double lastTime;
 
@@ -102,6 +103,7 @@ void Renderer::init(int window_width, int window_height) {
 	fboTest = new Framebuffer(width, height, 2, false);
 
 	Renderer::resize(width, height);
+    Renderer::passes.push_back(new DeferredPass(width, height));
 
 	lastTime = glfwGetTime();
 }

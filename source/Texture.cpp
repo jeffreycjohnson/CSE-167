@@ -22,7 +22,7 @@ void Texture::loadTextureFile(std::string filename) {
 	//TODO
 }
 
-void Texture::bindTexture(int slot) {
+void Texture::bindTexture(int slot) const {
 	int textureSlot = GL_TEXTURE0 + slot;
 	glActiveTexture(textureSlot);
 	glBindTexture(GL_TEXTURE_2D, textureHandle);

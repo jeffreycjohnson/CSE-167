@@ -1,45 +1,17 @@
 #include "ForwardDecs.h"
 #include "Renderer.h"
+#include "GameObject.h"
+#include "Material.h"
+#include "Input.h"
+#include "Timer.h"
 #include <glfw3.h>
 #include <iostream>
-
-class FrameTimer
-{
-public:
-    explicit FrameTimer(float delta)
-        : fps(0), deltaTime(0.0f), oldTime(0.0f), prevTime(0.0f), delta(delta), frames(0)
-    {
-        oldTime = static_cast<float>(glfwGetTime());
-    }
-
-    void tick()
-    {
-        float time = static_cast<float>(glfwGetTime());
-        deltaTime = time - prevTime;
-        prevTime = time;
-        frames++;
-        if (time - oldTime > delta)
-        {
-            std::cout << (time - oldTime) / frames * 1000 << " ms (";
-            std::cout << frames / (time - oldTime) << " fps)" << std::endl;
-            fps = static_cast<int>(frames / (time - oldTime) + 0.5f);
-            oldTime = time;
-            frames = 0;
-        }
-    }
-
-    int fps;
-    float deltaTime;
-
-private:
-    float oldTime, prevTime, delta, frames;
-};
 
 extern GameObject scene;
 
 int main()
 {
-    FrameTimer timer(2.5f);
+	Timer::init(2.5f);
     if (!glfwInit())
     {
         LOG("GLFW failed to initialize");
@@ -75,7 +47,10 @@ int main()
     glewInit();
 	glfwSwapInterval(1);
 	Renderer::init(width, height);
-
+	Input::init(window);
+	Input::setCursor("assets/cursor/cursor.png", 32, 32);
+    //Material m(new Shader("", ""));
+    //m["test"] = 2.0f;
 	//window events
 	glfwSetFramebufferSizeCallback(window, Renderer::framebuffer_size_callback);
 	glfwSetWindowFocusCallback(window, Renderer::window_focus_callback);
@@ -86,12 +61,13 @@ int main()
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	glfwSetCursorPosCallback(window, Renderer::cursor_position_callback);
 	glfwSetMouseButtonCallback(window, Renderer::mouse_button_callback); //note - if presses aren't working, try sticky mouse mode
-	glfwSetScrollCallback(window, Renderer::scroll_callback);
+	glfwSetScrollCallback(window, Input::scroll_callback);
 
 	while (!glfwWindowShouldClose(window))
 	{
-        timer.tick();
-        scene.update(timer.deltaTime);
+        scene.update(Timer::deltaTime());
+		Input::update();
+		Timer::update();
 		Renderer::loop();
 
 		glfwSwapBuffers(window);
