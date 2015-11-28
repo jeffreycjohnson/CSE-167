@@ -12,7 +12,7 @@ layout(location = 2) out vec4 frag_material;
 
 const float PI = 3.14159265359;
 
-const int sample_count = 16; //number of times to sample the cubemap for specular lighting
+const int sample_count = 1; //number of times to sample the cubemap for specular lighting
 
 uniform mat4 irradiance[3]; //matrices from the calculated SH corresponding to the env. diffuse lighting for r, g, and b.
 
@@ -76,6 +76,7 @@ float GGX_Visibility(float dotProduct, float k) {
 }
 
 float GGX_D(float dotNH, float a) {
+	a = clamp(a, 0.001, 1.0); //prevent a (and a2) from being too close to zero
 	float a2 = a*a;
 	float bot = (dotNH * dotNH * (a2 - 1.0) + 1.0);
 	return (a2) / (PI * bot * bot);
@@ -91,8 +92,8 @@ vec3 SpecularBRDF(vec3 lightColor, vec3 normal, vec3 view, vec3 lightDir, float 
 
 		vec3 F = F0 + (vec3(1,1,1)-F0) * pow(1-dotLH, 5);
 
-		float k = clamp(a+.36, 0, 1);
-		float G = GGX_Visibility(dotNV, k) * GGX_Visibility(dotNL, k);
+		float k = clamp(a+.36, 0.0, 1.0);
+		float G = GGX_Visibility(dotNV, k) * GGX_Visibility(dotNL, k) * d + (1-d);
 
 		return F * lightColor * (G * dotNL);
 }
@@ -121,7 +122,7 @@ void main () {
   if (!useTextures) {
 	  mat.r = testMetal;
 	  mat.y = testRough;
-	  albedo = vec3(0.2, 0.2, 0.75);
+	  albedo = vec3(0.1, 0.1, 0.75);
   }
   //end test values-------------------------------------
 

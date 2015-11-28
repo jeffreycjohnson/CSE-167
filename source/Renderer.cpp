@@ -100,7 +100,7 @@ void Renderer::init(int window_width, int window_height) {
 
 	testScene = new TestSceneHawk();
 	
-	fboTest = new Framebuffer(width, height, 2, false);
+	fboTest = new Framebuffer(width, height, 2, false, true);
 
 	Renderer::resize(width, height);
     Renderer::passes.push_back(new DeferredPass(width, height));

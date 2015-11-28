@@ -13,13 +13,15 @@ public:
 	int numColorTex;
 	GLuint depthTex;
 
+	bool hdrEnabled=false;
+
 	int width, height;
 
 	static MeshData meshData;
 	static bool loaded;
 
 
-	Framebuffer(int w, int h, int numColorTexture, bool accessibleDepth);
+	Framebuffer(int w, int h, int numColorTexture, bool accessibleDepth, bool hdrEnabled);
 	~Framebuffer();
 
 	void deleteTextures();

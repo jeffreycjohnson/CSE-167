@@ -3,7 +3,7 @@
 #include <gtc/matrix_transform.hpp>
 
 
-Framebuffer::Framebuffer(int w, int h, int numColorTextures, bool accessibleDepth) : width(w), height(h), numColorTex(numColorTextures), accessibleDepth(accessibleDepth) {
+Framebuffer::Framebuffer(int w, int h, int numColorTextures, bool accessibleDepth, bool hdrEnabled) : width(w), height(h), numColorTex(numColorTextures), accessibleDepth(accessibleDepth), hdrEnabled(hdrEnabled) {
 	glGenFramebuffers(1, &id);
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 
@@ -27,7 +27,8 @@ void Framebuffer::addColorTexture(int index) {
 	glGenTextures(1, &(colorTex[index]) );
 	glBindTexture(GL_TEXTURE_2D, colorTex[index]);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	GLint format = (hdrEnabled) ? GL_RGB16F : GL_RGBA;
+	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 

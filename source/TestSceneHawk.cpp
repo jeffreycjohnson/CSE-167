@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "Skybox.h"
 #include "Renderer.h"
+#include "Texture.h"
 
 #include "Animation.h"
 
@@ -15,11 +16,12 @@ GameObject *tankTop, *tankBot;
 GameObject scene;
 GameObject *bear;
 
-GLuint hatTex, turretTex, bagelTex;
-GLuint barrelTex, barrelTex_Mat;
-GLuint tankTexTop, tankTexBot, tankSpecTop, tankSpecBot;
-GLuint testNormal;
-GLuint bearTex, bearSpec;
+Texture* hatTex, *turretTex, *bagelTex;
+Texture* barrelTex, *barrelTex_Mat;
+Texture* tankTexTop, *tankTexBot, *tankSpecTop, *tankSpecBot;
+Texture* testNormal;
+Texture* bearTex, *bearSpec;
+Texture* blankNormal;
 
 float tmp = 0;
 
@@ -28,99 +30,30 @@ TestSceneHawk::TestSceneHawk()
 {
 
 
-	hatTex = SOIL_load_OGL_texture
-		(
-			"assets/hat_tex.png",
-			SOIL_LOAD_AUTO,
-			SOIL_CREATE_NEW_ID,
-			SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
-			);
-	turretTex = SOIL_load_OGL_texture
-		(
-			"assets/turret_tex.png",
-			SOIL_LOAD_AUTO,
-			SOIL_CREATE_NEW_ID,
-			SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
-			);
-	bagelTex = SOIL_load_OGL_texture
-		(
-			"assets/bagel_everything_tex.png",
-			SOIL_LOAD_AUTO,
-			SOIL_CREATE_NEW_ID,
-			SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
-			);
+	hatTex =new Texture("assets/hat_tex.png");
+	turretTex = new Texture("assets/turret_tex.png");
+	bagelTex = new Texture("assets/bagel_everything_tex.png");
 
 
-	barrelTex = SOIL_load_OGL_texture
-		(
-			"assets/WoodenBarrel/barrel_tex.png",
-			SOIL_LOAD_AUTO,
-			SOIL_CREATE_NEW_ID,
-			SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
-			);
+	barrelTex = new Texture("assets/WoodenBarrel/barrel_tex.png");
 
-	barrelTex_Mat = SOIL_load_OGL_texture
-		(
-			"assets/WoodenBarrel/barrel_spec.png",
-			SOIL_LOAD_AUTO,
-			SOIL_CREATE_NEW_ID,
-			SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
-			);
+	barrelTex_Mat = new Texture("assets/WoodenBarrel/barrel_spec.png");
 
 
 
-	tankTexTop = SOIL_load_OGL_texture
-		(
-			"assets/hover_tank/hoverTank1_top_tex.png",
-			SOIL_LOAD_AUTO,
-			SOIL_CREATE_NEW_ID,
-			SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
-			);
-	tankTexBot = SOIL_load_OGL_texture
-		(
-			"assets/hover_tank/hoverTank1_bot_tex.png",
-			SOIL_LOAD_AUTO,
-			SOIL_CREATE_NEW_ID,
-			SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
-			);
-	tankSpecTop = SOIL_load_OGL_texture
-		(
-			"assets/hover_tank/hoverTank1_top_spec.png",
-			SOIL_LOAD_AUTO,
-			SOIL_CREATE_NEW_ID,
-			SOIL_FLAG_MIPMAPS | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
-			);
-	tankSpecBot = SOIL_load_OGL_texture
-		(
-			"assets/hover_tank/hoverTank1_bot_spec.png",
-			SOIL_LOAD_AUTO,
-			SOIL_CREATE_NEW_ID,
-			SOIL_FLAG_MIPMAPS | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
-			);
+	tankTexTop = new Texture("assets/hover_tank/hoverTank1_top_tex.png");
+	tankTexBot = new Texture("assets/hover_tank/hoverTank1_bot_tex.png");
+	tankSpecTop = new Texture("assets/hover_tank/hoverTank1_top_spec.png");
+	tankSpecBot = new Texture("assets/hover_tank/hoverTank1_bot_spec.png");
 
-	testNormal = SOIL_load_OGL_texture
-		(
-			"assets/test_sphere_normal.png",
-			SOIL_LOAD_AUTO,
-			SOIL_CREATE_NEW_ID,
-			SOIL_FLAG_INVERT_Y
-			);
+	testNormal = new Texture("assets/test_sphere_normal.png");
 
-	bearTex = SOIL_load_OGL_texture
-		(
-			"assets/bearTex2.jpg",
-			SOIL_LOAD_AUTO,
-			SOIL_CREATE_NEW_ID,
-			SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
-			);
+	bearTex = new Texture("assets/bearTex2.jpg");
 
-	bearSpec = SOIL_load_OGL_texture
-		(
-			"assets/bearTex2_spec.png",
-			SOIL_LOAD_AUTO,
-			SOIL_CREATE_NEW_ID,
-			SOIL_FLAG_MIPMAPS | SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_INVERT_Y
-			);
+	bearSpec = new Texture("assets/bearTex2_spec.png");
+
+
+	blankNormal = new Texture("assets/blank_normal.png");
 
 	scene.addChild(*Renderer::camera);
 
@@ -146,7 +79,6 @@ TestSceneHawk::TestSceneHawk()
 	bear->transform.translate(0, -1, 1);
 
 	barrel = loadScene("assets/test_sphere.obj");
-	barrel->transform.scale(1);
 	/*
 	tankBot = loadScene("assets/hover_tank/hoverTank1_bot.obj");
 	tankTop = loadScene("assets/hover_tank/hoverTank1_top.obj");*/
@@ -154,13 +86,11 @@ TestSceneHawk::TestSceneHawk()
 
 void TestSceneHawk::loop() {
 
-	glActiveTexture(GL_TEXTURE0 + 2);
 	(*Renderer::getShader(FORWARD_PBR_SHADER))["normalTex"] = 2;
-	glBindTexture(GL_TEXTURE_2D, testNormal);
-	glActiveTexture(GL_TEXTURE0);
+	testNormal->bindTexture(2);
 
 
-	scene.transform.rotate(glm::angleAxis(0.003f, glm::vec3(0, 1, 0)));
+	scene.transform.rotate(glm::angleAxis(0.001f, glm::vec3(0, 1, 0)));
 	
 	Renderer::switchShader(FORWARD_PBR_SHADER);
 	(*Renderer::getShader(FORWARD_PBR_SHADER))["cameraPos"] = Renderer::camera->transform.getWorldPosition();
@@ -183,8 +113,8 @@ void TestSceneHawk::loop() {
 			float yDist = 2 * (y - 3.5);
 			float zDist = -1 + 2 * sin(x+y+tmp);
 			barrel->transform.translate(xDist, yDist, zDist);
-			(*Renderer::getShader(FORWARD_PBR_SHADER))["testMetal"] = x / 7.0f;
-			(*Renderer::getShader(FORWARD_PBR_SHADER))["testRough"] = y / 7.0f;
+			(*Renderer::getShader(FORWARD_PBR_SHADER))["testMetal"] = (x) / 7.f;
+			(*Renderer::getShader(FORWARD_PBR_SHADER))["testRough"] = (y) / 7.f;
 			barrel->draw();
 			barrel->transform.translate(-xDist, -yDist, -zDist);
 		}
@@ -195,16 +125,12 @@ void TestSceneHawk::loop() {
 	(*Renderer::getShader(FORWARD_PBR_SHADER_ANIM))["colorTex"] = 0;
 	(*Renderer::getShader(FORWARD_PBR_SHADER_ANIM))["matTex"] = 1;
 	(*Renderer::getShader(FORWARD_PBR_SHADER_ANIM))["normalTex"] = 2;
-	glBindTexture(GL_TEXTURE_2D, testNormal);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, bearTex);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, bearSpec);
+	bearTex->bindTexture(0);
+	bearSpec->bindTexture(1);
+	blankNormal->bindTexture(2);
 
 	(*Renderer::getShader(FORWARD_PBR_SHADER_ANIM))["cameraPos"] = Renderer::camera->transform.getWorldPosition();
 
-	(*Renderer::getShader(FORWARD_PBR_SHADER_ANIM))["testMetal"] = 0 / 7.0f;
-	(*Renderer::getShader(FORWARD_PBR_SHADER_ANIM))["testRough"] = 0 / 7.0f;
 	(*Renderer::getShader(FORWARD_PBR_SHADER_ANIM))["uLightData[0]"] = glm::vec4(5 * sin(tmp), 5 * cos(tmp), 4, 1 + sin(tmp / 5.f));
 	(*Renderer::getShader(FORWARD_PBR_SHADER_ANIM))["uLightData[1]"] = glm::vec4(1, 1, 1, 10);
 	(*Renderer::getShader(FORWARD_PBR_SHADER_ANIM))["useTextures"] = true;
@@ -214,7 +140,7 @@ void TestSceneHawk::loop() {
 	bear->draw();
 	Renderer::switchShader(FORWARD_PBR_SHADER);
 
-	tmp += 0.05f;
+	tmp += 0.02f;
 
 /*	turret->transform.translate(0.2f*sin(tmp), 0, 0);
 
