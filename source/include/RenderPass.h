@@ -25,7 +25,7 @@ public:
     void render() override;
 
 private:
-    Shader shader = Shader("deferred_lighting.vert", "deferred_lighting.frag");
+	//TODO uncomment me! // Shader shader = Shader("deferred_lighting.vert", "deferred_lighting.frag");
     Framebuffer * fbo;
 };
 

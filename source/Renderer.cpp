@@ -88,8 +88,6 @@ void Renderer::init(int window_width, int window_height) {
 	(*shaderList[FORWARD_PBR_SHADER])["irradiance[2]"] = irradianceMatrix[2];
 	(*shaderList[FORWARD_PBR_SHADER])["environment"] = 5;
 	(*shaderList[FORWARD_PBR_SHADER])["environment_mipmap"] = 8.0f;
-	glActiveTexture(GL_TEXTURE0 + 5);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
 
 
 	(*shaderList[FORWARD_PBR_SHADER_ANIM])["irradiance[0]"] = irradianceMatrix[0];
@@ -97,6 +95,10 @@ void Renderer::init(int window_width, int window_height) {
 	(*shaderList[FORWARD_PBR_SHADER_ANIM])["irradiance[2]"] = irradianceMatrix[2];
 	(*shaderList[FORWARD_PBR_SHADER_ANIM])["environment"] = 5;
 	(*shaderList[FORWARD_PBR_SHADER_ANIM])["environment_mipmap"] = 8.0f;
+
+
+	glActiveTexture(GL_TEXTURE0 + 5);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
 
 	testScene = new TestSceneHawk();
 	
@@ -110,35 +112,34 @@ void Renderer::init(int window_width, int window_height) {
 
 
 void Renderer::loop() {
-	glClearColor(0, 0, .25f, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	double dt = glfwGetTime() - lastTime;
 
 	GLuint buffersToDraw[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 	fboTest->bind(2, buffersToDraw);
 
-	glClearColor(1, 1, 0, 1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	
 	testScene->loop();
-
-
+		
+	applyPerFrameData();
+	GameObject::SceneRoot.draw();
+	
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
 	Skybox::draw();
-
-
-
+	
 	fboTest->unbind();
 
 	fboTest->bindTexture(0, 0);
 	switchShader(FBO_HDR);
 	fboTest->draw();
-
-	//fboTest->blitFramebuffer(0, 0, 0, 900, 900);
-	//fboTest->blitFramebuffer(1, 10+900, 0, 900, 900);
 }
+
+void Renderer::applyPerFrameData() {
+	(*Renderer::getShader(FORWARD_PBR_SHADER))["cameraPos"] = Renderer::camera->transform.getWorldPosition();
+	(*Renderer::getShader(FORWARD_PBR_SHADER_ANIM))["cameraPos"] = Renderer::camera->transform.getWorldPosition();
+}
+
+
 
 Shader& Renderer::getCurrentShader() {
 	return *currentShader;
@@ -146,6 +147,10 @@ Shader& Renderer::getCurrentShader() {
 
 Shader* Renderer::getShader(int shaderId) {
 	return shaderList[shaderId];
+}
+
+void Renderer::setCurrentShader(Shader* shader) {
+	currentShader = shader;
 }
 
 void Renderer::switchShader(int shaderId) {

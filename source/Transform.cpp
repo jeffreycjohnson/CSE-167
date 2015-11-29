@@ -17,6 +17,18 @@ void Transform::Transform::translate(glm::vec3& diff) {
     position += diff;
 }
 
+void Transform::setPosition(float x, float y, float z) {
+	transformMatrixDirty = true;
+
+	position = glm::vec3(x, y, z);
+}
+
+void Transform::Transform::setPosition(glm::vec3& pos) {
+	transformMatrixDirty = true;
+
+	position = pos;
+}
+
 
 /**
 * Rotate

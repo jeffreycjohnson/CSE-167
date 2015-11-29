@@ -6,6 +6,7 @@
 #include "Input.h"
 #include "Timer.h"
 #include <glfw3.h>
+#include "ObjectLoader.h"
 #include <iostream>
 
 int main()

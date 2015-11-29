@@ -31,8 +31,6 @@ std::unordered_map<std::string, MeshData> Mesh::meshMap;
 std::unordered_map<std::string, BoneData>  Mesh::boneIdMap;
 
 
-float tmpTime = 0;
-
 Mesh::Mesh(std::string name) : name(name) {
     if (Mesh::meshMap.find(name) == Mesh::meshMap.end()) throw;
 }
@@ -44,11 +42,15 @@ Mesh::~Mesh() {
 
 void Mesh::draw() {
 	MeshData& currentEntry = meshMap.at(name);
-
 	if (Renderer::gpuData.vaoHandle != currentEntry.vaoHandle) {
 		glBindVertexArray(currentEntry.vaoHandle);
 		Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
 	}
+
+	if (material) material->bind();
+
+	//TODO move
+	Renderer::setModelMatrix(gameObject->transform.getTransformMatrix());
 
 	if (Renderer::currentShader == Renderer::getShader(FORWARD_PBR_SHADER_ANIM) && animationRoot) {
 		BoneData & meshBoneData = boneIdMap.at(name);
@@ -69,12 +71,20 @@ void Mesh::draw() {
 	glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
 }
 
+void Mesh::setMaterial(Material *mat) {
+	material = mat;
+}
+
+
+
+
+
 
 bool boneWeightSort(std::pair<int, float> bone1, std::pair<int, float> bone2) {
 	return bone1.second > bone2.second;
 }
 
-void loadMesh(std::string name, const aiMesh* mesh) {
+void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
 
 	std::vector<float> megaArray;
 	std::vector<int> idArray;
@@ -103,9 +113,9 @@ void loadMesh(std::string name, const aiMesh* mesh) {
 			Mesh::boneIdMap[name].boneMap[mesh->mBones[b]->mName.C_Str()] = b;
 			for (int matIndex = 0; matIndex < 16; ++matIndex) {
 				//Assimp matrices are row major, glm & opengl are column major, so we need to convert here
-				Mesh::boneIdMap[name].boneBindArray[b][matIndex%4][matIndex/4] = mesh->mBones[b]->mOffsetMatrix[matIndex/4][matIndex%4];
+				Mesh::boneIdMap[name].boneBindArray[b][matIndex % 4][matIndex / 4] = mesh->mBones[b]->mOffsetMatrix[matIndex / 4][matIndex % 4];
 			}
-			
+
 			for (int w = 0; w < mesh->mBones[b]->mNumWeights; ++w) {
 				boneData[mesh->mBones[b]->mWeights[w].mVertexId].push_back(std::make_pair(b, mesh->mBones[b]->mWeights[w].mWeight));
 			}
@@ -113,8 +123,8 @@ void loadMesh(std::string name, const aiMesh* mesh) {
 
 		for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
 			std::sort(boneData[i].begin(), boneData[i].end(), boneWeightSort);
-			glm::ivec4 bones(0,0,0,0);
-			glm::vec4 weights(0,0,0,0);
+			glm::ivec4 bones(0, 0, 0, 0);
+			glm::vec4 weights(0, 0, 0, 0);
 			for (int d = 0; d < 4 && d < boneData[i].size(); ++d) {
 				bones[d] = boneData[i][d].first;
 				weights[d] = boneData[i][d].second;
@@ -205,7 +215,7 @@ void loadMesh(std::string name, const aiMesh* mesh) {
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (FLOAT_SIZE * 3);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (FLOAT_SIZE * 3);
-	if (enabledTexCoord[0])	{
+	if (enabledTexCoord[0]) {
 		glVertexAttribPointer(2, 2, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (FLOAT_SIZE * 2);
 	}
 	if (hasTangents) {
@@ -225,80 +235,4 @@ void loadMesh(std::string name, const aiMesh* mesh) {
 	meshData.indexSize = static_cast<GLsizei>(indexArray.size());
 
 	Mesh::meshMap[name] = meshData;
-}
-
-int counter = 0;
-
-GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string filename, std::unordered_map<std::string, Transform*>& loadingAcceleration) {
-	GameObject* nodeObject = new GameObject();
-	
-	//add mesh to this object
-	aiVector3D pos;
-	aiVector3D scale;
-	aiQuaternion rotate;
-
-	currentNode->mTransformation.Decompose(scale, rotate, pos);
-	
-	nodeObject->transform.scale(scale.x);
-	nodeObject->transform.translate(pos.x, pos.y, pos.z);
-	nodeObject->transform.rotate(glm::quat(rotate.w, rotate.x, rotate.y, rotate.z));
-
-	if (currentNode->mNumMeshes > 0) {
-		std::string name = currentNode->mName.C_Str();
-		if (name == "defaultobject") name = filename + std::to_string(counter);
-
-		if (Mesh::meshMap.find(name) == Mesh::meshMap.end()) {
-			int meshIndex = *currentNode->mMeshes;
-			loadMesh(name, scene->mMeshes[meshIndex]);
-		}
-		
-		nodeObject->addComponent(new Mesh(name));
-	}
-
-	loadingAcceleration[currentNode->mName.C_Str()] = &nodeObject->transform;
-
-	//load child objects
-	for (unsigned int c = 0; c < currentNode->mNumChildren; ++c) {
-		nodeObject->addChild(*parseNode(scene, currentNode->mChildren[c], filename, loadingAcceleration));
-	}
-	return nodeObject;
-}
-
-void linkRoot(Animation* anim, Transform* currentTransform) {
-	if (!currentTransform) return;
-
-	Mesh* currentMesh;
-	if ((currentMesh = currentTransform->gameObject->getComponent<Mesh>()) != nullptr) currentMesh->animationRoot = anim;
-	for (Transform* child : currentTransform->children) {
-		linkRoot(anim, child);
-	}
-}
-
-GameObject* loadScene(const std::string& filename) {
-	Assimp::Importer importer;
-
-	const aiScene* scene = importer.ReadFile(filename,
-        aiProcess_Triangulate | aiProcess_GenNormals |
-        aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality |
-        aiProcess_RemoveRedundantMaterials | aiProcess_FindInvalidData |
-        aiProcess_GenUVCoords | aiProcess_TransformUVCoords |
-        aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace | aiProcess_CalcTangentSpace);
-
-	if (!scene) {
-        LOG(importer.GetErrorString());
-        throw;
-	}
-
-
-	std::unordered_map<std::string, Transform*> loadingAcceleration;
-
-	GameObject* retScene = parseNode(scene, scene->mRootNode, filename, loadingAcceleration);
-
-	if (scene->HasAnimations()) {
-		retScene->addComponent(new Animation(scene, loadingAcceleration));
-		linkRoot(retScene->getComponent<Animation>(), &retScene->transform);
-	}
-
-
-    return retScene;
 }

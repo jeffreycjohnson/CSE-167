@@ -28,6 +28,10 @@ class Renderer
 
 		static void init(int w, int h);
 		static void loop();
+
+		static void applyPerFrameData();
+
+		static void setCurrentShader(Shader*);
 		static Shader& getCurrentShader();
 		static Shader* getShader(int shaderId);
 		static void switchShader(int shaderId);

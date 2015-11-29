@@ -9,7 +9,7 @@
 
 DeferredPass::DeferredPass(int resx, int resy)
 {
-    fbo = new Framebuffer(Renderer::getWindowWidth(), Renderer::getWindowHeight(), 4, true);
+    fbo = new Framebuffer(Renderer::getWindowWidth(), Renderer::getWindowHeight(), 4, true, true);
 }
 
 DeferredPass::~DeferredPass()
@@ -42,7 +42,7 @@ void DeferredPass::render()
     gbufferPass(&GameObject::SceneRoot);
     CHECK_ERROR();
 
-    shader.use();
+//TODO uncomment me! //    shader.use();
     glDepthMask(GL_FALSE);
     glStencilOpSeparate(GL_BACK, GL_KEEP, GL_INCR_WRAP, GL_KEEP);
     glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_DECR_WRAP, GL_KEEP);

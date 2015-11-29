@@ -4,6 +4,7 @@
 #include "ForwardDecs.h"
 #include "Transform.h"
 #include "Component.h"
+#include "Material.h"
 
 class GameObject
 {
@@ -51,6 +52,9 @@ public:
 
 	void draw();
     void update(float deltaTime);
+
+	void setMaterial(Material *mat);
+
 protected:
     std::vector<Component*> componentList;
 };

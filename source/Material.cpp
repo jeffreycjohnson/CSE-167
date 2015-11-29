@@ -35,7 +35,7 @@ void Material::bind()
     {
         uniform.second->set((*shader)[uniform.first]);
     }
-    unsigned int i = 0;
+    int i = 0; //sampler seems to prefer glUniform1i
     for (auto texture : textures)
     {
         texture.second->bindTexture(i);

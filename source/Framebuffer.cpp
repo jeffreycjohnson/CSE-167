@@ -27,7 +27,7 @@ void Framebuffer::addColorTexture(int index) {
 	glGenTextures(1, &(colorTex[index]) );
 	glBindTexture(GL_TEXTURE_2D, colorTex[index]);
 
-	GLint format = (hdrEnabled) ? GL_RGB16F : GL_RGBA;
+	GLint format = (hdrEnabled && index==0) ? GL_RGB16F : GL_RGBA;
 	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -84,6 +84,7 @@ void Framebuffer::bind(int bufferCount, GLuint *buffersToDraw) {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 	glDrawBuffers(bufferCount, buffersToDraw);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//TODO use Renderer::resize()?
 	glViewport(0, 0, width, height);

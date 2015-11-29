@@ -22,7 +22,6 @@ void GameObject::addChild(GameObject& go) {
 void GameObject::draw() {
 	Mesh* mesh;
 	if ((mesh = getComponent<Mesh>()) != nullptr) {
-		Renderer::setModelMatrix(transform.getTransformMatrix());
 		mesh->draw();
 	}
 	for (auto child : transform.children) {
@@ -40,4 +39,14 @@ void GameObject::update(float deltaTime)
     {
         component->update(deltaTime);
     }
+}
+
+void GameObject::setMaterial(Material *mat) {
+	Mesh* mesh;
+	if ((mesh = getComponent<Mesh>()) != nullptr) {
+		mesh->setMaterial(mat);
+	}
+	for (auto child : transform.children) {
+		(child->gameObject)->setMaterial(mat);
+	}
 }

@@ -34,6 +34,8 @@ class Transform : public Component
 		 */
         void translate(float x, float y, float z);
         void translate(glm::vec3& diff);
+		void setPosition(float x, float y, float z);
+		void setPosition(glm::vec3& pos);
 
 
 		/**

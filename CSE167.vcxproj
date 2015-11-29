@@ -169,6 +169,7 @@
     <ClCompile Include="source\Material.cpp" />
     <ClCompile Include="source\MathFunc.cpp" />
     <ClCompile Include="source\Mesh.cpp" />
+    <ClCompile Include="source\ObjectLoader.cpp" />
     <ClCompile Include="source\Renderer.cpp" />
     <ClCompile Include="source\Shader.cpp" />
     <ClCompile Include="source\Skybox.cpp" />
@@ -191,6 +192,7 @@
     <ClInclude Include="source\include\Material.h" />
     <ClInclude Include="source\include\MathFunc.h" />
     <ClInclude Include="source\include\Mesh.h" />
+    <ClInclude Include="source\include\ObjectLoader.h" />
     <ClInclude Include="source\include\Renderer.h" />
     <ClInclude Include="source\include\RenderPass.h" />
     <ClInclude Include="source\include\Shader.h" />
