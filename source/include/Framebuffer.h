@@ -2,6 +2,7 @@
 #define INCLUDE_FRAMEBUFFER_H
 
 #include "ForwardDecs.h"
+#include "Mesh.h"
 
 class Framebuffer
 {
@@ -12,9 +13,15 @@ public:
 	int numColorTex;
 	GLuint depthTex;
 
+	bool hdrEnabled=false;
+
 	int width, height;
 
-	Framebuffer(int w, int h, int numColorTexture, bool accessibleDepth);
+	static MeshData meshData;
+	static bool loaded;
+
+
+	Framebuffer(int w, int h, int numColorTexture, bool accessibleDepth, bool hdrEnabled);
 	~Framebuffer();
 
 	void deleteTextures();
@@ -28,10 +35,14 @@ public:
 
 	void blitFramebuffer(int index, int x, int y, int dest_width, int dest_height);
 
+	void draw();
+
 private:
 	void addColorTexture(int index);
 	void addDepthBuffer();
 	void addDepthTexture();
+
+	static void load();
 
 };
 

@@ -1,12 +1,14 @@
 #ifndef INCLUDE_FORWARD_DECS_H
 #define INCLUDE_FORWARD_DECS_H
 
+#include <algorithm>
 #include <string>
 #include <memory>
 #define GLM_FORCE_RADIANS
 #include "glm.hpp"
 #include "glew.h"
 
+class Animation;
 class Camera;
 class Component;
 class Framebuffer;
@@ -14,10 +16,12 @@ class GameObject;
 class Input;
 class Light;
 class Material;
+class MathFunc;
 class Mesh;
 class Renderer;
 class Shader;
 class Texture;
+class Timer;
 class Transform;
 
 #ifdef _MSC_VER

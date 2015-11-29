@@ -47,8 +47,8 @@ void Renderer::init(int window_width, int window_height) {
 	glClearColor(0, 0, .25, 1);
 	glDepthFunc(GL_LEQUAL); //needed for skybox to overwrite blank z-buffer values
 
-	shaderList[REGULAR_SHADER] = new Shader(
-		"source/shaders/forward_pbr.vert", "source/shaders/forward_pbr.frag"
+	shaderList[FORWARD_PBR_SHADER_ANIM] = new Shader(
+		"source/shaders/forward_pbr_skeletal.vert", "source/shaders/forward_pbr.frag"
 		);
 
 
@@ -62,7 +62,11 @@ void Renderer::init(int window_width, int window_height) {
 		"source/shaders/skybox.vert", "source/shaders/skybox.frag"
 		);
 
-	currentShader = shaderList[REGULAR_SHADER];
+	shaderList[FBO_HDR] = new Shader(
+		"source/shaders/fbo.vert", "source/shaders/fbo_hdr.frag"
+		);
+
+	currentShader = shaderList[FORWARD_PBR_SHADER];
 	
 	currentShader->use();
 
@@ -87,9 +91,16 @@ void Renderer::init(int window_width, int window_height) {
 	glActiveTexture(GL_TEXTURE0 + 5);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
 
+
+	(*shaderList[FORWARD_PBR_SHADER_ANIM])["irradiance[0]"] = irradianceMatrix[0];
+	(*shaderList[FORWARD_PBR_SHADER_ANIM])["irradiance[1]"] = irradianceMatrix[1];
+	(*shaderList[FORWARD_PBR_SHADER_ANIM])["irradiance[2]"] = irradianceMatrix[2];
+	(*shaderList[FORWARD_PBR_SHADER_ANIM])["environment"] = 5;
+	(*shaderList[FORWARD_PBR_SHADER_ANIM])["environment_mipmap"] = 8.0f;
+
 	testScene = new TestSceneHawk();
 	
-	fboTest = new Framebuffer(1800, 1800, 2, false);
+	fboTest = new Framebuffer(width, height, 2, false, true);
 
 	Renderer::resize(width, height);
     Renderer::passes.push_back(new DeferredPass(width, height));
@@ -121,8 +132,12 @@ void Renderer::loop() {
 
 	fboTest->unbind();
 
-	fboTest->blitFramebuffer(0, 0, 0, 900, 900);
-	fboTest->blitFramebuffer(1, 10+900, 0, 900, 900);
+	fboTest->bindTexture(0, 0);
+	switchShader(FBO_HDR);
+	fboTest->draw();
+
+	//fboTest->blitFramebuffer(0, 0, 0, 900, 900);
+	//fboTest->blitFramebuffer(1, 10+900, 0, 900, 900);
 }
 
 Shader& Renderer::getCurrentShader() {
