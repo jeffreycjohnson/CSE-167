@@ -7,15 +7,15 @@ using namespace std;
 double Timer::startTime, Timer::oldTime, Timer::currentTime;
 double Timer::mDeltaTime, Timer::mTime, Timer::mTimeScale, Timer::mUnscaledDeltaTime, Timer::mUnscaledTime, Timer::cycleTime;
 int Timer::frames;
-float Timer::interval;
+float Timer::count;
 
-void Timer::init(float interval)
+void Timer::init(float count)
 {
 	startTime = oldTime = currentTime = glfwGetTime();
 	mDeltaTime = mTime = mUnscaledDeltaTime = mUnscaledTime = cycleTime = 0;
 	mTimeScale = 1;
 	frames = 0;
-	Timer::interval = interval;
+	Timer::count = count;
 }
 
 void Timer::update()
@@ -31,7 +31,7 @@ void Timer::update()
 	cycleTime += mUnscaledDeltaTime;
 	frames++;
 
-	if (cycleTime > interval)
+	if (cycleTime > count)
 	{
 		cout << cycleTime / frames * 1000 << " ms (" << frames / cycleTime << " fps)" << endl;
 		cycleTime = 0;

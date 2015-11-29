@@ -162,6 +162,7 @@
     <ClCompile Include="source\DeferrerdPass.cpp" />
     <ClCompile Include="source\Framebuffer.cpp" />
     <ClCompile Include="source\GameObject.cpp" />
+    <ClCompile Include="source\GPUEmitter.cpp" />
     <ClCompile Include="source\Input.cpp" />
     <ClCompile Include="source\Light.cpp" />
     <ClCompile Include="source\Main.cpp" />
@@ -184,6 +185,7 @@
     <ClInclude Include="source\include\ForwardDecs.h" />
     <ClInclude Include="source\include\Framebuffer.h" />
     <ClInclude Include="source\include\GameObject.h" />
+    <ClInclude Include="source\include\GPUEmitter.h" />
     <ClInclude Include="source\include\Input.h" />
     <ClInclude Include="source\include\Light.h" />
     <ClInclude Include="source\include\Material.h" />

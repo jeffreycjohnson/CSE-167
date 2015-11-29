@@ -12,6 +12,7 @@ class Camera;
 class Component;
 class Framebuffer;
 class GameObject;
+class GPUEmitter;
 class Input;
 class Light;
 class Material;

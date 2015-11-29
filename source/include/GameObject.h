@@ -14,7 +14,7 @@ public:
 	~GameObject();
 
     template<typename T>
-    void GameObject::addComponent(T* c) {
+    void addComponent(T* c) {
         removeComponent<T>();
         c->setGameObject(this);
         componentList.push_back(c);

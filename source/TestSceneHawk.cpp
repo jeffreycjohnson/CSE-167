@@ -3,11 +3,15 @@
 #include "GameObject.h"
 #include "Mesh.h"
 #include "Camera.h"
+#include "GPUEmitter.h"
+#include "Timer.h"
 #include "Skybox.h"
 #include "Renderer.h"
 
 Mesh* test2;
 GameObject *hat, *bunny, *bagel, *barrel;
+GameObject* emitter;
+GPUEmitter* emitterComponent;
 GameObject* turret;
 GameObject *tankTop, *tankBot;
 GameObject scene;
@@ -101,6 +105,12 @@ TestSceneHawk::TestSceneHawk()
 
 	Renderer::camera->transform.translate(0, 0, 20);
 
+	emitter = loadScene("assets/bunny.obj");
+	emitterComponent = new GPUEmitter(emitter, "assets/particles/blur.png");
+	emitterComponent->start();
+	emitter->addComponent(emitterComponent);
+	emitter->transform.translate(0, 0, 4);
+
 	turret = loadScene("assets/turret.dae");
 	turret->transform.translate(-1, -2, 5);
 
@@ -151,6 +161,8 @@ void TestSceneHawk::loop() {
 		}
 	}
 
+	emitter->update(Timer::time());
+	emitter->draw();
 
 	turret->transform.translate(0.2f*sin(tmp += 0.05f), 0, 0);
 

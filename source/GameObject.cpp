@@ -1,5 +1,6 @@
 #include "GameObject.h"
 #include "Mesh.h"
+#include "GPUEmitter.h"
 #include "Renderer.h"
 
 GameObject::GameObject() {
@@ -22,6 +23,11 @@ void GameObject::draw() {
 	if ((mesh = getComponent<Mesh>()) != nullptr) {
 		Renderer::setModelMatrix(transform.getTransformMatrix());
 		mesh->draw();
+	}
+	GPUEmitter* emitter;
+	if ((emitter = getComponent<GPUEmitter>()) != nullptr) {
+		Renderer::setModelMatrix(transform.getTransformMatrix());
+		emitter->draw();
 	}
 	for (auto child : transform.children) {
 		(child->gameObject)->draw();
