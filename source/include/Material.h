@@ -40,6 +40,7 @@ private:
         UniformSetter(Material*, const std::string&);
         template<typename T>
         void operator=(T value) {
+            if (mat->uniforms.count(name)) delete mat->uniforms[name];
             mat->uniforms[name] = new UniformTypeInner<T>(value);
         }
     };
@@ -48,6 +49,7 @@ public:
     Shader * shader;
 
     explicit Material(Shader *);
+    ~Material() override;
     UniformSetter operator[](const std::string& name);
     void bind();
 };

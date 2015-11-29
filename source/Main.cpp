@@ -1,7 +1,7 @@
 #include "ForwardDecs.h"
 #include "Renderer.h"
 #include "GameObject.h"
-#include "Material.h"
+#include "Mesh.h"
 #include <glfw3.h>
 #include <iostream>
 
@@ -36,8 +36,6 @@ public:
 private:
     float oldTime, prevTime, delta, frames;
 };
-
-extern GameObject scene;
 
 int main()
 {
@@ -77,8 +75,6 @@ int main()
     glewInit();
 	glfwSwapInterval(1);
 	Renderer::init(width, height);
-    Material m(new Shader("", ""));
-    m["test"] = 2.0f;
 	//window events
 	glfwSetFramebufferSizeCallback(window, Renderer::framebuffer_size_callback);
 	glfwSetWindowFocusCallback(window, Renderer::window_focus_callback);
@@ -91,10 +87,13 @@ int main()
 	glfwSetMouseButtonCallback(window, Renderer::mouse_button_callback); //note - if presses aren't working, try sticky mouse mode
 	glfwSetScrollCallback(window, Renderer::scroll_callback);
 
+    // Loads mesh data for primatives, but we don't need it in a GameObject
+    delete loadScene("assets/Primatives.obj");
+
 	while (!glfwWindowShouldClose(window))
 	{
         timer.tick();
-        scene.update(timer.deltaTime);
+        GameObject::SceneRoot.update(timer.deltaTime);
 		Renderer::loop();
 
 		glfwSwapBuffers(window);

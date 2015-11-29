@@ -2,10 +2,45 @@
 #define INCLUDE_LIGHT_H
 
 #include "ForwardDecs.h"
+#include "Component.h"
+#include <glm.hpp>
 
-class Light
+class Light : public Component
 {
-    
+public:
+    glm::vec3 color;
+    bool shadowCaster = false;
+    // For now I'm ignoring this and hardcoding it to use the defaults
+    float constantFalloff = 0, linearFalloff = 0, exponentialFalloff = 1;
+
+    virtual void forwardPass() = 0;
+    virtual void deferredPass() = 0;
+
+protected:
+    void deferredHelper(const std::string& meshName);
+};
+
+class PointLight : public Light
+{
+public:
+    void forwardPass() override;
+    void deferredPass() override;
+};
+
+class DirectionalLight : public Light
+{
+public:
+    void forwardPass() override;
+    void deferredPass() override;
+};
+
+class SpotLight : public Light
+{
+public:
+    float angle = 30, exponent = 5;
+
+    void forwardPass() override;
+    void deferredPass() override;
 };
 
 #endif

@@ -18,8 +18,9 @@ Texture::Texture(std::string filename) {
     CHECK_ERROR();
 }
 
-void Texture::loadTextureFile(std::string filename) {
-	//TODO
+Texture::~Texture()
+{
+    glDeleteTextures(1, &textureHandle);
 }
 
 void Texture::bindTexture(int slot) const {

@@ -18,6 +18,11 @@ Material::Material(Shader* shader) : shader(shader)
 {
 }
 
+Material::~Material()
+{
+    for (auto uniform : uniforms) delete uniform.second;
+}
+
 Material::UniformSetter Material::operator[](const std::string& name)
 {
     return UniformSetter(this, name);

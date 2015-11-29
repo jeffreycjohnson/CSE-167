@@ -2,6 +2,7 @@
 #define INCLUDE_RENDERPASS_H
 
 #include "ForwardDecs.h"
+#include "Shader.h"
 
 class RenderPass
 {
@@ -20,7 +21,12 @@ class DeferredPass : public RenderPass
 {
 public:
     DeferredPass(int resx, int resy);
+    ~DeferredPass() override;
     void render() override;
+
+private:
+    Shader shader = Shader("deferred_lighting.vert", "deferred_lighting.frag");
+    Framebuffer * fbo;
 };
 
 #endif

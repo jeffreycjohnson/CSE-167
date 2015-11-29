@@ -2,6 +2,8 @@
 #include "Mesh.h"
 #include "Renderer.h"
 
+GameObject GameObject::SceneRoot;
+
 GameObject::GameObject() {
 	transform.setGameObject(this);
 }

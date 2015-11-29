@@ -10,6 +10,8 @@ class GameObject
 public:
 	Transform transform;
 
+    static GameObject SceneRoot;
+
 	GameObject();
 	~GameObject();
 
