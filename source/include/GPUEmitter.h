@@ -10,7 +10,7 @@
 class GPUEmitter : public Component
 {
 private:
-	GLuint vao, elapsedTimeUniform, deltaTimeUniform;
+	GLuint vao, elapsedTimeUniform, deltaTimeUniform, minVelocityUniform, maxVelocityUniform;
 	glm::vec3 prevPosition, velocity;
 	Texture* texture;
 	Shader* shader;

@@ -127,7 +127,7 @@ TestSceneHawk::TestSceneHawk()
 	Renderer::camera->transform.translate(0, 0, 20);
 
 	emitter = new GameObject();
-	emitterComponent = new GPUEmitter(emitter, "assets/particles/blur.png");
+	emitterComponent = new GPUEmitter(emitter, "assets/particles/particle.png");
 	emitterComponent->start();
 	emitter->addComponent(emitterComponent);
 	emitter->transform.translate(0, 0, 4);

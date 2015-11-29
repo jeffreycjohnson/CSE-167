@@ -12,20 +12,25 @@ GPUEmitter::GPUEmitter(GameObject* go, string tex)
 	Renderer::switchShader(EMITTER_SHADER);
 	elapsedTimeUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "elapsedTime");
 	deltaTimeUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "deltaTime");
+	minVelocityUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "minVelocity");
+	maxVelocityUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "maxVelocity");
 
 	prevPosition = gameObject->transform.position;
 	velocity = { 0, 0, 0 };
 	minStartSize = maxStartSize = minEndSize = maxEndSize = 1;
 	startOpacity = endOpacity = 1;
-	minDuration = 0.1;
-	maxDuration = 2;
+	minDuration = 0.5;
+	maxDuration = 1;
 	startColor = endColor = { 1, 1, 1 };
-	minStartVelocity = { -1, -1, -1 };
-	maxStartVelocity = { 1, 1, 1 };
+	minStartVelocity = { -10, 3, -10 };
+	maxStartVelocity = { 10, 20, 10 };
 	minAcceleration = maxAcceleration = { 0, 0, 0 };
 	burst = trigger = false;
-	count = 50000;
+	count = 4000000;
 	enabled = false;
+
+	glUniform3f(minVelocityUniform, minStartVelocity.x, minStartVelocity.y, minStartVelocity.z);
+	glUniform3f(maxVelocityUniform, maxStartVelocity.x, maxStartVelocity.y, maxStartVelocity.z);
 }
 
 GPUEmitter::~GPUEmitter()
@@ -50,12 +55,15 @@ void GPUEmitter::draw()
 {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	glDepthMask(false);
 	texture->bindTexture(0);
 	Renderer::switchShader(EMITTER_SHADER);
 
 	glBindVertexArray(vao);
 	glDrawArrays(GL_QUADS, 0, count * 4);
 	glBindVertexArray(NULL);
+	glDepthMask(true);
 	glDisable(GL_BLEND);
 }
 
