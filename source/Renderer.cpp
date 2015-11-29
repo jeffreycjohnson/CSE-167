@@ -25,11 +25,7 @@ std::list<RenderPass*> Renderer::passes;
 
 double lastTime;
 
-GLuint skyboxTex;
-
 Framebuffer* fboTest;
-
-glm::mat4 irradianceMatrix[3];
 
 TestSceneHawk* testScene;
 
@@ -71,26 +67,6 @@ void Renderer::init(int window_width, int window_height) {
 	currentShader->use();
 
 
-	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-
-	std::string cubeFilenames[6] = {
-		"assets/grace/grace_px.hdr",
-		"assets/grace/grace_nx.hdr",
-		"assets/grace/grace_py.hdr",
-		"assets/grace/grace_ny.hdr",
-		"assets/grace/grace_pz.hdr",
-		"assets/grace/grace_nz.hdr" };
-
-	skyboxTex = Skybox::loadCubemap(irradianceMatrix, cubeFilenames);
-
-	(*shaderList[FORWARD_PBR_SHADER])["irradiance[0]"] = irradianceMatrix[0];
-	(*shaderList[FORWARD_PBR_SHADER])["irradiance[1]"] = irradianceMatrix[1];
-	(*shaderList[FORWARD_PBR_SHADER])["irradiance[2]"] = irradianceMatrix[2];
-	(*shaderList[FORWARD_PBR_SHADER])["environment"] = 5;
-	(*shaderList[FORWARD_PBR_SHADER])["environment_mipmap"] = 8.0f;
-	glActiveTexture(GL_TEXTURE0 + 5);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
-
 	testScene = new TestSceneHawk();
 	
 	fboTest = new Framebuffer(1800, 1800, 2, false);
@@ -115,11 +91,6 @@ void Renderer::loop() {
 
 	
 	testScene->loop();
-
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
-	Skybox::draw();
 
 
 

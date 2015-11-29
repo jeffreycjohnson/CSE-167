@@ -19,13 +19,34 @@ GameObject scene;
 GLuint hatTex, turretTex, bagelTex;
 GLuint barrelTex, barrelTex_Mat;
 GLuint tankTexTop, tankTexBot, tankSpecTop, tankSpecBot;
+GLuint skyboxTex;
+
+glm::mat4 irradianceMatrix[3];
 
 float tmp = 0;
 
 
 TestSceneHawk::TestSceneHawk()
 {
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
+	std::string cubeFilenames[6] = {
+		"assets/grace/grace_px.hdr",
+		"assets/grace/grace_nx.hdr",
+		"assets/grace/grace_py.hdr",
+		"assets/grace/grace_ny.hdr",
+		"assets/grace/grace_pz.hdr",
+		"assets/grace/grace_nz.hdr" };
+
+	skyboxTex = Skybox::loadCubemap(irradianceMatrix, cubeFilenames);
+
+	(*Renderer::getShader(FORWARD_PBR_SHADER))["irradiance[0]"] = irradianceMatrix[0];
+	(*Renderer::getShader(FORWARD_PBR_SHADER))["irradiance[1]"] = irradianceMatrix[1];
+	(*Renderer::getShader(FORWARD_PBR_SHADER))["irradiance[2]"] = irradianceMatrix[2];
+	(*Renderer::getShader(FORWARD_PBR_SHADER))["environment"] = 5;
+	(*Renderer::getShader(FORWARD_PBR_SHADER))["environment_mipmap"] = 8.0f;
+	glActiveTexture(GL_TEXTURE0 + 5);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
 
 	hatTex = SOIL_load_OGL_texture
 		(
@@ -105,7 +126,7 @@ TestSceneHawk::TestSceneHawk()
 
 	Renderer::camera->transform.translate(0, 0, 20);
 
-	emitter = loadScene("assets/bunny.obj");
+	emitter = new GameObject();
 	emitterComponent = new GPUEmitter(emitter, "assets/particles/blur.png");
 	emitterComponent->start();
 	emitter->addComponent(emitterComponent);
@@ -161,8 +182,13 @@ void TestSceneHawk::loop() {
 		}
 	}
 
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
+	Skybox::draw();
+
 	emitter->update(Timer::time());
 	emitter->draw();
+	Renderer::switchShader(FORWARD_PBR_SHADER);
 
 	turret->transform.translate(0.2f*sin(tmp += 0.05f), 0, 0);
 

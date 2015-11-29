@@ -5,22 +5,21 @@
 #include "Component.h"
 #include "Texture.h"
 #include "Shader.h"
+#include <random>
 
 class GPUEmitter : public Component
 {
 private:
-	GLuint vao, elapsedTimeUniform;
+	GLuint vao, elapsedTimeUniform, deltaTimeUniform;
 	glm::vec3 prevPosition, velocity;
 	Texture* texture;
 	Shader* shader;
 	float* startPositions; // vec3
 	float* startVelocities; // vec3
-	float* accelerations; // vec3
-	float* startColors, *endColors; // vec3
-	float* startOpacities, *endOpacities;
-	float* startSizes, *endSizes;
 	float* startTimes;
+	float* durations;
 	int* quadCorners;
+	unsigned int* seeds;
 
 	GLuint genParticles();
 

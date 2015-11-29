@@ -10,5 +10,5 @@ out vec4 frag_color;
 void main()
 {
 	vec4 texel = texture(tex, texCoord);
-	frag_color.rgba = texel;
+	frag_color.rgba = texel * vec4(1, 1, 1, opacity);
 }
