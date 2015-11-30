@@ -3,11 +3,16 @@
 #include "GameObject.h"
 #include "Mesh.h"
 #include "Camera.h"
+#include "GPUEmitter.h"
+#include "Input.h"
+#include "Timer.h"
 #include "Skybox.h"
 #include "Renderer.h"
 
 Mesh* test2;
 GameObject *hat, *bunny, *bagel, *barrel;
+GameObject* emitter;
+GPUEmitter* emitterComponent;
 GameObject* turret;
 GameObject *tankTop, *tankBot;
 GameObject scene;
@@ -15,13 +20,34 @@ GameObject scene;
 GLuint hatTex, turretTex, bagelTex;
 GLuint barrelTex, barrelTex_Mat;
 GLuint tankTexTop, tankTexBot, tankSpecTop, tankSpecBot;
+GLuint skyboxTex;
+
+glm::mat4 irradianceMatrix[3];
 
 float tmp = 0;
 
 
 TestSceneHawk::TestSceneHawk()
 {
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
+	std::string cubeFilenames[6] = {
+		"assets/grace/grace_px.hdr",
+		"assets/grace/grace_nx.hdr",
+		"assets/grace/grace_py.hdr",
+		"assets/grace/grace_ny.hdr",
+		"assets/grace/grace_pz.hdr",
+		"assets/grace/grace_nz.hdr" };
+
+	skyboxTex = Skybox::loadCubemap(irradianceMatrix, cubeFilenames);
+
+	(*Renderer::getShader(FORWARD_PBR_SHADER))["irradiance[0]"] = irradianceMatrix[0];
+	(*Renderer::getShader(FORWARD_PBR_SHADER))["irradiance[1]"] = irradianceMatrix[1];
+	(*Renderer::getShader(FORWARD_PBR_SHADER))["irradiance[2]"] = irradianceMatrix[2];
+	(*Renderer::getShader(FORWARD_PBR_SHADER))["environment"] = 5;
+	(*Renderer::getShader(FORWARD_PBR_SHADER))["environment_mipmap"] = 8.0f;
+	glActiveTexture(GL_TEXTURE0 + 5);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
 
 	hatTex = SOIL_load_OGL_texture
 		(
@@ -101,6 +127,12 @@ TestSceneHawk::TestSceneHawk()
 
 	Renderer::camera->transform.translate(0, 0, 20);
 
+	emitter = new GameObject();
+	emitterComponent = new GPUEmitter(emitter, "assets/particles/particle.png", true);
+	emitterComponent->init();
+	emitter->addComponent(emitterComponent);
+	emitter->transform.translate(0, 0, 2);
+
 	turret = loadScene("assets/turret.dae");
 	turret->transform.translate(-1, -2, 5);
 
@@ -151,6 +183,20 @@ void TestSceneHawk::loop() {
 		}
 	}
 
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
+	Skybox::draw();
+
+	if (Input::getKeyDown("space"))
+	{
+		emitter->getComponent<GPUEmitter>()->play();
+		emitter->getComponent<GPUEmitter>()->loop = true;
+	}
+
+	//emitter->transform.position.x = sin(Timer::time() * 5) * 5;
+	emitter->update(Timer::time());
+	emitter->draw();
+	Renderer::switchShader(FORWARD_PBR_SHADER);
 
 	turret->transform.translate(0.2f*sin(tmp += 0.05f), 0, 0);
 

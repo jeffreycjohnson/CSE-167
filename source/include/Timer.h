@@ -7,7 +7,7 @@ private:
 	static double startTime, oldTime, currentTime;
 	static double mDeltaTime, mTime, mTimeScale, mUnscaledDeltaTime, mUnscaledTime, cycleTime;
 	static int frames;
-	static float interval;
+	static float count;
 
 public:
 	static void init(float);
