@@ -5,60 +5,113 @@
 
 using namespace std;
 
-GPUEmitter::GPUEmitter(GameObject* go, string tex)
+GPUEmitter::GPUEmitter(GameObject* go, string tex, bool burstEmitter)
 {
 	gameObject = go;
 	texture = new Texture(tex);
-	Renderer::switchShader(EMITTER_SHADER);
+	if (burst)
+		Renderer::switchShader(EMITTER_BURST_SHADER);
+	else
+		Renderer::switchShader(EMITTER_SHADER);
+
+	if (burst)
+	{
+		startTimeUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "startTime");
+		burstSeedUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "burstSeed");
+	}
+
+	emitterPosUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "emitterPos");
+	emitterVelocityUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "emitterVelocity");
 	elapsedTimeUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "elapsedTime");
-	deltaTimeUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "deltaTime");
 	minVelocityUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "minVelocity");
 	maxVelocityUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "maxVelocity");
+	minAccelUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "minAcceleration");
+	maxAccelUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "maxAcceleration");
+	minStartSizeUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "minStartSize");
+	maxStartSizeUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "maxStartSize");
+	minEndSizeUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "minEndSize");
+	maxEndSizeUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "maxEndSize");
 
 	prevPosition = gameObject->transform.position;
 	velocity = { 0, 0, 0 };
-	minStartSize = maxStartSize = minEndSize = maxEndSize = 1;
+	minStartSize = 0.5;
+	maxStartSize = 1;
+	minEndSize = 1;
+	maxEndSize = 1;
 	startOpacity = endOpacity = 1;
 	minDuration = 0.5;
-	maxDuration = 1;
+	maxDuration = 2;
 	startColor = endColor = { 1, 1, 1 };
-	minStartVelocity = { -10, 3, -10 };
-	maxStartVelocity = { 10, 20, 10 };
-	minAcceleration = maxAcceleration = { 0, 0, 0 };
-	burst = trigger = false;
-	count = 4000000;
+	minStartVelocity = { -5, -10, -5 };
+	maxStartVelocity = { 10, 5, 10 };
+	minAcceleration = { -30, 0, -30 };
+	maxAcceleration = { 0, 30, 0 };
+	burst = burstEmitter;
+	trigger = true;
+	count = 10;
 	enabled = false;
-
-	glUniform3f(minVelocityUniform, minStartVelocity.x, minStartVelocity.y, minStartVelocity.z);
-	glUniform3f(maxVelocityUniform, maxStartVelocity.x, maxStartVelocity.y, maxStartVelocity.z);
 }
 
 GPUEmitter::~GPUEmitter()
 {
-	//delete texture;
-	delete startTimes;
+	if (!burst)
+		delete startTimes;
+
 	delete durations;
 	delete quadCorners;
-	delete startPositions;
-	delete startVelocities;
 	delete seeds;
 }
 
 void GPUEmitter::update(float deltaTime)
 {
-	Renderer::switchShader(EMITTER_SHADER);
+	if (burst)
+		Renderer::switchShader(EMITTER_BURST_SHADER);
+	else
+		Renderer::switchShader(EMITTER_SHADER);
+
 	glUniform1f(elapsedTimeUniform, (GLfloat) Timer::time());
-	glUniform1f(deltaTimeUniform, (GLfloat) deltaTime);
+	
+	// Update burst
+	if (burst)
+	{
+		if (trigger)
+		{
+			glUniform1f(startTimeUniform, (GLfloat)Timer::time());
+			glUniform1ui(burstSeedUniform, (GLuint) rand());
+			glUniform3f(emitterPosUniform, gameObject->transform.position.x,
+				gameObject->transform.position.y,
+				gameObject->transform.position.z);
+			glUniform3f(emitterVelocityUniform, gameObject->transform.position.x - prevPosition.x,
+				gameObject->transform.position.y - prevPosition.y,
+				gameObject->transform.position.z - prevPosition.z);
+			trigger = false;
+		}
+	}
+	else
+	{
+		glUniform3f(emitterPosUniform, gameObject->transform.position.x, 
+			gameObject->transform.position.y, 
+			gameObject->transform.position.z);
+		glUniform3f(emitterVelocityUniform, gameObject->transform.position.x - prevPosition.x, 
+			gameObject->transform.position.y - prevPosition.y, 
+			gameObject->transform.position.z - prevPosition.z);
+	}
+
+	prevPosition = gameObject->transform.position;
 }
 
 void GPUEmitter::draw()
 {
 	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	glDepthMask(false);
 	texture->bindTexture(0);
-	Renderer::switchShader(EMITTER_SHADER);
+
+	if (burst)
+		Renderer::switchShader(EMITTER_BURST_SHADER);
+	else
+		Renderer::switchShader(EMITTER_SHADER);
 
 	glBindVertexArray(vao);
 	glDrawArrays(GL_QUADS, 0, count * 4);
@@ -67,7 +120,7 @@ void GPUEmitter::draw()
 	glDisable(GL_BLEND);
 }
 
-void GPUEmitter::start()
+void GPUEmitter::init()
 {
 	genParticles();
 	enabled = true;
@@ -75,29 +128,41 @@ void GPUEmitter::start()
 
 void GPUEmitter::restart()
 {
-	delete startTimes;
+	if (!burst)
+		delete startTimes;
+
 	delete durations;
 	delete quadCorners;
-	delete startPositions;
-	delete startVelocities;
 	delete seeds;
-	start();
+	init();
+}
+
+void GPUEmitter::play()
+{
+	trigger = true;
 }
 
 GLuint GPUEmitter::genParticles()
 {
-	startTimes = new float[count * 4];
+	if (burst)
+		Renderer::switchShader(EMITTER_BURST_SHADER);
+	else
+	{
+		Renderer::switchShader(EMITTER_SHADER);
+		startTimes = new float[count * 4];
+	}
+
 	durations = new float[count * 4];
 	quadCorners = new int[count * 4];
-	startPositions = new float[count * 12];
-	startVelocities = new float[count * 12];
 	seeds = new unsigned int[count * 4];
 
 	srand(Timer::time());
 
 	for (int i = 0; i < count * 4 - 3; i += 4)
 	{
-		startTimes[i] = startTimes[i + 1] = startTimes[i + 2] = startTimes[i + 3] = (float) i / count + Timer::time();
+		if (!burst)
+			startTimes[i] = startTimes[i + 1] = startTimes[i + 2] = startTimes[i + 3] = (float) i / count + Timer::time();
+
 		seeds[i] = seeds[i + 1] = seeds[i + 2] = seeds[i + 3] = rand();
 		quadCorners[i] = i % 4;
 		quadCorners[i + 1] = (i + 1) % 4;
@@ -107,22 +172,6 @@ GLuint GPUEmitter::genParticles()
 		float rnd = minDuration + (((maxDuration - minDuration) * rand()) / (RAND_MAX + 1.0f));
 		durations[i] = durations[i + 1] = durations[i + 2] = durations[i + 3] = rnd;
 	}
-
-	for (int i = 0; i < count * 4 * 3 - 2; i += 3)
-	{
-		startPositions[i] = 0;
-		startPositions[i + 1] = 0;
-		startPositions[i + 2] = 0;
-
-		startVelocities[i] = 0;
-		startVelocities[i + 1] = 0;
-		startVelocities[i + 2] = 0;
-	}
-
-	GLuint time_vbo;
-	glGenBuffers(1, &time_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, time_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(startTimes[0]) * count * 4, startTimes, GL_STATIC_DRAW);
 
 	GLuint duration_vbo;
 	glGenBuffers(1, &duration_vbo);
@@ -139,37 +188,47 @@ GLuint GPUEmitter::genParticles()
 	glBindBuffer(GL_ARRAY_BUFFER, seed_vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(seeds[0]) * count * 4, seeds, GL_STATIC_DRAW);
 
-	GLuint position_vbo;
-	glGenBuffers(1, &position_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, position_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(startPositions[0]) * count * 12, startPositions, GL_STATIC_DRAW);
-
-	GLuint velocity_vbo;
-	glGenBuffers(1, &velocity_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, velocity_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(startVelocities[0]) * count * 12, startVelocities, GL_STATIC_DRAW);
-
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, time_vbo);
-	glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, 0, NULL);
+	if (!burst)
+	{
+		GLuint time_vbo;
+		glGenBuffers(1, &time_vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, time_vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(startTimes[0]) * count * 4, startTimes, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ARRAY_BUFFER, time_vbo);
+		glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, 0, NULL);
+		glEnableVertexAttribArray(0);
+	}
 	glBindBuffer(GL_ARRAY_BUFFER, duration_vbo);
 	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, NULL);
 	glBindBuffer(GL_ARRAY_BUFFER, corner_vbo);
 	glVertexAttribIPointer(2, 1, GL_INT, 0, NULL);
 	glBindBuffer(GL_ARRAY_BUFFER, seed_vbo);
 	glVertexAttribIPointer(3, 1, GL_INT, 0, NULL);
-	glBindBuffer(GL_ARRAY_BUFFER, position_vbo);
-	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glBindBuffer(GL_ARRAY_BUFFER, velocity_vbo);
-	glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 	glEnableVertexAttribArray(3);
-	glEnableVertexAttribArray(4);
-	glEnableVertexAttribArray(5);
 	glBindVertexArray(NULL);
+
+	if (burst)
+	{
+		glUniform1f(startTimeUniform, (GLfloat) 0);
+		glUniform1ui(burstSeedUniform, (GLuint) rand());
+	}
+
+	glUniform3f(emitterPosUniform, gameObject->transform.position.x, 
+		gameObject->transform.position.y, gameObject->transform.position.z);
+	glUniform3f(emitterVelocityUniform, 0, 0, 0);
+	glUniform3f(minVelocityUniform, minStartVelocity.x, minStartVelocity.y, minStartVelocity.z);
+	glUniform3f(maxVelocityUniform, maxStartVelocity.x, maxStartVelocity.y, maxStartVelocity.z);
+	glUniform3f(minAccelUniform, minAcceleration.x, minAcceleration.y, minAcceleration.z);
+	glUniform3f(maxAccelUniform, maxAcceleration.x, maxAcceleration.y, maxAcceleration.z);
+	glUniform1f(minStartSizeUniform, minStartSize);
+	glUniform1f(maxStartSizeUniform, maxStartSize);
+	glUniform1f(minEndSizeUniform, minEndSize);
+	glUniform1f(maxEndSizeUniform, maxEndSize);
 
 	return vao;
 }

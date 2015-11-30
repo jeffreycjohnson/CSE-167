@@ -1,6 +1,5 @@
 #version 430
 
-layout (location = 0) in float startTime; // Emitter Specific
 layout (location = 1) in float duration;
 layout (location = 2) in int corner; // 0 = BL, 1 = BR, 2 = TL, 3 = TR
 layout (location = 3) in uint seed;
@@ -23,6 +22,10 @@ uniform float maxStartSize;
 uniform float minEndSize;
 uniform float maxEndSize;
 
+// Burst specific
+uniform float startTime;
+uniform uint burstSeed;
+
 out float opacity;
 out vec3 color;
 out vec2 texCoord;
@@ -37,19 +40,19 @@ void main()
 	vec3 tmpVec;
 	float tmp, t;
 	
-	srand(seed + uint((elapsedTime + startTime) / duration));
+	srand(seed + burstSeed);
 
 	texCoord.x = int(corner == 1 || corner == 2);
 	texCoord.y = int(corner > 1);
 	
 	// Init
 	pos = vec4(emitterPos, 1);
-	t = mod(elapsedTime + startTime, duration);
+	t = elapsedTime - startTime;
 
 	// Velocity
 	tmpVec = minVelocity + (maxVelocity - minVelocity) 
 		* vec3(float(rand()) / 4294967295f, float(rand()) / 4294967295f, float(rand()) / 4294967295f);
-	pos.xyz += (tmpVec + emitterVelocity) * t;
+	pos.xyz += (tmpVec + emitterVelocity * 20) * t;
 
 	// Acceleration
 	tmpVec = minAcceleration + (maxAcceleration - minAcceleration) 
@@ -64,7 +67,8 @@ void main()
 	pos.x += (texCoord.x - 0.5f) * tmp; // Multiply by size
 	pos.y += (texCoord.y - 0.5f) * tmp;
 
-	opacity = 1 - t / duration;
+	uint finished = 1u - min(1u, uint((elapsedTime - startTime) / duration));
+	opacity = (1f - t / duration) * float(finished);
 
 	gl_Position = uP_Matrix * pos;
 }

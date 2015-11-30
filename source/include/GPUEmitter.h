@@ -10,16 +10,17 @@
 class GPUEmitter : public Component
 {
 private:
-	GLuint vao, elapsedTimeUniform, deltaTimeUniform, minVelocityUniform, maxVelocityUniform;
+	GLuint vao, emitterPosUniform, emitterVelocityUniform, elapsedTimeUniform, startTimeUniform, 
+		minVelocityUniform, maxVelocityUniform, minAccelUniform, maxAccelUniform, minStartSizeUniform, 
+		maxStartSizeUniform, minEndSizeUniform, maxEndSizeUniform, burstSeedUniform;
 	glm::vec3 prevPosition, velocity;
 	Texture* texture;
 	Shader* shader;
-	float* startPositions; // vec3
-	float* startVelocities; // vec3
 	float* startTimes;
 	float* durations;
 	int* quadCorners;
 	unsigned int* seeds;
+	bool burst, trigger;
 
 	GLuint genParticles();
 
@@ -30,16 +31,16 @@ public:
 	glm::vec3 minStartVelocity, maxStartVelocity;
 	glm::vec3 minAcceleration, maxAcceleration;
 	float minDuration, maxDuration;
-	bool burst, trigger;
 	int count; // Per second
 	bool enabled;
 
-	GPUEmitter(GameObject*, std::string);
+	GPUEmitter(GameObject*, std::string, bool);
 	~GPUEmitter();
 	void update(float deltaTime);
 	void draw();
-	void start();
+	void init();
 	void restart();
+	void play();
 	void setGameObject(GameObject* go);
 };
 

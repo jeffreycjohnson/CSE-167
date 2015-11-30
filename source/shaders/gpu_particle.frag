@@ -1,4 +1,4 @@
-#version 330
+#version 430
 
 in float opacity;
 in vec2 texCoord;

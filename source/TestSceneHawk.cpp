@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include "Camera.h"
 #include "GPUEmitter.h"
+#include "Input.h"
 #include "Timer.h"
 #include "Skybox.h"
 #include "Renderer.h"
@@ -127,8 +128,8 @@ TestSceneHawk::TestSceneHawk()
 	Renderer::camera->transform.translate(0, 0, 20);
 
 	emitter = new GameObject();
-	emitterComponent = new GPUEmitter(emitter, "assets/particles/particle.png");
-	emitterComponent->start();
+	emitterComponent = new GPUEmitter(emitter, "assets/particles/particle.png", true);
+	emitterComponent->init();
 	emitter->addComponent(emitterComponent);
 	emitter->transform.translate(0, 0, 4);
 
@@ -186,6 +187,10 @@ void TestSceneHawk::loop() {
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
 	Skybox::draw();
 
+	if (Input::getKeyDown("space"))
+		emitter->getComponent<GPUEmitter>()->play();
+
+	emitter->transform.position.x = sin(Timer::time() * 20) * 5;
 	emitter->update(Timer::time());
 	emitter->draw();
 	Renderer::switchShader(FORWARD_PBR_SHADER);

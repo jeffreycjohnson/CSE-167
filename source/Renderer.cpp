@@ -62,6 +62,10 @@ void Renderer::init(int window_width, int window_height) {
 		"source/shaders/gpu_particle.vert", "source/shaders/gpu_particle.frag"
 		);
 
+	shaderList[EMITTER_BURST_SHADER] = new Shader(
+		"source/shaders/gpu_particle_burst.vert", "source/shaders/gpu_particle.frag"
+		);
+
 	currentShader = shaderList[REGULAR_SHADER];
 	
 	currentShader->use();
