@@ -131,7 +131,7 @@ TestSceneHawk::TestSceneHawk()
 	emitterComponent = new GPUEmitter(emitter, "assets/particles/particle.png", true);
 	emitterComponent->init();
 	emitter->addComponent(emitterComponent);
-	emitter->transform.translate(0, 0, 4);
+	emitter->transform.translate(0, 0, 2);
 
 	turret = loadScene("assets/turret.dae");
 	turret->transform.translate(-1, -2, 5);
@@ -188,9 +188,12 @@ void TestSceneHawk::loop() {
 	Skybox::draw();
 
 	if (Input::getKeyDown("space"))
+	{
 		emitter->getComponent<GPUEmitter>()->play();
+		emitter->getComponent<GPUEmitter>()->loop = true;
+	}
 
-	emitter->transform.position.x = sin(Timer::time() * 20) * 5;
+	//emitter->transform.position.x = sin(Timer::time() * 5) * 5;
 	emitter->update(Timer::time());
 	emitter->draw();
 	Renderer::switchShader(FORWARD_PBR_SHADER);

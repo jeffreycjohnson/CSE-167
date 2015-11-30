@@ -1,4 +1,4 @@
-#version 430
+#version 330
 
 layout (location = 0) in float startTime; // Emitter Specific
 layout (location = 1) in float duration;
@@ -17,18 +17,30 @@ uniform vec3 minVelocity;
 uniform vec3 maxVelocity;
 uniform vec3 minAcceleration;
 uniform vec3 maxAcceleration;
+uniform vec3 minStartColor;
+uniform vec3 maxStartColor;
+uniform vec3 minEndColor;
+uniform vec3 maxEndColor;
 uniform float elapsedTime;
 uniform float minStartSize;
 uniform float maxStartSize;
 uniform float minEndSize;
 uniform float maxEndSize;
+uniform float startOpacity;
+uniform float endOpacity;
+uniform float minStartAngle;
+uniform float maxStartAngle;
+uniform float minAngularVelocity;
+uniform float maxAngularVelocity;
 
 out float opacity;
+out float angle;
 out vec3 color;
 out vec2 texCoord;
 
 uint rand();
 float range(float min, float max);
+vec3 range(vec3 min, vec3 max);
 void srand(uint newSeed);
 
 void main()
@@ -47,24 +59,30 @@ void main()
 	t = mod(elapsedTime + startTime, duration);
 
 	// Velocity
-	tmpVec = minVelocity + (maxVelocity - minVelocity) 
-		* vec3(float(rand()) / 4294967295f, float(rand()) / 4294967295f, float(rand()) / 4294967295f);
-	pos.xyz += (tmpVec + emitterVelocity) * t;
+	tmpVec = range(minVelocity, maxVelocity);
+	pos.xyz += (tmpVec - emitterVelocity) * t;
 
 	// Acceleration
-	tmpVec = minAcceleration + (maxAcceleration - minAcceleration) 
-		* vec3(float(rand()) / 4294967295f, float(rand()) / 4294967295f, float(rand()) / 4294967295f);
+	tmpVec = range(minAcceleration, maxAcceleration);
 	pos.xyz += 0.5f * tmpVec * t * t;
 
 	// Size
-	tmp = range(minStartSize, maxStartSize);
+	tmp = (1 - t / duration) * range(minStartSize, maxStartSize) + (t / duration) * range(minEndSize, maxEndSize);
 
 	// Billboard particles
 	pos = uV_Matrix * uM_Matrix * pos;
 	pos.x += (texCoord.x - 0.5f) * tmp; // Multiply by size
 	pos.y += (texCoord.y - 0.5f) * tmp;
 
-	opacity = 1 - t / duration;
+	// Angle
+	angle = range(minStartAngle, maxStartAngle) + range(minAngularVelocity, maxAngularVelocity) * t;
+
+	// Opacity
+	tmp = t / duration;
+	opacity = ((1 - tmp) * startOpacity + tmp * endOpacity);
+
+	// Color
+	color = (1 - tmp) * range(minStartColor, maxStartColor) + tmp * range(minEndColor, maxEndColor);
 
 	gl_Position = uP_Matrix * pos;
 }
@@ -87,6 +105,12 @@ uint rand()
 float range(float min, float max)
 {
 	return min + (max - min) * (rand() / 4294967295f);
+}
+
+vec3 range(vec3 min, vec3 max)
+{
+	return min + (max - min) 
+		* vec3(float(rand()) / 4294967295f, float(rand()) / 4294967295f, float(rand()) / 4294967295f);
 }
 
 void srand(uint newSeed)

@@ -12,14 +12,18 @@ class GPUEmitter : public Component
 private:
 	GLuint vao, emitterPosUniform, emitterVelocityUniform, elapsedTimeUniform, startTimeUniform, 
 		minVelocityUniform, maxVelocityUniform, minAccelUniform, maxAccelUniform, minStartSizeUniform, 
-		maxStartSizeUniform, minEndSizeUniform, maxEndSizeUniform, burstSeedUniform;
+		maxStartSizeUniform, minEndSizeUniform, maxEndSizeUniform, burstSeedUniform, 
+		minStartColorUniform, maxStartColorUniform, minEndColorUniform, maxEndColorUniform, 
+		minStartAngleUniform, maxStartAngleUniform, minAngularVelocityUniform, maxAngularVelocityUniform,
+		startOpacityUniform, endOpacityUniform;
 	glm::vec3 prevPosition, velocity;
 	Texture* texture;
 	Shader* shader;
-	float* startTimes;
+	float* startTimes; // For standard emitter
 	float* durations;
 	int* quadCorners;
 	unsigned int* seeds;
+	float startTime; // For burst
 	bool burst, trigger;
 
 	GLuint genParticles();
@@ -27,12 +31,14 @@ private:
 public:
 	float minStartSize, maxStartSize, minEndSize, maxEndSize;
 	float startOpacity, endOpacity;
-	glm::vec3 startColor, endColor;
+	glm::vec3 minStartColor, maxStartColor, minEndColor, maxEndColor;
 	glm::vec3 minStartVelocity, maxStartVelocity;
 	glm::vec3 minAcceleration, maxAcceleration;
 	float minDuration, maxDuration;
+	float minStartAngle, maxStartAngle, minAngularVelocity, maxAngularVelocity;
+	float emitterVelocityScale;
 	int count; // Per second
-	bool enabled;
+	bool enabled, loop, additive;
 
 	GPUEmitter(GameObject*, std::string, bool);
 	~GPUEmitter();
