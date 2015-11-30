@@ -20,16 +20,30 @@ struct AnimNodeData {
 	float animationTime;
 };
 
+struct AnimationData {
+	float animationTime;
+	std::vector<AnimNodeData> boneData;
+};
+
 class Animation :
 	public Component
 {
 public:
-	std::vector<AnimNodeData> data;
-	float currentTime=0;
 	
 	Animation(const aiScene*, std::unordered_map<std::string, Transform*>);
 	~Animation();
 
-	void play(float dt);
+	void play(int animation, bool loop);
+	void stop();
+
+	const std::vector<AnimNodeData>& getAnimationData();
+
+	void update(float dt);
+private:
+	std::vector<AnimationData> animData;
+	int currentAnimationIndex = 0;
+	float currentTime = 0;
+	bool playing = false;
+	bool looping = false;
 };
 

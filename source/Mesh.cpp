@@ -55,7 +55,7 @@ void Mesh::draw() {
 	if (Renderer::currentShader == Renderer::getShader(FORWARD_PBR_SHADER_ANIM) && animationRoot) {
 		BoneData & meshBoneData = boneIdMap.at(name);
 
-		for (AnimNodeData node : animationRoot->data) {
+		for (AnimNodeData node : animationRoot->getAnimationData()) {
 			auto bone = meshBoneData.boneMap.find(node.name);
 			if (bone == meshBoneData.boneMap.end()) continue;
 			int id = bone->second;

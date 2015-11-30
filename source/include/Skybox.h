@@ -4,9 +4,17 @@
 class Skybox
 {
 public:
-	static void draw();
-	static GLuint loadCubemap(glm::mat4(&irradianceMatrix)[3], std::string imageFiles[6]);
+	void draw();
+	GLuint getTexture();
+	void applyIrradiance();
+	void applyTexture(int slot);
+	Skybox(std::string imageFiles[6]);
 private:
+	GLuint skyboxTex;
+	glm::mat4 irradianceMatrix[3];
+	Material* material = nullptr;
+	float mipmapLevels;
+
 	struct ImageData {
 		float* imageArray[6];
 		int width[6];
@@ -17,7 +25,7 @@ private:
 	static bool loaded;
 	static MeshData meshData;
 	static void load();
-	static GLuint loadGLCube(ImageData& data);
+	GLuint loadGLCube(ImageData& data);
 	static void loadIrradiance(glm::mat4(&irradianceMatrix)[3], ImageData& data);
 
 	static glm::vec3 sampleTexture(ImageData& environment, glm::vec3 sampleDirection);

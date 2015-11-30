@@ -45,21 +45,45 @@ glm::quat interpolateQuaternions(std::vector<std::pair<float, glm::quat>> data, 
 	return currentRotation;
 }
 
+void Animation::play(int animation, bool loop) {
+	currentAnimationIndex = animation;
+	currentTime = 0;
+	playing = true;
+	looping = loop;
+}
 
-void Animation::play(float dt) {
-	currentTime += dt;
-	for (AnimNodeData &node : data) {
-		//TODO might want to place this elsewhere
-		if (currentTime > node.animationTime) {
-			currentTime -= node.animationTime;
+void Animation::stop() {
+	playing = false;
+}
+
+const std::vector<AnimNodeData>& Animation::getAnimationData() {
+	return animData[currentAnimationIndex].boneData;
+}
+
+void Animation::update(float dt) {
+	AnimationData & currentAnim = animData[currentAnimationIndex];
+	if (playing) {
+		currentTime += dt;
+		if (currentTime > currentAnim.animationTime) {
+			if (looping) {
+				currentTime -= currentAnim.animationTime;
+			}
+			else {
+				stop();
+			}
 		}
-
+	}
+	for (AnimNodeData &node : currentAnim.boneData) {
 		node.object->position = interpolateKeyframes(node.keyframes.position, currentTime);
 		node.object->rotation = interpolateQuaternions(node.keyframes.rotation, currentTime);
 		//node.object->scaleFactor = node.keyframes.scale[scaleIndex].second;
 		node.object->transformMatrixDirty = true;
 	}
 }
+
+
+
+
 
 glm::quat convertQuat(aiQuaternion input) {
 	return glm::quat(input.w, input.x, input.y, input.z);
@@ -71,9 +95,11 @@ glm::vec3 convertVec(aiVector3D input) {
 
 Animation::Animation(const aiScene* scene, std::unordered_map<std::string, Transform*> loadingAcceleration)
 {
-	//TODO support multiple animaitons
-	for (int a = 0; a < 1; ++a) { // scene->mNumAnimations; ++a) { //separate animations (e.g. run, jump)
+	for (int a = 0; a < scene->mNumAnimations; ++a) { //separate animations (e.g. run, jump)
+		AnimationData currentAnimData;
+
 		float longestTime = 0;
+		//channels correspond to nodes, i.e. bones
 		for (int channel = 0; channel < scene->mAnimations[a]->mNumChannels; ++channel) {
 
 			std::string name = scene->mAnimations[a]->mChannels[channel]->mNodeName.C_Str();
@@ -101,12 +127,11 @@ Animation::Animation(const aiScene* scene, std::unordered_map<std::string, Trans
 			if (newData.keyframes.rotation.back().first > longestTime) longestTime = newData.keyframes.rotation.back().first;
 			if (newData.keyframes.scale.back().first > longestTime) longestTime = newData.keyframes.scale.back().first;
 
-			data.push_back(newData);
+			currentAnimData.boneData.push_back(newData);
 			
 		}
-		for (AnimNodeData &nodeData : data) {
-			nodeData.animationTime = longestTime;
-		}
+		currentAnimData.animationTime = longestTime;
+		animData.push_back(currentAnimData);
 	}
 }
 

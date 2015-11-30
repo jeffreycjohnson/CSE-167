@@ -89,9 +89,7 @@ void Framebuffer::bind(int bufferCount, GLuint *buffersToDraw) {
 	//TODO use Renderer::resize()?
 	glViewport(0, 0, width, height);
 	glm::mat4 perspective = glm::perspective((float)(atan(1)*4.0f / 3.0f), width / (float)height, .1f, 100.f);
-	for (int i = 0; i < SHADER_COUNT; ++i) {
-		(*Renderer::getShader(i))["uP_Matrix"] = perspective;
-	}
+	Renderer::updatePerspective(perspective);
 }
 
 void Framebuffer::unbind() {
@@ -99,9 +97,7 @@ void Framebuffer::unbind() {
 
 	glViewport(0, 0, Renderer::getWindowWidth(), Renderer::getWindowHeight());
 	glm::mat4 perspective = glm::perspective((float)(atan(1)*4.0f / 3.0f), Renderer::getWindowWidth() / (float)Renderer::getWindowHeight(), .1f, 100.f);
-	for (int i = 0; i < SHADER_COUNT; ++i) {
-		(*Renderer::getShader(i))["uP_Matrix"] = perspective;
-	}
+	Renderer::updatePerspective(perspective);
 }
 
 void Framebuffer::bindTexture(int slot, int colorIndex) {

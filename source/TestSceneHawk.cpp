@@ -7,6 +7,7 @@
 #include "Renderer.h"
 #include "Texture.h"
 
+#include "Timer.h"
 #include "ObjectLoader.h"
 
 #include "Animation.h"
@@ -47,6 +48,7 @@ TestSceneHawk::TestSceneHawk()
 	(*bearMat)["matTex"] = bearSpec;
 	(*bearMat)["normalTex"] = blankNormal;
 	bear->setMaterial(bearMat);
+	bear->getComponent<Animation>()->play(0, true);
 
 	GameObject::SceneRoot.addChild(*bear);
 
@@ -102,7 +104,7 @@ void TestSceneHawk::loop() {
 		}
 	}
 
-	bear->getComponent<Animation>()->play(0.032);
+	bear->getComponent<Animation>()->update(Timer::deltaTime());
 }
 
 TestSceneHawk::~TestSceneHawk()

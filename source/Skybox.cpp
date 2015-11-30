@@ -62,9 +62,13 @@ void Skybox::draw() {
 		load();
 	}
 
+	material->bind();
+	glActiveTexture(GL_TEXTURE0 + 5);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, getTexture());
+	(*Renderer::getShader(SKYBOX_SHADER))["environment"] = 5;
 
-	Renderer::switchShader(SKYBOX_SHADER);
 	(*Renderer::getShader(SKYBOX_SHADER))["uV_Matrix"] = Renderer::camera->getCameraMatrix();
+
 
 	if (Renderer::gpuData.vaoHandle != meshData.vaoHandle) {
 		glBindVertexArray(meshData.vaoHandle);
@@ -74,34 +78,35 @@ void Skybox::draw() {
 	glDrawElements(GL_TRIANGLES, meshData.indexSize, GL_UNSIGNED_INT, 0);
 }
 
-GLuint Skybox::loadCubemap(glm::mat4(&irradianceMatrix)[3], std::string imageFiles[6]) {
-	GLuint retVal;
-	/*retVal = SOIL_load_OGL_cubemap
-		(
-			imageFiles[0].c_str(),
-			imageFiles[1].c_str(),
-			imageFiles[2].c_str(),
-			imageFiles[3].c_str(),
-			imageFiles[4].c_str(),
-			imageFiles[5].c_str(),
-			SOIL_LOAD_AUTO,
-			SOIL_CREATE_NEW_ID,
-			SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB
-			);
-			*/
+Skybox::Skybox(std::string imageFiles[6]) {
+
 	ImageData data;
 	for (int f = 0; f < CUBE_FACES; ++f) {
 		data.imageArray[f] = stbi_loadf(imageFiles[f].c_str(), &data.width[f], &data.height[f], &data.channels[f], 0);
 	}
 
-	retVal = loadGLCube(data);
+	skyboxTex = loadGLCube(data);
 	loadIrradiance(irradianceMatrix, data);
 
 	for (int f = 0; f < CUBE_FACES; ++f) {
 		free(data.imageArray[f]);
 	}
 
-	return retVal;
+	material = new Material(Renderer::getShader(SKYBOX_SHADER));
+}
+
+void Skybox::applyIrradiance() {
+	Renderer::setIrradiance(irradianceMatrix);
+}
+
+void Skybox::applyTexture(int slot) {
+	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, getTexture());
+	Renderer::setEnvironment(slot, mipmapLevels);
+}
+
+GLuint Skybox::getTexture() {
+	return skyboxTex;
 }
 
 
@@ -231,14 +236,9 @@ void Skybox::loadIrradiance(glm::mat4(&irradianceMatrix)[3], ImageData& data) {
 
 float PI = atanf(1) * 4;
 
-//main algorithm from http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html
+//prev algorithm from http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html
+//new algorithm from http://cg.informatik.uni-freiburg.de/course_notes/graphics2_04_sampling.pdf slide 22 - old one had incorrect normalization constant
 glm::vec2 Hammersley(unsigned int i, unsigned int N) {
-/*unsigned int bits = i;
-bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
-bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
-bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
-bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
-return glm::vec2(float(i) / float(N), float(bits) * (2.3283064365386963e-10));*/
 	float px = 2;
 	int k = i;
 	float theta = 0;
@@ -387,6 +387,9 @@ GLuint Skybox::loadGLCube(ImageData& data) {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
 	int mipmapLevel = (int)(log(data.width[0]) / log(2)) + 1;
+
+	this->mipmapLevels = mipmapLevel-1;
+
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, mipmapLevel-1);
 
@@ -451,6 +454,7 @@ GLuint Skybox::loadGLCube(ImageData& data) {
 			delete[] tmpImage;
 		}
 	}
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
 
 	return cubeTextureHandle;

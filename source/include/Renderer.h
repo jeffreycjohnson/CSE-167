@@ -30,6 +30,9 @@ class Renderer
 		static void loop();
 
 		static void applyPerFrameData();
+		static void updatePerspective(const glm::mat4& perspectiveMatrix);
+		static void setIrradiance(glm::mat4(&irradianceMatrix)[3]);
+		static void setEnvironment(int slot, float mipmapLevels);
 
 		static void setCurrentShader(Shader*);
 		static Shader& getCurrentShader();

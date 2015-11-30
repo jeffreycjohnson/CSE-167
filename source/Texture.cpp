@@ -18,6 +18,9 @@ Texture::Texture(std::string filename) {
     CHECK_ERROR();
 }
 
+Texture::Texture(GLuint handle) : textureHandle(handle) {
+}
+
 Texture::~Texture()
 {
     glDeleteTextures(1, &textureHandle);

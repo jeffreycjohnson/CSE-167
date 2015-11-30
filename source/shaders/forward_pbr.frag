@@ -29,7 +29,7 @@ uniform float environment_mipmap; //the number of mipmaps the environment map ha
 //world space camera position, to get view vector
 uniform vec3 cameraPos;
 
-//light data - (position.xyz, _blank_) followed by (lightColor.xyz, strength)
+//light data - (position.xyz, lightType) followed by (lightColor.xyz, strength)
 const int lightCount = 1;
 uniform vec4 uLightData[2*lightCount];
 

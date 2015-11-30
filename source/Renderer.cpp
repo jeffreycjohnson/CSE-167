@@ -16,6 +16,9 @@ int Renderer::height = 0;
 
 Shader* Renderer::currentShader;
 Shader* shaderList[SHADER_COUNT];
+int shaderCameraDataList[2] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM};
+int shaderEnvironmentList[2] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM };
+int shaderPerspectiveList[3] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER };
 
 Camera* Renderer::camera = new Camera();
 
@@ -29,10 +32,9 @@ GLuint skyboxTex;
 
 Framebuffer* fboTest;
 
-glm::mat4 irradianceMatrix[3];
-
 TestSceneHawk* testScene;
 
+Skybox* skybox;
 
 void Renderer::init(int window_width, int window_height) {
 	width = window_width;
@@ -47,6 +49,8 @@ void Renderer::init(int window_width, int window_height) {
 	glClearColor(0, 0, .25, 1);
 	glDepthFunc(GL_LEQUAL); //needed for skybox to overwrite blank z-buffer values
 
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
 	shaderList[FORWARD_PBR_SHADER_ANIM] = new Shader(
 		"source/shaders/forward_pbr_skeletal.vert", "source/shaders/forward_pbr.frag"
 		);
@@ -55,8 +59,6 @@ void Renderer::init(int window_width, int window_height) {
 	shaderList[FORWARD_PBR_SHADER] = new Shader(
 		"source/shaders/forward_pbr.vert", "source/shaders/forward_pbr.frag"
 		);
-
-	(*shaderList[FORWARD_PBR_SHADER])["matTex"] = 2;
 
 	shaderList[SKYBOX_SHADER] = new Shader(
 		"source/shaders/skybox.vert", "source/shaders/skybox.frag"
@@ -67,11 +69,8 @@ void Renderer::init(int window_width, int window_height) {
 		);
 
 	currentShader = shaderList[FORWARD_PBR_SHADER];
-	
 	currentShader->use();
 
-
-	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	std::string cubeFilenames[6] = {
 		"assets/grace/grace_px.hdr",
@@ -80,25 +79,9 @@ void Renderer::init(int window_width, int window_height) {
 		"assets/grace/grace_ny.hdr",
 		"assets/grace/grace_pz.hdr",
 		"assets/grace/grace_nz.hdr" };
-
-	skyboxTex = Skybox::loadCubemap(irradianceMatrix, cubeFilenames);
-
-	(*shaderList[FORWARD_PBR_SHADER])["irradiance[0]"] = irradianceMatrix[0];
-	(*shaderList[FORWARD_PBR_SHADER])["irradiance[1]"] = irradianceMatrix[1];
-	(*shaderList[FORWARD_PBR_SHADER])["irradiance[2]"] = irradianceMatrix[2];
-	(*shaderList[FORWARD_PBR_SHADER])["environment"] = 5;
-	(*shaderList[FORWARD_PBR_SHADER])["environment_mipmap"] = 8.0f;
-
-
-	(*shaderList[FORWARD_PBR_SHADER_ANIM])["irradiance[0]"] = irradianceMatrix[0];
-	(*shaderList[FORWARD_PBR_SHADER_ANIM])["irradiance[1]"] = irradianceMatrix[1];
-	(*shaderList[FORWARD_PBR_SHADER_ANIM])["irradiance[2]"] = irradianceMatrix[2];
-	(*shaderList[FORWARD_PBR_SHADER_ANIM])["environment"] = 5;
-	(*shaderList[FORWARD_PBR_SHADER_ANIM])["environment_mipmap"] = 8.0f;
-
-
-	glActiveTexture(GL_TEXTURE0 + 5);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
+	skybox = new Skybox(cubeFilenames);
+	skybox->applyIrradiance();
+	skybox->applyTexture(5);
 
 	testScene = new TestSceneHawk();
 	
@@ -123,9 +106,7 @@ void Renderer::loop() {
 	applyPerFrameData();
 	GameObject::SceneRoot.draw();
 	
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
-	Skybox::draw();
+	skybox->draw();
 	
 	fboTest->unbind();
 
@@ -135,10 +116,35 @@ void Renderer::loop() {
 }
 
 void Renderer::applyPerFrameData() {
-	(*Renderer::getShader(FORWARD_PBR_SHADER))["cameraPos"] = Renderer::camera->transform.getWorldPosition();
-	(*Renderer::getShader(FORWARD_PBR_SHADER_ANIM))["cameraPos"] = Renderer::camera->transform.getWorldPosition();
+	for (int shaderId : shaderCameraDataList) {
+		(*Renderer::getShader(shaderId))[VIEW_MATRIX] = camera->getCameraMatrix();
+		(*Renderer::getShader(shaderId))["cameraPos"] = Renderer::camera->transform.getWorldPosition();
+	}
 }
 
+
+void Renderer::updatePerspective(const glm::mat4& perspectiveMatrix) {
+	for (int shaderId : shaderPerspectiveList) {
+		(*Renderer::getShader(shaderId))["uP_Matrix"] = perspectiveMatrix;
+	}
+}
+
+void Renderer::setEnvironment(int slot, float mipmapLevels) {
+	for (int shaderId : shaderEnvironmentList) {
+		((*Renderer::getShader(shaderId)))["environment"] = slot;
+		((*Renderer::getShader(shaderId)))["environment_mipmap"] = mipmapLevels;
+	}
+}
+
+
+void Renderer::setIrradiance(glm::mat4 (&irradianceMatrix)[3]) {
+	(*shaderList[FORWARD_PBR_SHADER])["irradiance[0]"] = irradianceMatrix[0];
+	(*shaderList[FORWARD_PBR_SHADER])["irradiance[1]"] = irradianceMatrix[1];
+	(*shaderList[FORWARD_PBR_SHADER])["irradiance[2]"] = irradianceMatrix[2];
+	(*shaderList[FORWARD_PBR_SHADER_ANIM])["irradiance[0]"] = irradianceMatrix[0];
+	(*shaderList[FORWARD_PBR_SHADER_ANIM])["irradiance[1]"] = irradianceMatrix[1];
+	(*shaderList[FORWARD_PBR_SHADER_ANIM])["irradiance[2]"] = irradianceMatrix[2];
+}
 
 
 Shader& Renderer::getCurrentShader() {
@@ -158,9 +164,10 @@ void Renderer::switchShader(int shaderId) {
 	currentShader->use();
 }
 
+
+
 void Renderer::setModelMatrix(glm::mat4 transform) {
 	(*currentShader)[MODEL_MATRIX] = transform;
-	(*currentShader)[VIEW_MATRIX] = camera->getCameraMatrix();
 }
 
 void Renderer::framebuffer_size_callback(GLFWwindow* window, int window_width, int window_height)
@@ -172,9 +179,7 @@ void Renderer::resize(int width, int height) {
 	glViewport(0, 0, width, height);
 
 	glm::mat4 perspective = glm::perspective((float)(atan(1)*4.0f / 3.0f), width / (float)height, .1f, 100.f);
-	for (Shader* shader : shaderList) {
-		(*shader)["uP_Matrix"] = perspective;
-	}
+	updatePerspective(perspective);
 }
 
 void Renderer::window_focus_callback(GLFWwindow* window, int focused)

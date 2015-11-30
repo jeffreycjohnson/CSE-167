@@ -9,6 +9,7 @@ class Texture
 		unsigned int textureHandle;
 
         explicit Texture(std::string filename);
+		explicit Texture(GLuint handle);
 		~Texture();
 
 		void bindTexture(int slot) const;
