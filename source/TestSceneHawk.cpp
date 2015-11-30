@@ -47,6 +47,7 @@ TestSceneHawk::TestSceneHawk()
 	emitterComponent->init();
 	emitter->addComponent(emitterComponent);
 	emitter->transform.translate(0, 0, 2);
+	//scene->addChild(*emitter);
 
 	bear = loadScene("assets/bear2.dae");
 	bear->transform.rotate(glm::angleAxis(atanf(1)*1.f, glm::vec3(1, 0, 0)));
@@ -115,15 +116,9 @@ void TestSceneHawk::loop() {
 	}
 
 	if (Input::getKeyDown("space"))
-	{
 		emitter->getComponent<GPUEmitter>()->play();
-		emitter->getComponent<GPUEmitter>()->loop = true;
-	}
-
-	// Emitters aren't drawing, probably due to render passes
 	emitter->update(Timer::time());
 	emitter->draw();
-	Renderer::switchShader(FORWARD_PBR_SHADER);
 
 	bear->getComponent<Animation>()->update(Timer::deltaTime());
 }

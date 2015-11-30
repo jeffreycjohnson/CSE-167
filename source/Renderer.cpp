@@ -16,9 +16,9 @@ int Renderer::height = 0;
 
 Shader* Renderer::currentShader;
 Shader* shaderList[SHADER_COUNT];
-int shaderCameraDataList[2] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM};
+int shaderCameraDataList[4] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER };
 int shaderEnvironmentList[2] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM };
-int shaderPerspectiveList[3] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER };
+int shaderPerspectiveList[5] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER, EMITTER_SHADER, EMITTER_BURST_SHADER };
 
 Camera* Renderer::camera = new Camera();
 
@@ -106,13 +106,13 @@ void Renderer::loop() {
 	GLuint buffersToDraw[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 	fboTest->bind(2, buffersToDraw);
 
-	testScene->loop();
-		
 	applyPerFrameData();
 	GameObject::SceneRoot.draw();
 	
 	skybox->draw();
 	
+	testScene->loop();
+
 	fboTest->unbind();
 
 	fboTest->bindTexture(0, 0);

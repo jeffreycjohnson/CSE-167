@@ -27,7 +27,6 @@ void GameObject::draw() {
 	}
 	GPUEmitter* emitter;
 	if ((emitter = getComponent<GPUEmitter>()) != nullptr) {
-		Renderer::setModelMatrix(transform.getTransformMatrix());
 		emitter->draw();
 	}
 	for (auto child : transform.children) {

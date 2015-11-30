@@ -44,9 +44,9 @@ GPUEmitter::GPUEmitter(GameObject* go, string tex, bool burstEmitter)
 
 	prevPosition = gameObject->transform.position;
 	velocity = { 0, 0, 0 };
-	minStartSize = 0.2;
-	maxStartSize = 0.5;
-	minEndSize = 0.5;
+	minStartSize = 0.4;
+	maxStartSize = 0.6;
+	minEndSize = 0.6;
 	maxEndSize = 1;
 	startOpacity = 1;
 	endOpacity = 0;
@@ -67,7 +67,7 @@ GPUEmitter::GPUEmitter(GameObject* go, string tex, bool burstEmitter)
 	emitterVelocityScale = 10;
 	burst = burstEmitter;
 	trigger = false;
-	count = 2000;
+	count = 4000;
 	enabled = false;
 	loop = false;
 	additive = true;
@@ -141,7 +141,11 @@ void GPUEmitter::draw()
 		else
 			Renderer::switchShader(EMITTER_SHADER);
 
-		glBindVertexArray(vao);
+		Renderer::setModelMatrix(gameObject->transform.getTransformMatrix());
+		if (Renderer::gpuData.vaoHandle != vao) {
+			glBindVertexArray(vao);
+			Renderer::gpuData.vaoHandle = vao;
+		}
 		glDrawArrays(GL_QUADS, 0, count * 4);
 		glBindVertexArray(NULL);
 		glDepthMask(true);
@@ -152,6 +156,8 @@ void GPUEmitter::draw()
 void GPUEmitter::init()
 {
 	genParticles();
+	if (!burst)
+		enabled = true;
 }
 
 void GPUEmitter::restart()
