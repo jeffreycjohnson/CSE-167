@@ -7,12 +7,13 @@
 
 #include <glfw3.h>
 
-#define SHADER_COUNT 5
-#define REGULAR_SHADER 0
+#define SHADER_COUNT 6
+#define FORWARD_PBR_SHADER_ANIM 0
 #define FORWARD_PBR_SHADER 1
 #define SKYBOX_SHADER 2
-#define EMITTER_SHADER 3
-#define EMITTER_BURST_SHADER 4
+#define FBO_HDR 3
+#define EMITTER_SHADER 4
+#define EMITTER_BURST_SHADER 5
 
 struct GPUData {
 	int vaoHandle;
@@ -29,6 +30,13 @@ class Renderer
 
 		static void init(int w, int h);
 		static void loop();
+
+		static void applyPerFrameData();
+		static void updatePerspective(const glm::mat4& perspectiveMatrix);
+		static void setIrradiance(glm::mat4(&irradianceMatrix)[3]);
+		static void setEnvironment(int slot, float mipmapLevels);
+
+		static void setCurrentShader(Shader*);
 		static Shader& getCurrentShader();
 		static Shader* getShader(int shaderId);
 		static void switchShader(int shaderId);

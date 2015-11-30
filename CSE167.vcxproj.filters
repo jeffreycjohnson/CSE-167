@@ -69,6 +69,9 @@
     <ClCompile Include="source\TestSceneHawk.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\Animation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="source\DeferrerdPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -79,6 +82,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\GPUEmitter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ObjectLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -131,6 +137,9 @@
     <ClInclude Include="source\include\TestSceneHawk.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\include\Animation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="source\include\RenderPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -141,6 +150,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\include\GPUEmitter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\ObjectLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -155,6 +167,15 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="source\shaders\skybox.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="source\shaders\fbo.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="source\shaders\fbo_hdr.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="source\shaders\forward_pbr_skeletal.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

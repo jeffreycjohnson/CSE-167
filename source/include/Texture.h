@@ -8,10 +8,9 @@ class Texture
 	public:
 		unsigned int textureHandle;
 
-		Texture(std::string filename);
+        explicit Texture(std::string filename);
+		explicit Texture(GLuint handle);
 		~Texture();
-
-		void loadTextureFile(std::string filename);
 
 		void bindTexture(int slot) const;
 

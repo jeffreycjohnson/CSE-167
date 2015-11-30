@@ -4,9 +4,9 @@
 #include "ForwardDecs.h"
 #include "Component.h"
 #include <unordered_map>
+#include <assimp/scene.h>           // Output data structure
 
-// returns the root game object of the file, with all children correctly added
-GameObject* loadScene(const std::string& filename);
+
 
 struct MeshData {
 	GLuint vaoHandle;
@@ -14,16 +14,27 @@ struct MeshData {
 	//BoundingBox boundingBox;
 };
 
+struct BoneData {
+	std::vector<glm::mat4> boneBindArray;
+	std::unordered_map<std::string, int> boneMap;
+};
+
 class Mesh : public Component
 {
 	public:
 		static std::unordered_map<std::string, MeshData> meshMap;
+		static std::unordered_map<std::string, BoneData> boneIdMap;
+
+		static void loadMesh(std::string name, const aiMesh* mesh);
 
         std::string name;
+		Material* material = nullptr;
+		Animation* animationRoot;
     
         Mesh(std::string);
 		~Mesh();
 
+		void setMaterial(Material *mat);
 		void draw();
 };
 

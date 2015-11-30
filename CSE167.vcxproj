@@ -157,6 +157,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Animation.cpp" />
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\Component.cpp" />
     <ClCompile Include="source\DeferrerdPass.cpp" />
@@ -169,6 +170,7 @@
     <ClCompile Include="source\Material.cpp" />
     <ClCompile Include="source\MathFunc.cpp" />
     <ClCompile Include="source\Mesh.cpp" />
+    <ClCompile Include="source\ObjectLoader.cpp" />
     <ClCompile Include="source\Renderer.cpp" />
     <ClCompile Include="source\Shader.cpp" />
     <ClCompile Include="source\Skybox.cpp" />
@@ -180,6 +182,7 @@
     <ClCompile Include="source\WebWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\include\Animation.h" />
     <ClInclude Include="source\include\Camera.h" />
     <ClInclude Include="source\include\Component.h" />
     <ClInclude Include="source\include\ForwardDecs.h" />
@@ -191,6 +194,7 @@
     <ClInclude Include="source\include\Material.h" />
     <ClInclude Include="source\include\MathFunc.h" />
     <ClInclude Include="source\include\Mesh.h" />
+    <ClInclude Include="source\include\ObjectLoader.h" />
     <ClInclude Include="source\include\Renderer.h" />
     <ClInclude Include="source\include\RenderPass.h" />
     <ClInclude Include="source\include\Shader.h" />
@@ -202,8 +206,11 @@
     <ClInclude Include="source\include\WebWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="source\shaders\fbo.vert" />
+    <None Include="source\shaders\fbo_hdr.frag" />
     <None Include="source\shaders\forward_pbr.frag" />
     <None Include="source\shaders\forward_pbr.vert" />
+    <None Include="source\shaders\forward_pbr_skeletal.vert" />
     <None Include="source\shaders\skybox.frag" />
     <None Include="source\shaders\skybox.vert" />
   </ItemGroup>

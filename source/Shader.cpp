@@ -2,6 +2,8 @@
 #include <fstream>
 #include "gtc/type_ptr.hpp"
 
+#include "Renderer.h"
+
 Shader::Uniform::Uniform(GLint program, GLint location)
     : program(program), location(location)
 {
@@ -111,6 +113,7 @@ void Shader::use()
     reloadTimer++;
     if(reloadTimer % 30) reload();
     glUseProgram(id);
+	Renderer::setCurrentShader(this);
 }
 
 void Shader::reload()

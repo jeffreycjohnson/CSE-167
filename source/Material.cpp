@@ -18,6 +18,11 @@ Material::Material(Shader* shader) : shader(shader)
 {
 }
 
+Material::~Material()
+{
+    for (auto uniform : uniforms) delete uniform.second;
+}
+
 Material::UniformSetter Material::operator[](const std::string& name)
 {
     return UniformSetter(this, name);
@@ -30,7 +35,7 @@ void Material::bind()
     {
         uniform.second->set((*shader)[uniform.first]);
     }
-    unsigned int i = 0;
+    int i = 0; //sampler seems to prefer glUniform1i
     for (auto texture : textures)
     {
         texture.second->bindTexture(i);

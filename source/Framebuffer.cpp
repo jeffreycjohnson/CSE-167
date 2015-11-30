@@ -2,7 +2,8 @@
 #include "Renderer.h"
 #include <gtc/matrix_transform.hpp>
 
-Framebuffer::Framebuffer(int w, int h, int numColorTextures, bool accessibleDepth) : width(w), height(h), numColorTex(numColorTextures), accessibleDepth(accessibleDepth) {
+
+Framebuffer::Framebuffer(int w, int h, int numColorTextures, bool accessibleDepth, bool hdrEnabled) : width(w), height(h), numColorTex(numColorTextures), accessibleDepth(accessibleDepth), hdrEnabled(hdrEnabled) {
 	glGenFramebuffers(1, &id);
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 
@@ -26,7 +27,8 @@ void Framebuffer::addColorTexture(int index) {
 	glGenTextures(1, &(colorTex[index]) );
 	glBindTexture(GL_TEXTURE_2D, colorTex[index]);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	GLint format = (hdrEnabled && index==0) ? GL_RGB16F : GL_RGBA;
+	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -82,13 +84,12 @@ void Framebuffer::bind(int bufferCount, GLuint *buffersToDraw) {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 	glDrawBuffers(bufferCount, buffersToDraw);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//TODO use Renderer::resize()?
 	glViewport(0, 0, width, height);
 	glm::mat4 perspective = glm::perspective((float)(atan(1)*4.0f / 3.0f), width / (float)height, .1f, 100.f);
-	for (int i = 0; i < SHADER_COUNT; ++i) {
-		(*Renderer::getShader(i))["uP_Matrix"] = perspective;
-	}
+	Renderer::updatePerspective(perspective);
 }
 
 void Framebuffer::unbind() {
@@ -96,9 +97,7 @@ void Framebuffer::unbind() {
 
 	glViewport(0, 0, Renderer::getWindowWidth(), Renderer::getWindowHeight());
 	glm::mat4 perspective = glm::perspective((float)(atan(1)*4.0f / 3.0f), Renderer::getWindowWidth() / (float)Renderer::getWindowHeight(), .1f, 100.f);
-	for (int i = 0; i < SHADER_COUNT; ++i) {
-		(*Renderer::getShader(i))["uP_Matrix"] = perspective;
-	}
+	Renderer::updatePerspective(perspective);
 }
 
 void Framebuffer::bindTexture(int slot, int colorIndex) {
@@ -138,4 +137,69 @@ void Framebuffer::resize(int w, int h) {
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+}
+
+
+
+
+#define VERTEX_COUNT ((3+2) * 4)
+float fbo_vertices[VERTEX_COUNT] = { -1, -1, 0, 0, 0,
+1, -1, 0, 1, 0,
+1,  1, 0, 1, 1,
+-1,  1, 0, 0, 1 };
+
+#define INDEX_COUNT 6
+GLuint fbo_indices[INDEX_COUNT] = { 0, 1, 2, 0, 2, 3 };
+
+#define FLOAT_SIZE 4
+
+#define POSITION_COUNT 3
+#define TEX_COORD_COUNT 2
+
+#define VERTEX_ATTRIB_LOCATION 0
+#define TEX_COORD_0_ATTRIB_LOCATION 2
+
+MeshData Framebuffer::meshData;
+bool Framebuffer::loaded = false;
+
+void Framebuffer::load() {
+
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	glEnableVertexAttribArray(VERTEX_ATTRIB_LOCATION);
+	glEnableVertexAttribArray(TEX_COORD_0_ATTRIB_LOCATION);
+
+	GLuint meshBuffer[2];
+	glGenBuffers(2, meshBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, meshBuffer[0]);
+	glBufferData(GL_ARRAY_BUFFER, VERTEX_COUNT * sizeof(float), fbo_vertices, GL_STATIC_DRAW);
+
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshBuffer[1]);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, INDEX_COUNT * sizeof(GLuint), fbo_indices, GL_STATIC_DRAW);
+
+
+	int stride = FLOAT_SIZE * (POSITION_COUNT + TEX_COORD_COUNT);
+	glVertexAttribPointer(VERTEX_ATTRIB_LOCATION, 3, GL_FLOAT, false, stride, (GLvoid*)0);
+	glVertexAttribPointer(TEX_COORD_0_ATTRIB_LOCATION, 2, GL_FLOAT, false, stride, (GLvoid*)(FLOAT_SIZE * 3));
+
+	meshData.vaoHandle = vao;
+	meshData.indexSize = static_cast<GLsizei>(INDEX_COUNT);
+	
+	loaded = true;
+}
+
+void Framebuffer::draw() {
+	if (!loaded) {
+		load();
+	}
+
+	if (Renderer::gpuData.vaoHandle != meshData.vaoHandle) {
+		glBindVertexArray(meshData.vaoHandle);
+		Renderer::gpuData.vaoHandle = meshData.vaoHandle;
+	}
+
+	glDrawElements(GL_TRIANGLES, meshData.indexSize, GL_UNSIGNED_INT, 0);
 }
