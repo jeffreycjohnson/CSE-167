@@ -45,7 +45,6 @@ public:
 	void update(float deltaTime);
 	void draw();
 	void init();
-	void restart();
 	void play();
 	void setGameObject(GameObject* go);
 };

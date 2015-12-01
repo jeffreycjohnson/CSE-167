@@ -47,7 +47,6 @@ TestSceneHawk::TestSceneHawk()
 	emitterComponent->init();
 	emitter->addComponent(emitterComponent);
 	emitter->transform.translate(0, 0, 2);
-	//scene->addChild(*emitter);
 
 	bear = loadScene("assets/bear2.dae");
 	bear->transform.rotate(glm::angleAxis(atanf(1)*1.f, glm::vec3(1, 0, 0)));

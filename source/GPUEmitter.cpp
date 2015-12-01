@@ -76,12 +76,8 @@ GPUEmitter::GPUEmitter(GameObject* go, string tex, bool burstEmitter)
 
 GPUEmitter::~GPUEmitter()
 {
-	if (!burst)
-		delete startTimes;
-
-	delete durations;
-	delete quadCorners;
-	delete seeds;
+	delete texture;
+	// Delete for arrays is handled in genParticles
 }
 
 void GPUEmitter::update(float deltaTime)
@@ -158,17 +154,6 @@ void GPUEmitter::init()
 	genParticles();
 	if (!burst)
 		enabled = true;
-}
-
-void GPUEmitter::restart()
-{
-	if (!burst)
-		delete startTimes;
-
-	delete durations;
-	delete quadCorners;
-	delete seeds;
-	init();
 }
 
 void GPUEmitter::play()
@@ -275,6 +260,14 @@ GLuint GPUEmitter::genParticles()
 	glUniform1f(maxStartAngleUniform, maxStartAngle);
 	glUniform1f(minAngularVelocityUniform, minAngularVelocity);
 	glUniform1f(maxAngularVelocityUniform, maxAngularVelocity);
+
+	// We don't need the arrays anymore, since we already passed them to the GPU
+	if (!burst)
+		delete[] startTimes;
+
+	delete[] durations;
+	delete[] quadCorners;
+	delete[] seeds;
 
 	return vao;
 }
