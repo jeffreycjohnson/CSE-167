@@ -44,10 +44,10 @@ GPUEmitter::GPUEmitter(GameObject* go, string tex, bool burstEmitter)
 
 	prevPosition = gameObject->transform.position;
 	velocity = { 0, 0, 0 };
-	minStartSize = 0.4;
-	maxStartSize = 0.6;
-	minEndSize = 0.6;
-	maxEndSize = 1;
+	minStartSize = 0.01;
+	maxStartSize = 0.025;
+	minEndSize = 0.025;
+	maxEndSize = 0.03;
 	startOpacity = 1;
 	endOpacity = 0;
 	minDuration = 0;
@@ -67,7 +67,7 @@ GPUEmitter::GPUEmitter(GameObject* go, string tex, bool burstEmitter)
 	emitterVelocityScale = 10;
 	burst = burstEmitter;
 	trigger = false;
-	count = 4000;
+	count = 1000000;
 	enabled = false;
 	loop = false;
 	additive = true;
@@ -76,12 +76,8 @@ GPUEmitter::GPUEmitter(GameObject* go, string tex, bool burstEmitter)
 
 GPUEmitter::~GPUEmitter()
 {
-	if (!burst)
-		delete startTimes;
-
-	delete durations;
-	delete quadCorners;
-	delete seeds;
+	delete texture;
+	// Delete for arrays is handled in genParticles
 }
 
 void GPUEmitter::update(float deltaTime)
@@ -158,17 +154,6 @@ void GPUEmitter::init()
 	genParticles();
 	if (!burst)
 		enabled = true;
-}
-
-void GPUEmitter::restart()
-{
-	if (!burst)
-		delete startTimes;
-
-	delete durations;
-	delete quadCorners;
-	delete seeds;
-	init();
 }
 
 void GPUEmitter::play()
@@ -275,6 +260,14 @@ GLuint GPUEmitter::genParticles()
 	glUniform1f(maxStartAngleUniform, maxStartAngle);
 	glUniform1f(minAngularVelocityUniform, minAngularVelocity);
 	glUniform1f(maxAngularVelocityUniform, maxAngularVelocity);
+
+	// We don't need the arrays anymore, since we already passed them to the GPU
+	if (!burst)
+		delete[] startTimes;
+
+	delete[] durations;
+	delete[] quadCorners;
+	delete[] seeds;
 
 	return vao;
 }
