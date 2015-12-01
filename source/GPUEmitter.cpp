@@ -44,10 +44,10 @@ GPUEmitter::GPUEmitter(GameObject* go, string tex, bool burstEmitter)
 
 	prevPosition = gameObject->transform.position;
 	velocity = { 0, 0, 0 };
-	minStartSize = 0.01;
-	maxStartSize = 0.025;
-	minEndSize = 0.025;
-	maxEndSize = 0.03;
+	minStartSize = 0.4;
+	maxStartSize = 0.6;
+	minEndSize = 0.6;
+	maxEndSize = 1;
 	startOpacity = 1;
 	endOpacity = 0;
 	minDuration = 0;
@@ -67,7 +67,7 @@ GPUEmitter::GPUEmitter(GameObject* go, string tex, bool burstEmitter)
 	emitterVelocityScale = 10;
 	burst = burstEmitter;
 	trigger = false;
-	count = 1000000;
+	count = 4000;
 	enabled = false;
 	loop = false;
 	additive = true;
