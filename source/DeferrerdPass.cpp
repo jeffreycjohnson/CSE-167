@@ -42,7 +42,7 @@ void DeferredPass::render()
     gbufferPass(&GameObject::SceneRoot);
     CHECK_ERROR();
 
-//TODO uncomment me! //    shader.use();
+    shader.use();
     glDepthMask(GL_FALSE);
     glStencilOpSeparate(GL_BACK, GL_KEEP, GL_INCR_WRAP, GL_KEEP);
     glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_DECR_WRAP, GL_KEEP);

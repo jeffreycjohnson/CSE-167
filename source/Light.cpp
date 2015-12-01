@@ -16,7 +16,7 @@ void Light::deferredHelper(const std::string& meshName)
     Renderer::setModelMatrix(gameObject->transform.getTransformMatrix());
     (*Renderer::currentShader)["uLightPosition"] = gameObject->transform.getWorldPosition();
     (*Renderer::currentShader)["uLightColor"] = color;
-    (*Renderer::currentShader)["uLightDirection"] = gameObject->transform.getTransformMatrix() * glm::vec4(0,0,-1,0);
+    (*Renderer::currentShader)["uLightDirection"] = gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, -1, 0);
     glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
 }
 
@@ -26,6 +26,14 @@ void PointLight::forwardPass()
 
 void PointLight::deferredPass()
 {
+    (*Renderer::currentShader)["uLightType"] = 0;
+    auto oldScale = gameObject->transform.scaleFactor;
+    // TODO : Make it use different falloffs
+    gameObject->transform.scaleFactor = glm::vec3(16.0 * sqrtf(std::max(std::max(color.r, color.g), color.b)) * exponentialFalloff);
+    gameObject->transform.transformMatrixDirty = true;
+    (*Renderer::currentShader)["uM_Matrix"] = gameObject->transform.getTransformMatrix();
+    gameObject->transform.scaleFactor = oldScale;
+    gameObject->transform.transformMatrixDirty = true;
     deferredHelper("Sphere");
 }
 
@@ -35,6 +43,8 @@ void DirectionalLight::forwardPass()
 
 void DirectionalLight::deferredPass()
 {
+    (*Renderer::currentShader)["uLightType"] = 1;
+    (*Renderer::currentShader)["uM_Matrix"] = glm::mat4();
     deferredHelper("Plane");
 }
 

@@ -178,5 +178,11 @@
     <None Include="source\shaders\forward_pbr_skeletal.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="source\shaders\deferred_gbuffer.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="source\shaders\deferred_lighting.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

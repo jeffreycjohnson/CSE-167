@@ -100,7 +100,17 @@ void Renderer::init(int window_width, int window_height) {
 
 
 void Renderer::loop() {
+    // START LOOP: NOTHING OUTSIDE OF THIS SHOULD BE HERE
+    //             REFACTOR YOUR CODE!
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    for(auto pass : passes)
+    {
+        //pass->render();
+    }
+
+    // END LOOP
 	double dt = glfwGetTime() - lastTime;
 
 	GLuint buffersToDraw[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
@@ -173,42 +183,9 @@ void Renderer::setModelMatrix(glm::mat4 transform) {
 	(*currentShader)[MODEL_MATRIX] = transform;
 }
 
-void Renderer::framebuffer_size_callback(GLFWwindow* window, int window_width, int window_height)
-{
-	Renderer::resize(window_width, window_height);
-}
-
 void Renderer::resize(int width, int height) {
 	glViewport(0, 0, width, height);
 
 	glm::mat4 perspective = glm::perspective((float)(atan(1)*4.0f / 3.0f), width / (float)height, .1f, 100.f);
 	updatePerspective(perspective);
-}
-
-void Renderer::window_focus_callback(GLFWwindow* window, int focused)
-{
-	if (focused)
-	{
-		// The window gained input focus
-	}
-	else
-	{
-		// The window lost input focus
-	}
-}
-
-void Renderer::key_callback(GLFWwindow * window, int key, int scancode, int action, int mods)
-{
-}
-
-void Renderer::cursor_position_callback(GLFWwindow * window, double xpos, double ypos)
-{
-}
-
-void Renderer::mouse_button_callback(GLFWwindow * window, int button, int action, int mods)
-{
-}
-
-void Renderer::scroll_callback(GLFWwindow * window, double xoffset, double yoffset)
-{
 }

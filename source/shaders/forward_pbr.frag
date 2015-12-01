@@ -133,7 +133,7 @@ void main () {
 
 
   mat.y += 0.01; //there seem to be issues with roughness = 0 due to visibility
-  float a = mat.y * mat.y;
+  float a = sqrt(mat.y);// squaring it makes everything shiny, sqrting it looks like linear roughness
 
   
   //F0 is essentially specular color, as well as Fresnel term

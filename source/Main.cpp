@@ -49,16 +49,8 @@ int main()
 	Renderer::init(width, height);
 	Input::init(window);
 	Input::setCursor("assets/cursor/cursor.png", 32, 32);
-	//window events
-	glfwSetFramebufferSizeCallback(window, Renderer::framebuffer_size_callback);
-	glfwSetWindowFocusCallback(window, Renderer::window_focus_callback);
-
-	glfwSetKeyCallback(window, Renderer::key_callback);
-
 	//mouse events
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	glfwSetCursorPosCallback(window, Renderer::cursor_position_callback);
-	glfwSetMouseButtonCallback(window, Renderer::mouse_button_callback); //note - if presses aren't working, try sticky mouse mode
 	glfwSetScrollCallback(window, Input::scroll_callback);
 
     // Loads mesh data for primatives, but we don't need it in a GameObject
