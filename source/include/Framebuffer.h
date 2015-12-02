@@ -32,7 +32,8 @@ public:
 
 	void bindTexture(int slot, int index);
 	void bindDepthTexture(int slot);
-
+	
+	void blitAll();
 	void blitFramebuffer(int index, int x, int y, int dest_width, int dest_height);
 
 	void draw();

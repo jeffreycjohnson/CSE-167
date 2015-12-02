@@ -157,6 +157,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="SkyboxPass.cpp" />
     <ClCompile Include="source\Animation.cpp" />
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\Component.cpp" />

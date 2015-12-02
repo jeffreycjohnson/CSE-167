@@ -3,6 +3,7 @@
 
 #include "ForwardDecs.h"
 #include "Shader.h"
+#include "Skybox.h"
 
 class RenderPass
 {
@@ -29,6 +30,14 @@ public:
     ~DeferredPass() override;
     void render() override;
     Framebuffer * fbo;
+};
+
+class SkyboxPass : public RenderPass
+{
+public:
+	SkyboxPass(Skybox* skybox);
+	void render() override;
+	Skybox* skybox;
 };
 
 #endif

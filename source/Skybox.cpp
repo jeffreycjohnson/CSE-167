@@ -67,8 +67,6 @@ void Skybox::draw() {
 	glBindTexture(GL_TEXTURE_CUBE_MAP, getTexture());
 	(*Renderer::getShader(SKYBOX_SHADER))["environment"] = 5;
 
-	(*Renderer::getShader(SKYBOX_SHADER))["uV_Matrix"] = Renderer::camera->getCameraMatrix();
-
 
 	if (Renderer::gpuData.vaoHandle != meshData.vaoHandle) {
 		glBindVertexArray(meshData.vaoHandle);

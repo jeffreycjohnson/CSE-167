@@ -5,6 +5,7 @@
 #include <gtc/matrix_transform.inl>
 #include "Skybox.h"
 #include "TestSceneHawk.h"
+#include "Input.h"
 
 
 #define MODEL_MATRIX "uM_Matrix"
@@ -17,7 +18,7 @@ int Renderer::height = 0;
 Shader* Renderer::currentShader;
 Shader* shaderList[SHADER_COUNT];
 int Renderer::shaderForwardLightList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM };
-int shaderViewList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
+int shaderViewList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING, SKYBOX_SHADER };
 int shaderCameraPosList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 int shaderEnvironmentList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 int shaderPerspectiveList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER, EMITTER_SHADER, EMITTER_BURST_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
@@ -116,6 +117,7 @@ void Renderer::init(int window_width, int window_height) {
 
     Renderer::passes.push_back(new DeferredPass(width, height));
 	Renderer::passes.push_back(regularPass);
+	Renderer::passes.push_back(new SkyboxPass(skybox));
 	Renderer::passes.push_back(particlePass);
 
 	lastTime = glfwGetTime();
@@ -136,7 +138,6 @@ void Renderer::loop() {
     {
         pass->render();
     }
-    skybox->draw();
 
 	testScene->loop(); /* This is just temporary - all it does it do translation without having to create temporary components */
 
@@ -144,6 +145,11 @@ void Renderer::loop() {
     dynamic_cast<DeferredPass*>(passes.front())->fbo->bindTexture(0, 3);
     switchShader(FBO_HDR);
     dynamic_cast<DeferredPass*>(passes.front())->fbo->draw();
+
+
+
+	if (Input::getKey("b"))
+		dynamic_cast<DeferredPass*>(passes.front())->fbo->blitAll();
 }
 
 void Renderer::extractObjects() {

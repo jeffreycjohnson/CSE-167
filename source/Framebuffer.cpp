@@ -119,6 +119,12 @@ void Framebuffer::blitFramebuffer(int index, int x, int y, int destW, int destH)
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 }
 
+void Framebuffer::blitAll() {
+	for (int index = 0; index < this->numColorTex; ++index) {
+		blitFramebuffer(index, index * 300, 0, 300, 300);
+	}
+}
+
 void Framebuffer::resize(int w, int h) {
 	width = w;
 	height = h;
