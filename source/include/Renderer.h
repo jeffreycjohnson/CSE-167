@@ -7,13 +7,16 @@
 
 #include <glfw3.h>
 
-#define SHADER_COUNT 6
+#define SHADER_COUNT 9
 #define FORWARD_PBR_SHADER_ANIM 0
 #define FORWARD_PBR_SHADER 1
 #define SKYBOX_SHADER 2
 #define FBO_HDR 3
 #define EMITTER_SHADER 4
 #define EMITTER_BURST_SHADER 5
+#define DEFERRED_PBR_SHADER_ANIM 6
+#define DEFERRED_PBR_SHADER 7
+#define DEFERRED_SHADER_LIGHTING 8
 
 struct GPUData {
 	int vaoHandle;
@@ -28,9 +31,12 @@ class Renderer
 		static GPUData gpuData;
         static std::list<RenderPass*> passes;
 
+		static int shaderForwardLightList[2];
+
 		static void init(int w, int h);
 		static void loop();
 
+		static void extractObjects();
 		static void applyPerFrameData();
 		static void updatePerspective(const glm::mat4& perspectiveMatrix);
 		static void setIrradiance(glm::mat4(&irradianceMatrix)[3]);
@@ -46,15 +52,7 @@ class Renderer
 		static int getWindowWidth() { return width; }
 		static int getWindowHeight() { return height; }
 
-		static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 		static void resize(int width, int height);
-		static void window_focus_callback(GLFWwindow* window, int focused);
-
-		//glfwSetScrollCallback(window, scroll_callback);
-		static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-		static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
-		static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
-		static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 private:
     static int width, height;

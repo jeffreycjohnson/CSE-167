@@ -42,8 +42,8 @@ public:
 
 	GPUEmitter(GameObject*, std::string, bool);
 	~GPUEmitter();
-	void update(float deltaTime);
-	void draw();
+	void update(float deltaTime) override;
+	void draw() override;
 	void init();
 	void play();
 	void setGameObject(GameObject* go);

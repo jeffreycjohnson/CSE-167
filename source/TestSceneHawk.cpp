@@ -16,10 +16,12 @@
 #include "Swarm.h"
 #include "Input.h"
 #include "Animation.h"
+#include "Light.h"
 
 GameObject* scene = new GameObject();
 GameObject *bear;
 GameObject *light;
+GameObject *light2;
 GameObject *sphere[8][8];
 GameObject* emitter;
 GPUEmitter* emitterComponent;
@@ -47,10 +49,11 @@ TestSceneHawk::TestSceneHawk()
 	Renderer::camera->transform.translate(0, 0, 20);
 
 	emitter = new GameObject();
-	emitterComponent = new GPUEmitter(emitter, "assets/particles/particle.png", true);
+	emitterComponent = new GPUEmitter(emitter, "assets/particles/particle.png", false);
 	emitterComponent->init();
 	emitter->addComponent(emitterComponent);
 	emitter->transform.translate(0, 0, 2);
+	GameObject::SceneRoot.addChild(*emitter);
 
 	boid = loadScene("assets/test_sphere.obj");
 	swarm = new Swarm(boid, 50);
@@ -67,7 +70,7 @@ TestSceneHawk::TestSceneHawk()
 	bear->transform.rotate(glm::angleAxis(atanf(1)*1.f, glm::vec3(1, 0, 0)));
 	bear->transform.translate(-5, 0, 1);
 
-	Material* bearMat = new Material(Renderer::getShader(FORWARD_PBR_SHADER_ANIM));
+	Material* bearMat = new Material(Renderer::getShader(DEFERRED_PBR_SHADER_ANIM), false);
 	(*bearMat)["useTextures"] = true;
 	(*bearMat)["colorTex"] = bearTex;
 	(*bearMat)["matTex"] = bearSpec;
@@ -83,7 +86,8 @@ TestSceneHawk::TestSceneHawk()
 			
 			float xDist = 2 * (x - 3.5);
 			float yDist = 2 * (y - 3.5);
-			sphere[x][y]->transform.translate(xDist, yDist, -3);
+			float zDist = sin(x + y);
+			sphere[x][y]->transform.translate(xDist, yDist, -3 + zDist);
 
 			Material* sphereMat = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
 			(*sphereMat)["useTextures"] = false;
@@ -102,26 +106,35 @@ TestSceneHawk::TestSceneHawk()
 	(*sphereMat)["testMetal"] = (0) / 7.f;
 	(*sphereMat)["testRough"] = (0) / 7.f;
 	(*sphereMat)["normalTex"] = blankNormal;
+	Light* lightComponent = new PointLight();
+	lightComponent->color = glm::vec3(1, 1, 1);
+	light->addComponent<Light>(lightComponent);
 	light->setMaterial(sphereMat);
 
 	GameObject::SceneRoot.addChild(*light);
+
+	light2 = loadScene("assets/test_sphere.obj");
+	sphereMat = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
+	(*sphereMat)["useTextures"] = false;
+	(*sphereMat)["testMetal"] = (0) / 7.f;
+	(*sphereMat)["testRough"] = (0) / 7.f;
+	(*sphereMat)["normalTex"] = blankNormal;
+	Light* light2Component = new PointLight();
+	light2Component->color = glm::vec3(1, 1, 1);
+	light2->addComponent<Light>(light2Component);
+	light2->setMaterial(sphereMat);
+
+	GameObject::SceneRoot.addChild(*light2);
 }
 
 void TestSceneHawk::loop() {
-	
-
 	scene->transform.rotate(glm::angleAxis(0.001f, glm::vec3(0, 1, 0)));
 
 	tmp += 0.02f;
 	light->transform.setPosition(5 * sin(tmp), 5 * cos(tmp), 4);
-	light->transform.scaleFactor = glm::vec3(1 + sin(tmp / 5.f));
 
-	//TODO move into light object
-	(*Renderer::getShader(FORWARD_PBR_SHADER))["uLightData[0]"] = glm::vec4(light->transform.position, 1.0);
-	(*Renderer::getShader(FORWARD_PBR_SHADER))["uLightData[1]"] = glm::vec4(1, 1, 1, 10);
-	(*Renderer::getShader(FORWARD_PBR_SHADER_ANIM))["uLightData[0]"] = glm::vec4(light->transform.position, 1.0);
-	(*Renderer::getShader(FORWARD_PBR_SHADER_ANIM))["uLightData[1]"] = glm::vec4(1, 1, 1, 10);
-
+	light2->transform.setPosition(-5 * sin(tmp), -5 * cos(tmp), 4);
+	
 	for (int x = 0; x < 8; ++x) {
 		for (int y = 0; y < 8; ++y) {
 			float zDist = -0.015 * cos(x + y + tmp);
@@ -131,6 +144,7 @@ void TestSceneHawk::loop() {
 
 	if (Input::getKeyDown("space"))
 		emitter->getComponent<GPUEmitter>()->play();
+
 	emitter->update(Timer::time());
 	emitter->draw();
 

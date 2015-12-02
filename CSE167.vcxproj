@@ -161,6 +161,7 @@
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\Component.cpp" />
     <ClCompile Include="source\DeferrerdPass.cpp" />
+    <ClCompile Include="source\ForwardPass.cpp" />
     <ClCompile Include="source\Framebuffer.cpp" />
     <ClCompile Include="source\GameObject.cpp" />
     <ClCompile Include="source\GPUEmitter.cpp" />
@@ -208,11 +209,16 @@
     <ClInclude Include="source\include\WebWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="source\shaders\deferred_gbuffer.frag" />
+    <None Include="source\shaders\deferred_lighting.frag" />
     <None Include="source\shaders\fbo.vert" />
     <None Include="source\shaders\fbo_hdr.frag" />
     <None Include="source\shaders\forward_pbr.frag" />
     <None Include="source\shaders\forward_pbr.vert" />
     <None Include="source\shaders\forward_pbr_skeletal.vert" />
+    <None Include="source\shaders\gpu_particle.frag" />
+    <None Include="source\shaders\gpu_particle.vert" />
+    <None Include="source\shaders\gpu_particle_burst.vert" />
     <None Include="source\shaders\skybox.frag" />
     <None Include="source\shaders\skybox.vert" />
   </ItemGroup>

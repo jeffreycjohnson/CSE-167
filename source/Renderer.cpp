@@ -16,9 +16,11 @@ int Renderer::height = 0;
 
 Shader* Renderer::currentShader;
 Shader* shaderList[SHADER_COUNT];
-int shaderCameraDataList[4] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER };
-int shaderEnvironmentList[2] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM };
-int shaderPerspectiveList[5] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER, EMITTER_SHADER, EMITTER_BURST_SHADER };
+int Renderer::shaderForwardLightList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM };
+int shaderViewList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
+int shaderCameraPosList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
+int shaderEnvironmentList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
+int shaderPerspectiveList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER, EMITTER_SHADER, EMITTER_BURST_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 
 Camera* Renderer::camera = new Camera();
 
@@ -34,6 +36,8 @@ TestSceneHawk* testScene;
 
 Skybox* skybox;
 
+ForwardPass *regularPass, *particlePass;
+
 void Renderer::init(int window_width, int window_height) {
 	width = window_width;
 	height = window_height;
@@ -44,7 +48,7 @@ void Renderer::init(int window_width, int window_height) {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
-	glClearColor(0, 0, .25, 1);
+	glClearColor(0, 0, 0, 1);
 	glDepthFunc(GL_LEQUAL); //needed for skybox to overwrite blank z-buffer values
 
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
@@ -57,6 +61,19 @@ void Renderer::init(int window_width, int window_height) {
 	shaderList[FORWARD_PBR_SHADER] = new Shader(
 		"source/shaders/forward_pbr.vert", "source/shaders/forward_pbr.frag"
 		);
+
+    shaderList[DEFERRED_PBR_SHADER_ANIM] = new Shader(
+        "source/shaders/forward_pbr_skeletal.vert", "source/shaders/deferred_gbuffer.frag"
+        );
+
+
+    shaderList[DEFERRED_PBR_SHADER] = new Shader(
+        "source/shaders/forward_pbr.vert", "source/shaders/deferred_gbuffer.frag"
+        );
+
+    shaderList[DEFERRED_SHADER_LIGHTING] = new Shader(
+        "source/shaders/forward_pbr.vert", "source/shaders/deferred_lighting.frag"
+        );
 
 	shaderList[SKYBOX_SHADER] = new Shader(
 		"source/shaders/skybox.vert", "source/shaders/skybox.frag"
@@ -93,36 +110,57 @@ void Renderer::init(int window_width, int window_height) {
 	fboTest = new Framebuffer(width, height, 2, false, true);
 
 	Renderer::resize(width, height);
+
+	regularPass = new ForwardPass();
+	particlePass = new ForwardPass();
+
     Renderer::passes.push_back(new DeferredPass(width, height));
+	Renderer::passes.push_back(regularPass);
+	Renderer::passes.push_back(particlePass);
 
 	lastTime = glfwGetTime();
 }
 
 
 void Renderer::loop() {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	double dt = glfwGetTime() - lastTime;
+    // START LOOP: NOTHING OUTSIDE OF THIS SHOULD BE HERE
+    //             REFACTOR YOUR CODE!
 
-	GLuint buffersToDraw[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-	fboTest->bind(2, buffersToDraw);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    double dt = glfwGetTime() - lastTime;
+    applyPerFrameData();
 
-	applyPerFrameData();
-	GameObject::SceneRoot.draw();
+    extractObjects();
+
+    testScene->loop(); /* This is just temporary - all it does it do translation without having to create temporary components */
+
+    for (auto pass : passes)
+    {
+        pass->render();
+    }
+    skybox->draw();
+
+    dynamic_cast<DeferredPass*>(passes.front())->fbo->unbind();
+    dynamic_cast<DeferredPass*>(passes.front())->fbo->bindTexture(0, 3);
+    switchShader(FBO_HDR);
+    dynamic_cast<DeferredPass*>(passes.front())->fbo->draw();
+}
+
+void Renderer::extractObjects() {
+	GameObject::PassList passList;
+	GameObject::SceneRoot.extract(passList);
+
+	regularPass->setObjects(passList.forward);
+	regularPass->setLights(passList.light);
+	particlePass->setObjects(passList.particle);
 	
-	skybox->draw();
-	
-	testScene->loop();
-
-	fboTest->unbind();
-
-	fboTest->bindTexture(0, 0);
-	switchShader(FBO_HDR);
-	fboTest->draw();
 }
 
 void Renderer::applyPerFrameData() {
-	for (int shaderId : shaderCameraDataList) {
+	for (int shaderId : shaderViewList) {
 		(*Renderer::getShader(shaderId))[VIEW_MATRIX] = camera->getCameraMatrix();
+	}
+	for (int shaderId : shaderCameraPosList) {
 		(*Renderer::getShader(shaderId))["cameraPos"] = Renderer::camera->transform.getWorldPosition();
 	}
 }
@@ -141,12 +179,11 @@ void Renderer::setEnvironment(int slot, float mipmapLevels) {
 }
 
 void Renderer::setIrradiance(glm::mat4 (&irradianceMatrix)[3]) {
-	(*shaderList[FORWARD_PBR_SHADER])["irradiance[0]"] = irradianceMatrix[0];
-	(*shaderList[FORWARD_PBR_SHADER])["irradiance[1]"] = irradianceMatrix[1];
-	(*shaderList[FORWARD_PBR_SHADER])["irradiance[2]"] = irradianceMatrix[2];
-	(*shaderList[FORWARD_PBR_SHADER_ANIM])["irradiance[0]"] = irradianceMatrix[0];
-	(*shaderList[FORWARD_PBR_SHADER_ANIM])["irradiance[1]"] = irradianceMatrix[1];
-	(*shaderList[FORWARD_PBR_SHADER_ANIM])["irradiance[2]"] = irradianceMatrix[2];
+    for (int shaderId : shaderEnvironmentList) {
+        ((*Renderer::getShader(shaderId)))["irradiance[0]"] = irradianceMatrix[0];
+        ((*Renderer::getShader(shaderId)))["irradiance[1]"] = irradianceMatrix[1];
+        ((*Renderer::getShader(shaderId)))["irradiance[2]"] = irradianceMatrix[2];
+    }
 }
 
 
@@ -173,42 +210,9 @@ void Renderer::setModelMatrix(glm::mat4 transform) {
 	(*currentShader)[MODEL_MATRIX] = transform;
 }
 
-void Renderer::framebuffer_size_callback(GLFWwindow* window, int window_width, int window_height)
-{
-	Renderer::resize(window_width, window_height);
-}
-
 void Renderer::resize(int width, int height) {
 	glViewport(0, 0, width, height);
 
 	glm::mat4 perspective = glm::perspective((float)(atan(1)*4.0f / 3.0f), width / (float)height, .1f, 100.f);
 	updatePerspective(perspective);
-}
-
-void Renderer::window_focus_callback(GLFWwindow* window, int focused)
-{
-	if (focused)
-	{
-		// The window gained input focus
-	}
-	else
-	{
-		// The window lost input focus
-	}
-}
-
-void Renderer::key_callback(GLFWwindow * window, int key, int scancode, int action, int mods)
-{
-}
-
-void Renderer::cursor_position_callback(GLFWwindow * window, double xpos, double ypos)
-{
-}
-
-void Renderer::mouse_button_callback(GLFWwindow * window, int button, int action, int mods)
-{
-}
-
-void Renderer::scroll_callback(GLFWwindow * window, double xoffset, double yoffset)
-{
 }

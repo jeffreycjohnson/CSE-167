@@ -90,6 +90,9 @@
     <ClCompile Include="source\Swarm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\ForwardPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\include\Camera.h">
@@ -182,6 +185,21 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="source\shaders\forward_pbr_skeletal.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="source\shaders\deferred_gbuffer.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="source\shaders\deferred_lighting.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="source\shaders\gpu_particle.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="source\shaders\gpu_particle.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="source\shaders\gpu_particle_burst.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

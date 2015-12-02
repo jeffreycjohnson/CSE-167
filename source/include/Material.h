@@ -2,12 +2,11 @@
 #define INCLUDE_MATERIAL_H
 
 #include "ForwardDecs.h"
-#include "Component.h"
 #include "Texture.h"
 #include "Shader.h"
 #include <map>
 
-class Material : public Component
+class Material
 {
 private:
     class UniformType
@@ -47,9 +46,10 @@ private:
 
 public:
     Shader * shader;
+    bool transparent;
 
-    explicit Material(Shader *);
-    ~Material() override;
+    Material(Shader *, bool transparent = true);
+    ~Material();
     UniformSetter operator[](const std::string& name);
     void bind();
 };

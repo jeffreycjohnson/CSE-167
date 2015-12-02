@@ -2,6 +2,7 @@
 #include "Mesh.h"
 #include "GPUEmitter.h"
 #include "Renderer.h"
+#include "Light.h"
 
 GameObject GameObject::SceneRoot;
 
@@ -44,6 +45,25 @@ void GameObject::update(float deltaTime)
     {
         component->update(deltaTime);
     }
+}
+
+void GameObject::extract(PassList & list)
+{
+	Mesh* mesh;
+	if ((mesh = getComponent<Mesh>()) != nullptr) {
+		list.forward.push_back(mesh);
+	}
+	GPUEmitter* emitter;
+	if ((emitter = getComponent<GPUEmitter>()) != nullptr) {
+		list.particle.push_back(emitter);
+	}
+	Light* light;
+	if ((light = getComponent<Light>()) != nullptr) {
+		list.light.push_back(light);
+	}
+	for (auto child : transform.children) {
+		(child->gameObject)->extract(list);
+	}
 }
 
 void GameObject::setMaterial(Material *mat) {

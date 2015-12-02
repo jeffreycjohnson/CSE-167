@@ -13,32 +13,48 @@ void Light::deferredHelper(const std::string& meshName)
         Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
     }
 
-    Renderer::setModelMatrix(gameObject->transform.getTransformMatrix());
     (*Renderer::currentShader)["uLightPosition"] = gameObject->transform.getWorldPosition();
     (*Renderer::currentShader)["uLightColor"] = color;
-    (*Renderer::currentShader)["uLightDirection"] = gameObject->transform.getTransformMatrix() * glm::vec4(0,0,-1,0);
+    (*Renderer::currentShader)["uLightSize"] = radius;
+    (*Renderer::currentShader)["uLightDirection"] = glm::vec3(gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, -1, 0));
     glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
+    CHECK_ERROR();
 }
 
-void PointLight::forwardPass()
+void PointLight::forwardPass(int index)
 {
+	for (int shaderId : Renderer::shaderForwardLightList) {
+		(*Renderer::getShader(shaderId))["uLightData[" + std::to_string(2*index) + "]"] = glm::vec4(gameObject->transform.position, 1.0);
+		(*Renderer::getShader(shaderId))["uLightData[" + std::to_string(2*index+1) + "]"] = glm::vec4(color, 10);
+	}
 }
 
 void PointLight::deferredPass()
 {
+    (*Renderer::currentShader)["uLightType"] = 0;
+    auto oldScale = gameObject->transform.scaleFactor;
+    auto max = std::max(std::max(color.r, color.g), color.b);
+    gameObject->transform.scaleFactor = glm::vec3((-linearFalloff + sqrtf(linearFalloff * linearFalloff - 4.0 * (constantFalloff - 256.0 * max) * exponentialFalloff))
+        / (2.0 * exponentialFalloff));
+    gameObject->transform.transformMatrixDirty = true;
+    (*Renderer::currentShader)["uM_Matrix"] = gameObject->transform.getTransformMatrix();
     deferredHelper("Sphere");
+    gameObject->transform.scaleFactor = oldScale;
+    gameObject->transform.transformMatrixDirty = true;
 }
 
-void DirectionalLight::forwardPass()
+void DirectionalLight::forwardPass(int index)
 {
 }
 
 void DirectionalLight::deferredPass()
 {
+    (*Renderer::currentShader)["uLightType"] = 1;
+    (*Renderer::currentShader)["uM_Matrix"] = glm::mat4();
     deferredHelper("Plane");
 }
 
-void SpotLight::forwardPass()
+void SpotLight::forwardPass(int index)
 {
 }
 

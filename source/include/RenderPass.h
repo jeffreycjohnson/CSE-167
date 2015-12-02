@@ -14,7 +14,12 @@ public:
 class ForwardPass : public RenderPass
 {
 public:
+	void setObjects(const std::list<Component*>& list);
+	void setLights(const std::list<Light*>& list);
     void render() override;
+private:
+	std::list<Component*> objectList;
+	std::list<Light*> lightList;
 };
 
 class DeferredPass : public RenderPass
@@ -23,9 +28,6 @@ public:
     DeferredPass(int resx, int resy);
     ~DeferredPass() override;
     void render() override;
-
-private:
-	//TODO uncomment me! // Shader shader = Shader("deferred_lighting.vert", "deferred_lighting.frag");
     Framebuffer * fbo;
 };
 
