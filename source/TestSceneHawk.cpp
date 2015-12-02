@@ -30,7 +30,7 @@ Swarm* swarm;
 BoidSphere* ob1, *ob2;
 
 Texture* testNormal;
-Texture* bearTex, *bearSpec;
+Texture* bearTex, *bearSpec, *bearNormal;
 Texture* blankNormal;
 
 float tmp = 0;
@@ -40,7 +40,8 @@ TestSceneHawk::TestSceneHawk()
 {
 	testNormal = new Texture("assets/test_sphere_normal.png");
 	bearTex = new Texture("assets/bearTex2.jpg");
-	bearSpec = new Texture("assets/bearTex2_spec.png");
+    bearSpec = new Texture("assets/bearTex2_spec.png");
+    bearNormal = new Texture("assets/bearTex2_normal.jpg");
 
 	blankNormal = new Texture("assets/blank_normal.png");
 
@@ -74,7 +75,7 @@ TestSceneHawk::TestSceneHawk()
 	(*bearMat)["useTextures"] = true;
 	(*bearMat)["colorTex"] = bearTex;
 	(*bearMat)["matTex"] = bearSpec;
-	(*bearMat)["normalTex"] = blankNormal;
+	(*bearMat)["normalTex"] = bearNormal;
 	bear->setMaterial(bearMat);
 	bear->getComponent<Animation>()->play(0, true);
 
@@ -120,7 +121,7 @@ TestSceneHawk::TestSceneHawk()
 	(*sphereMat)["testRough"] = (0) / 7.f;
 	(*sphereMat)["normalTex"] = blankNormal;
 	Light* light2Component = new PointLight();
-	light2Component->color = glm::vec3(1, 1, 1);
+	light2Component->color = glm::vec3(10, 10, 10);
 	light2->addComponent<Light>(light2Component);
 	light2->setMaterial(sphereMat);
 

@@ -126,7 +126,7 @@ void DeferredPass::render()
     glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
     CHECK_ERROR();
 
-    // TODO : Render Ambient and Environment
+    // TODO : Render Ambient
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glDepthMask(GL_TRUE);

@@ -125,11 +125,7 @@ void Renderer::init(int window_width, int window_height) {
 
 
 void Renderer::loop() {
-    // START LOOP: NOTHING OUTSIDE OF THIS SHOULD BE HERE
-    //             REFACTOR YOUR CODE!
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    double dt = glfwGetTime() - lastTime;
     applyPerFrameData();
 
     extractObjects();

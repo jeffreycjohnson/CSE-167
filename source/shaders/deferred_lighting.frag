@@ -106,7 +106,7 @@ void main () {
   vec3 view = normalize(cameraPos - vPosition.xyz);
 
 
-  mat.y += 0.01; //there seem to be issues with roughness = 0 due to visibility
+  mat.y += 0.0001; //there seem to be issues with roughness = 0 due to visibility
   float a = sqrt(mat.y);// squaring it makes everything shiny, sqrting it looks like linear roughness
 
   float IOR = 1 + mat.z;
