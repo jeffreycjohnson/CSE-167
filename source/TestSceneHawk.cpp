@@ -13,6 +13,7 @@
 #include "Timer.h"
 #include "ObjectLoader.h"
 #include "GPUEmitter.h"
+#include "Swarm.h"
 #include "Input.h"
 #include "Animation.h"
 
@@ -22,6 +23,9 @@ GameObject *light;
 GameObject *sphere[8][8];
 GameObject* emitter;
 GPUEmitter* emitterComponent;
+GameObject* boid;
+Swarm* swarm;
+BoidSphere* obstacle;
 
 Texture* testNormal;
 Texture* bearTex, *bearSpec;
@@ -48,9 +52,20 @@ TestSceneHawk::TestSceneHawk()
 	emitter->addComponent(emitterComponent);
 	emitter->transform.translate(0, 0, 2);
 
+	boid = loadScene("assets/test_sphere.obj");
+	swarm = new Swarm(boid, 50);
+	obstacle = new BoidSphere();
+	obstacle->position = {-5, -6, 0};
+	obstacle->radius = 5;
+	Swarm::addObstacle(obstacle);
+	BoidSphere* ob2 = new BoidSphere();
+	ob2->position = { 6, 5, 0 };
+	ob2->radius = 3;
+	Swarm::addObstacle(ob2);
+
 	bear = loadScene("assets/bear2.dae");
 	bear->transform.rotate(glm::angleAxis(atanf(1)*1.f, glm::vec3(1, 0, 0)));
-	bear->transform.translate(0, -1, 1);
+	bear->transform.translate(-5, 0, 1);
 
 	Material* bearMat = new Material(Renderer::getShader(FORWARD_PBR_SHADER_ANIM));
 	(*bearMat)["useTextures"] = true;
@@ -118,6 +133,9 @@ void TestSceneHawk::loop() {
 		emitter->getComponent<GPUEmitter>()->play();
 	emitter->update(Timer::time());
 	emitter->draw();
+
+	swarm->update(Timer::time());
+	swarm->draw();
 
 	bear->getComponent<Animation>()->update(Timer::deltaTime());
 }
