@@ -12,6 +12,11 @@ uniform sampler2D posTex; //position texture - rgb: position | a: roughness
 
 //world space camera position, to get view vector
 uniform vec3 cameraPos;
+uniform vec3 uLightColor;
+uniform vec3 uLightPosition;
+uniform vec3 uLightDirection;
+uniform float uLightSize = 1.0f;
+uniform vec2 uScreenSize;
 
 float GGX_Visibility(float dotProduct, float k) {
 	//return 2.0 / (dotProduct + sqrt(k*k + (1 - k*k)*dotProduct*dotProduct)); //More accurate, but slower version
@@ -44,9 +49,9 @@ vec3 SpecularBRDF(vec3 lightColor, vec3 normal, vec3 view, vec3 lightDir, float 
 }
 
 void main () {
-  /*vec4 albedo = texture(colorTex, vTexCoord);
-  vec4 pos = texture(posTex, vTexCoord);
-  vec4 normal = texture(normalTex, vTexCoord);
+  vec4 albedo = texture(colorTex, gl_FragCoord.xy / uScreenSize);
+  vec4 pos = texture(posTex, gl_FragCoord.xy / uScreenSize);
+  vec4 normal = texture(normalTex, gl_FragCoord.xy / uScreenSize);
   vec3 mat = vec3(albedo.a, pos.w, normal.w);
 
   vec3 view = normalize(cameraPos - vPosition.xyz);
@@ -58,31 +63,31 @@ void main () {
   float IOR = mat.z;
   //F0 is essentially specular color, as well as Fresnel term
   vec3 F0 = vec3(1,1,1) * pow((1.0 - IOR) / (1.0 + IOR), 2);
-  F0 = mix(F0, albedo, mat.r); //interpolate Fresnel with the color as metalness increases (with metalness=1, color => reflection color)
+  F0 = mix(F0, albedo.xyz, mat.r); //interpolate Fresnel with the color as metalness increases (with metalness=1, color => reflection color)
   F0 = mix(vec3(1,1,1) * dot(vec3(.33,.33,.33),F0), F0, mat.r); //my own improvement - could be wrong : desaturates Fresnel as metalness decreases
 
-  vec3 lightDir =  (uLightData[2*i] - vPosition).xyz;
+  vec3 lightDir =  (uLightPosition - pos.xyz).xyz;
   float lightDist = length(lightDir);
 
   //Spherical light algorithm from http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf
-  float sphereRadius = uLightData[2*i].w;
-  vec3 reflectedRay = reflect(-view, normal);
+  float sphereRadius = uLightSize;
+  vec3 reflectedRay = reflect(-view, normal.xyz);
   vec3 centerToRay = dot(lightDir, reflectedRay) * reflectedRay - lightDir;
   lightDir = normalize(lightDir + centerToRay * clamp(sphereRadius / length(centerToRay), 0.0, 1.0));
   //todo normalize based on sphere size
 
 
-  float power = uLightData[2*i+1].w / (lightDist * lightDist + 1);
-  diffuseLight = diffuseLight + (uLightData[2*i+1].xyz * (clamp(dot(lightDir, normal) * power, 0.0, 1.0)));
+  float power = 1.0 / (lightDist * lightDist + 1.0);
+  vec3 diffuseLight = uLightColor * (clamp(dot(lightDir, normal.xyz) * power, 0.0, 1.0));
 	
   vec3 halfVec = normalize(view + lightDir);
-  float dotNH = clamp(dot(normal, halfVec), 0.0, 1.0);
+  float dotNH = clamp(dot(normal.xyz, halfVec), 0.0, 1.0);
 
-  vec3 specColor = GGX_D(dotNH, a) * SpecularBRDF(uLightData[2*i+1].xyz, normal, view, lightDir, a, F0, 1) * power;
+  vec3 specColor = GGX_D(dotNH, a) * SpecularBRDF(uLightColor, normal.xyz, view, lightDir, a, F0, 1) * power;
 
-  vec3 diffuseColor = ((1.0-mat.r) * albedo) * diffuseLight;
+  vec3 diffuseColor = ((1.0-mat.r) * albedo.xyz) * diffuseLight;
   vec3 color = diffuseColor + specColor;
   
 
-  frag_color = vec4(color, 1.0);*/
+  frag_color = vec4(color, 1.0);
 }

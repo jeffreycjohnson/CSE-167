@@ -1,4 +1,6 @@
-#pragma once
+#ifndef INCLUDE_ANIMATION_H
+#define INCLUDE_ANIMATION_H
+
 #include "ForwardDecs.h"
 #include "Component.h"
 #include <vector>
@@ -47,3 +49,4 @@ private:
 	bool looping = false;
 };
 
+#endif

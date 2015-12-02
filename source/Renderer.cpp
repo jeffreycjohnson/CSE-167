@@ -16,9 +16,9 @@ int Renderer::height = 0;
 
 Shader* Renderer::currentShader;
 Shader* shaderList[SHADER_COUNT];
-int shaderCameraDataList[4] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER };
-int shaderEnvironmentList[2] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM };
-int shaderPerspectiveList[5] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER, EMITTER_SHADER, EMITTER_BURST_SHADER };
+int shaderCameraDataList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
+int shaderEnvironmentList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
+int shaderPerspectiveList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER, EMITTER_SHADER, EMITTER_BURST_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 
 Camera* Renderer::camera = new Camera();
 
@@ -44,7 +44,7 @@ void Renderer::init(int window_width, int window_height) {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
-	glClearColor(0, 0, .25, 1);
+	glClearColor(0, 0, 0, 1);
 	glDepthFunc(GL_LEQUAL); //needed for skybox to overwrite blank z-buffer values
 
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
@@ -57,6 +57,19 @@ void Renderer::init(int window_width, int window_height) {
 	shaderList[FORWARD_PBR_SHADER] = new Shader(
 		"source/shaders/forward_pbr.vert", "source/shaders/forward_pbr.frag"
 		);
+
+    shaderList[DEFERRED_PBR_SHADER_ANIM] = new Shader(
+        "source/shaders/forward_pbr_skeletal.vert", "source/shaders/deferred_gbuffer.frag"
+        );
+
+
+    shaderList[DEFERRED_PBR_SHADER] = new Shader(
+        "source/shaders/forward_pbr.vert", "source/shaders/deferred_gbuffer.frag"
+        );
+
+    shaderList[DEFERRED_SHADER_LIGHTING] = new Shader(
+        "source/shaders/forward_pbr.vert", "source/shaders/deferred_lighting.frag"
+        );
 
 	shaderList[SKYBOX_SHADER] = new Shader(
 		"source/shaders/skybox.vert", "source/shaders/skybox.frag"
@@ -104,30 +117,31 @@ void Renderer::loop() {
     //             REFACTOR YOUR CODE!
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    testScene->loop();
+    double dt = glfwGetTime() - lastTime;
+    applyPerFrameData();
 
     for(auto pass : passes)
     {
-        //pass->render();
+        pass->render();
     }
 
     // END LOOP
-	double dt = glfwGetTime() - lastTime;
 
-	GLuint buffersToDraw[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-	fboTest->bind(2, buffersToDraw);
+	//GLuint buffersToDraw[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	//fboTest->bind(2, buffersToDraw);
 
-	applyPerFrameData();
-	GameObject::SceneRoot.draw();
+	//GameObject::SceneRoot.draw();
 	
 	skybox->draw();
-	
-	testScene->loop();
 
-	fboTest->unbind();
-
-	fboTest->bindTexture(0, 0);
+	//fboTest->unbind();
+    dynamic_cast<DeferredPass*>(passes.front())->fbo->unbind();
+    dynamic_cast<DeferredPass*>(passes.front())->fbo->bindTexture(0, 3);
+	//fboTest->bindTexture(0, 0);
 	switchShader(FBO_HDR);
-	fboTest->draw();
+	//fboTest->draw();
+    dynamic_cast<DeferredPass*>(passes.front())->fbo->draw();
 }
 
 void Renderer::applyPerFrameData() {

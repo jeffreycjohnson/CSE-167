@@ -13,9 +13,9 @@ void Light::deferredHelper(const std::string& meshName)
         Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
     }
 
-    Renderer::setModelMatrix(gameObject->transform.getTransformMatrix());
     (*Renderer::currentShader)["uLightPosition"] = gameObject->transform.getWorldPosition();
     (*Renderer::currentShader)["uLightColor"] = color;
+    (*Renderer::currentShader)["uLightSize"] = radius;
     (*Renderer::currentShader)["uLightDirection"] = gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, -1, 0);
     glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
 }
@@ -28,13 +28,14 @@ void PointLight::deferredPass()
 {
     (*Renderer::currentShader)["uLightType"] = 0;
     auto oldScale = gameObject->transform.scaleFactor;
-    // TODO : Make it use different falloffs
-    gameObject->transform.scaleFactor = glm::vec3(16.0 * sqrtf(std::max(std::max(color.r, color.g), color.b)) * exponentialFalloff);
+    auto max = std::max(std::max(color.r, color.g), color.b);
+    gameObject->transform.scaleFactor = glm::vec3((-linearFalloff + sqrtf(linearFalloff * linearFalloff - 4.0 * (constantFalloff - 256.0 * max) * exponentialFalloff))
+        / (2.0 * exponentialFalloff));
     gameObject->transform.transformMatrixDirty = true;
     (*Renderer::currentShader)["uM_Matrix"] = gameObject->transform.getTransformMatrix();
+    deferredHelper("Sphere");
     gameObject->transform.scaleFactor = oldScale;
     gameObject->transform.transformMatrixDirty = true;
-    deferredHelper("Sphere");
 }
 
 void DirectionalLight::forwardPass()

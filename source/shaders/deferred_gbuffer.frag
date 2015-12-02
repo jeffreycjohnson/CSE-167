@@ -13,14 +13,14 @@ in vec4 vPosition;
 in vec3 vTangent;
 in vec3 vBitangent;
 
-layout (location = 0) out vec3 ColorOut; //color texture - rgb: color | a: metalness
-layout (location = 1) out vec3 NormOut; //normal texture - rgb: normal | a: IOR
-layout (location = 2) out vec3 PosOut; //position texture - rgb: position | a: roughness
-layout (location = 3) out vec3 foo;
+layout (location = 0) out vec4 ColorOut; //color texture - rgb: color | a: metalness
+layout (location = 1) out vec4 NormOut; //normal texture - rgb: normal | a: IOR
+layout (location = 2) out vec4 PosOut; //position texture - rgb: position | a: roughness
+layout (location = 3) out vec4 foo;
 
 void main()
 {
-	vec3 mat = texture(matTex, vTexCoord);
+	vec3 mat = texture(matTex, vTexCoord).xyz;
 
     vec3 norm = normalize(vNormal);
     vec3 tangent = normalize(vTangent);
@@ -32,6 +32,6 @@ void main()
     NormOut = vec4(normalize(model * norm), mat.y);
 
     ColorOut = vec4(texture(colorTex, vTexCoord).xyz, mat.x);
-    PosOut = vec4(vPosition.xyz, mat.z);
-    foo = vec3(0);
+    PosOut = vec4(vPosition.xyz/vPosition.w, mat.z);
+    foo = vec4(0);
 }

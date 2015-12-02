@@ -15,6 +15,7 @@
 #include "GPUEmitter.h"
 #include "Input.h"
 #include "Animation.h"
+#include "Light.h"
 
 GameObject* scene = new GameObject();
 GameObject *bear;
@@ -52,7 +53,7 @@ TestSceneHawk::TestSceneHawk()
 	bear->transform.rotate(glm::angleAxis(atanf(1)*1.f, glm::vec3(1, 0, 0)));
 	bear->transform.translate(0, -1, 1);
 
-	Material* bearMat = new Material(Renderer::getShader(FORWARD_PBR_SHADER_ANIM));
+	Material* bearMat = new Material(Renderer::getShader(DEFERRED_PBR_SHADER_ANIM));
 	(*bearMat)["useTextures"] = true;
 	(*bearMat)["colorTex"] = bearTex;
 	(*bearMat)["matTex"] = bearSpec;
@@ -88,6 +89,9 @@ TestSceneHawk::TestSceneHawk()
 	(*sphereMat)["testRough"] = (0) / 7.f;
 	(*sphereMat)["normalTex"] = blankNormal;
 	light->setMaterial(sphereMat);
+    auto l = new PointLight();
+    l->color = glm::vec3(0.1);
+    light->addComponent(l);
 
 	GameObject::SceneRoot.addChild(*light);
 }

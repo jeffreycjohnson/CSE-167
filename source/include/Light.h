@@ -10,8 +10,9 @@ class Light : public Component
 public:
     glm::vec3 color;
     bool shadowCaster = false;
+    float radius = 1.0f;
     // For now I'm ignoring this and hardcoding it to use the defaults
-    float constantFalloff = 0, linearFalloff = 0, exponentialFalloff = 1;
+    float constantFalloff = 1, linearFalloff = 0, exponentialFalloff = 1;
 
     virtual void forwardPass() = 0;
     virtual void deferredPass() = 0;

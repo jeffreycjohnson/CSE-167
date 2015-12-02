@@ -23,9 +23,6 @@ public:
     DeferredPass(int resx, int resy);
     ~DeferredPass() override;
     void render() override;
-
-private:
-	Shader shader = Shader("source/shaders/forward_pbr.vert", "source/shaders/deferred_lighting.frag");
     Framebuffer * fbo;
 };
 
