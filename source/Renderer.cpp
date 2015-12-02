@@ -16,7 +16,9 @@ int Renderer::height = 0;
 
 Shader* Renderer::currentShader;
 Shader* shaderList[SHADER_COUNT];
-int shaderCameraDataList[4] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER };
+int Renderer::shaderForwardLightList[2] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM };
+int shaderViewList[4] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER };
+int shaderCameraPosList[2] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM };
 int shaderEnvironmentList[2] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM };
 int shaderPerspectiveList[5] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER, EMITTER_SHADER, EMITTER_BURST_SHADER };
 
@@ -33,6 +35,8 @@ Framebuffer* fboTest;
 TestSceneHawk* testScene;
 
 Skybox* skybox;
+
+ForwardPass *regularPass, *particlePass;
 
 void Renderer::init(int window_width, int window_height) {
 	width = window_width;
@@ -93,7 +97,13 @@ void Renderer::init(int window_width, int window_height) {
 	fboTest = new Framebuffer(width, height, 2, false, true);
 
 	Renderer::resize(width, height);
-    Renderer::passes.push_back(new DeferredPass(width, height));
+
+	regularPass = new ForwardPass();
+	particlePass = new ForwardPass();
+
+	Renderer::passes.push_back(regularPass);
+   // Renderer::passes.push_back(new DeferredPass(width, height));
+	Renderer::passes.push_back(particlePass);
 
 	lastTime = glfwGetTime();
 }
@@ -105,34 +115,34 @@ void Renderer::loop() {
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    for(auto pass : passes)
+	applyPerFrameData();
+	extractObjects();
+
+	testScene->loop(); /* This is just temporary - all it does it do translation without having to create temporary components */
+	skybox->draw();
+    
+	for(auto pass : passes)
     {
-        //pass->render();
+        pass->render();
     }
 
     // END LOOP
-	double dt = glfwGetTime() - lastTime;
+}
 
-	GLuint buffersToDraw[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-	fboTest->bind(2, buffersToDraw);
-
-	applyPerFrameData();
-	GameObject::SceneRoot.draw();
+void Renderer::extractObjects() {
+	GameObject::PassList passList;
+	GameObject::SceneRoot.extract(passList);
 	
-	skybox->draw();
-	
-	testScene->loop();
-
-	fboTest->unbind();
-
-	fboTest->bindTexture(0, 0);
-	switchShader(FBO_HDR);
-	fboTest->draw();
+	regularPass->setObjects(passList.forward);
+	regularPass->setLights(passList.light);
+	particlePass->setObjects(passList.particle);
 }
 
 void Renderer::applyPerFrameData() {
-	for (int shaderId : shaderCameraDataList) {
+	for (int shaderId : shaderViewList) {
 		(*Renderer::getShader(shaderId))[VIEW_MATRIX] = camera->getCameraMatrix();
+	}
+	for (int shaderId : shaderCameraPosList) {
 		(*Renderer::getShader(shaderId))["cameraPos"] = Renderer::camera->transform.getWorldPosition();
 	}
 }

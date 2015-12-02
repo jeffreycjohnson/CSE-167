@@ -35,7 +35,7 @@ class Mesh : public Component
 		~Mesh();
 
 		void setMaterial(Material *mat);
-		void draw();
+		void draw() override;
 };
 
 #endif

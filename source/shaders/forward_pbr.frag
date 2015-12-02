@@ -30,7 +30,7 @@ uniform float environment_mipmap; //the number of mipmaps the environment map ha
 uniform vec3 cameraPos;
 
 //light data - (position.xyz, lightType) followed by (lightColor.xyz, strength)
-const int lightCount = 1;
+const int lightCount = 2;
 uniform vec4 uLightData[2*lightCount];
 
 //tmp variables to set the metalness and roughness instead of a texture
@@ -171,7 +171,8 @@ void main () {
 	vec3 halfVec = normalize(view + lightDir);
 	float dotNH = clamp(dot(normal, halfVec), 0.0, 1.0);
 
-	specColor += GGX_D(dotNH, a) * SpecularBRDF(uLightData[2*i+1].xyz, normal, view, lightDir, a, F0, 1) * power;
+	float a2 = a*a;
+	specColor += GGX_D(dotNH, a2*a2) * SpecularBRDF(uLightData[2*i+1].xyz, normal, view, lightDir, a, F0, 1) * power;
   }
 
   vec3 diffuseColor = ((1.0-mat.r) * albedo) * diffuseLight;

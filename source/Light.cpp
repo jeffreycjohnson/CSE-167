@@ -20,8 +20,12 @@ void Light::deferredHelper(const std::string& meshName)
     glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
 }
 
-void PointLight::forwardPass()
+void PointLight::forwardPass(int index)
 {
+	for (int shaderId : Renderer::shaderForwardLightList) {
+		(*Renderer::getShader(shaderId))["uLightData[" + std::to_string(2*index) + "]"] = glm::vec4(gameObject->transform.position, 1.0);
+		(*Renderer::getShader(shaderId))["uLightData[" + std::to_string(2*index+1) + "]"] = glm::vec4(color, 10);
+	}
 }
 
 void PointLight::deferredPass()
@@ -37,7 +41,7 @@ void PointLight::deferredPass()
     deferredHelper("Sphere");
 }
 
-void DirectionalLight::forwardPass()
+void DirectionalLight::forwardPass(int index)
 {
 }
 
@@ -48,7 +52,7 @@ void DirectionalLight::deferredPass()
     deferredHelper("Plane");
 }
 
-void SpotLight::forwardPass()
+void SpotLight::forwardPass(int index)
 {
 }
 
