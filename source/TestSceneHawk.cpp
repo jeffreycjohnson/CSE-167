@@ -27,7 +27,7 @@ GameObject* emitter;
 GPUEmitter* emitterComponent;
 GameObject* boid;
 Swarm* swarm;
-BoidSphere* obstacle;
+BoidSphere* ob1, *ob2;
 
 Texture* testNormal;
 Texture* bearTex, *bearSpec;
@@ -49,7 +49,7 @@ TestSceneHawk::TestSceneHawk()
 	Renderer::camera->transform.translate(0, 0, 20);
 
 	emitter = new GameObject();
-	emitterComponent = new GPUEmitter(emitter, "assets/particles/particle.png", false);
+	emitterComponent = new GPUEmitter(emitter, "assets/particles/particle.png", true);
 	emitterComponent->init();
 	emitter->addComponent(emitterComponent);
 	emitter->transform.translate(0, 0, 2);
@@ -57,11 +57,11 @@ TestSceneHawk::TestSceneHawk()
 
 	boid = loadScene("assets/test_sphere.obj");
 	swarm = new Swarm(boid, 50);
-	obstacle = new BoidSphere();
-	obstacle->position = {-5, -6, 0};
-	obstacle->radius = 5;
-	Swarm::addObstacle(obstacle);
-	BoidSphere* ob2 = new BoidSphere();
+	ob1 = new BoidSphere();
+	ob1->position = {-5, -6, 0};
+	ob1->radius = 5;
+	Swarm::addObstacle(ob1);
+	ob2 = new BoidSphere();
 	ob2->position = { 6, 5, 0 };
 	ob2->radius = 3;
 	Swarm::addObstacle(ob2);

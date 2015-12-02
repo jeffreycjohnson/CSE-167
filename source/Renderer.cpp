@@ -132,13 +132,13 @@ void Renderer::loop() {
 
     extractObjects();
 
-    testScene->loop(); /* This is just temporary - all it does it do translation without having to create temporary components */
-
     for (auto pass : passes)
     {
         pass->render();
     }
     skybox->draw();
+
+	testScene->loop(); /* This is just temporary - all it does it do translation without having to create temporary components */
 
     dynamic_cast<DeferredPass*>(passes.front())->fbo->unbind();
     dynamic_cast<DeferredPass*>(passes.front())->fbo->bindTexture(0, 3);
