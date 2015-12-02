@@ -16,12 +16,17 @@ void Light::deferredHelper(const std::string& meshName)
     (*Renderer::currentShader)["uLightPosition"] = gameObject->transform.getWorldPosition();
     (*Renderer::currentShader)["uLightColor"] = color;
     (*Renderer::currentShader)["uLightSize"] = radius;
-    (*Renderer::currentShader)["uLightDirection"] = gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, -1, 0);
+    (*Renderer::currentShader)["uLightDirection"] = glm::vec3(gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, -1, 0));
     glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
+    CHECK_ERROR();
 }
 
-void PointLight::forwardPass()
+void PointLight::forwardPass(int index)
 {
+	for (int shaderId : Renderer::shaderForwardLightList) {
+		(*Renderer::getShader(shaderId))["uLightData[" + std::to_string(2*index) + "]"] = glm::vec4(gameObject->transform.position, 1.0);
+		(*Renderer::getShader(shaderId))["uLightData[" + std::to_string(2*index+1) + "]"] = glm::vec4(color, 10);
+	}
 }
 
 void PointLight::deferredPass()
@@ -38,7 +43,7 @@ void PointLight::deferredPass()
     gameObject->transform.transformMatrixDirty = true;
 }
 
-void DirectionalLight::forwardPass()
+void DirectionalLight::forwardPass(int index)
 {
 }
 
@@ -49,7 +54,7 @@ void DirectionalLight::deferredPass()
     deferredHelper("Plane");
 }
 
-void SpotLight::forwardPass()
+void SpotLight::forwardPass(int index)
 {
 }
 

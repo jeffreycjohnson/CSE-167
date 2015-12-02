@@ -14,7 +14,7 @@ public:
     // For now I'm ignoring this and hardcoding it to use the defaults
     float constantFalloff = 1, linearFalloff = 0, exponentialFalloff = 1;
 
-    virtual void forwardPass() = 0;
+    virtual void forwardPass(int index) = 0;
     virtual void deferredPass() = 0;
 
 protected:
@@ -24,14 +24,14 @@ protected:
 class PointLight : public Light
 {
 public:
-    void forwardPass() override;
+    void forwardPass(int index) override;
     void deferredPass() override;
 };
 
 class DirectionalLight : public Light
 {
 public:
-    void forwardPass() override;
+    void forwardPass(int index) override;
     void deferredPass() override;
 };
 
@@ -40,7 +40,7 @@ class SpotLight : public Light
 public:
     float angle = 30, exponent = 5;
 
-    void forwardPass() override;
+    void forwardPass(int index) override;
     void deferredPass() override;
 };
 

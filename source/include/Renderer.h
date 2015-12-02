@@ -31,9 +31,12 @@ class Renderer
 		static GPUData gpuData;
         static std::list<RenderPass*> passes;
 
+		static int shaderForwardLightList[2];
+
 		static void init(int w, int h);
 		static void loop();
 
+		static void extractObjects();
 		static void applyPerFrameData();
 		static void updatePerspective(const glm::mat4& perspectiveMatrix);
 		static void setIrradiance(glm::mat4(&irradianceMatrix)[3]);

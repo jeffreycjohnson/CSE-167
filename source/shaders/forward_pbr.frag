@@ -16,13 +16,10 @@ const int sample_count = 1; //number of times to sample the cubemap for specular
 
 uniform mat4 irradiance[3]; //matrices from the calculated SH corresponding to the env. diffuse lighting for r, g, and b.
 
-uniform sampler2D colorTex; //color texture - rgb: color | a: unused
-uniform sampler2D matTex; //material texture - r: metalness | gb: unused | a:roughness
+uniform sampler2D colorTex; //color texture - rgb: color | a: team mask
+uniform sampler2D matTex; //material texture - r: metalness | g: IOR | b: roughness | a: unused
 uniform sampler2D normalTex; //normal texture - rgb: normal | a: unused
 uniform samplerCube environment; //the environment cubemap to sample reflections from
-
-
-uniform float IOR = 1.4;
 
 uniform float environment_mipmap; //the number of mipmaps the environment map has (used to select mipmap based on roughness)
 
@@ -30,7 +27,7 @@ uniform float environment_mipmap; //the number of mipmaps the environment map ha
 uniform vec3 cameraPos;
 
 //light data - (position.xyz, lightType) followed by (lightColor.xyz, strength)
-const int lightCount = 1;
+const int lightCount = 2;
 uniform vec4 uLightData[2*lightCount];
 
 //tmp variables to set the metalness and roughness instead of a texture
@@ -116,12 +113,13 @@ vec3 SpecularEnvMap(vec3 normal, vec3 view, float a, vec3 F0) {
 
 void main () {
   vec3 albedo = texture(colorTex, vTexCoord).rgb;
-  vec2 mat = texture(matTex, vTexCoord).ra;
+  vec3 mat = texture(matTex, vTexCoord).rgb;
 
   //Test values - remove these for objects with textures
   if (!useTextures) {
 	  mat.r = testMetal;
-	  mat.y = testRough;
+	  mat.g = 0.45;
+	  mat.b = testRough;
 	  albedo = vec3(0.1, 0.1, 0.75);
   }
   //end test values-------------------------------------
@@ -132,10 +130,10 @@ void main () {
   vec3 view = normalize(cameraPos - vPosition.xyz);
 
 
-  mat.y += 0.01; //there seem to be issues with roughness = 0 due to visibility
-  float a = sqrt(mat.y);// squaring it makes everything shiny, sqrting it looks like linear roughness
+  mat.b += 0.01; //there seem to be issues with roughness = 0 due to visibility
+  float a = sqrt(mat.b);// squaring it makes everything shiny, sqrting it looks like linear roughness
 
-  
+  float IOR = 1 + mat.g;
   //F0 is essentially specular color, as well as Fresnel term
   vec3 F0 = vec3(1,1,1) * pow((1.0 - IOR) / (1.0 + IOR), 2);
   F0 = mix(F0, albedo, mat.r); //interpolate Fresnel with the color as metalness increases (with metalness=1, color => reflection color)
@@ -171,7 +169,8 @@ void main () {
 	vec3 halfVec = normalize(view + lightDir);
 	float dotNH = clamp(dot(normal, halfVec), 0.0, 1.0);
 
-	specColor += GGX_D(dotNH, a) * SpecularBRDF(uLightData[2*i+1].xyz, normal, view, lightDir, a, F0, 1) * power;
+	float a2 = a*a;
+	specColor += GGX_D(dotNH, a2*a2) * SpecularBRDF(uLightData[2*i+1].xyz, normal, view, lightDir, a, F0, 1) * power;
   }
 
   vec3 diffuseColor = ((1.0-mat.r) * albedo) * diffuseLight;
@@ -180,5 +179,5 @@ void main () {
 
   frag_color = vec4(color, 1.0);
   frag_normal = vec4(normal, 1.0);
-  frag_material = vec4(mat, 1.0, 1.0);
+  frag_material = vec4(mat, 1.0);
 }

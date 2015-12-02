@@ -46,8 +46,9 @@ private:
 
 public:
     Shader * shader;
+    bool transparent;
 
-    explicit Material(Shader *);
+    Material(Shader *, bool transparent = true);
     ~Material();
     UniformSetter operator[](const std::string& name);
     void bind();

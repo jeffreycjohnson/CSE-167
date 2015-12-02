@@ -36,7 +36,7 @@ void DeferredPass::render()
     gbufferPass = [&](GameObject* obj)
     {
         auto mesh = obj->getComponent<Mesh>();
-        if (mesh) {
+        if (mesh && mesh->material && !mesh->material->transparent) {
             mesh->material->bind();
             mesh->draw();
         }
@@ -63,6 +63,7 @@ void DeferredPass::render()
     (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["colorTex"] = 0;
     (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["normalTex"] = 1;
     (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["posTex"] = 2;
+    CHECK_ERROR();
 
     std::function<void(GameObject*)> lightPass = [&](GameObject* obj)
     {
@@ -107,10 +108,28 @@ void DeferredPass::render()
     };
     lightPass(&GameObject::SceneRoot);
     CHECK_ERROR();
+    glDisable(GL_STENCIL_TEST);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+
+    auto& currentEntry = Mesh::meshMap["Plane"];
+
+    if (Renderer::gpuData.vaoHandle != currentEntry.vaoHandle) {
+        glBindVertexArray(currentEntry.vaoHandle);
+        Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
+    }
+
+    (*Renderer::currentShader)["uLightType"] = 3;
+    (*Renderer::currentShader)["uM_Matrix"] = glm::mat4();
+    (*Renderer::currentShader)["uV_Matrix"] = glm::mat4();
+    (*Renderer::currentShader)["uP_Matrix"] = glm::mat4();
+    glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
+    CHECK_ERROR();
 
     // TODO : Render Ambient and Environment
     glEnable(GL_DEPTH_TEST);
-    glDisable(GL_STENCIL_TEST);
-    glCullFace(GL_BACK);
+    glEnable(GL_CULL_FACE);
     glDepthMask(GL_TRUE);
+    glCullFace(GL_BACK);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }

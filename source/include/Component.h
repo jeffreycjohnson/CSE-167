@@ -10,6 +10,7 @@ class Component
 
         virtual ~Component() = default;
         virtual void update(float deltaTime);
+		virtual void draw();
         virtual void setGameObject(GameObject* go);
 };
 

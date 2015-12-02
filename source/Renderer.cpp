@@ -16,7 +16,9 @@ int Renderer::height = 0;
 
 Shader* Renderer::currentShader;
 Shader* shaderList[SHADER_COUNT];
-int shaderCameraDataList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
+int Renderer::shaderForwardLightList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM };
+int shaderViewList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
+int shaderCameraPosList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 int shaderEnvironmentList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 int shaderPerspectiveList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER, EMITTER_SHADER, EMITTER_BURST_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 
@@ -33,6 +35,8 @@ Framebuffer* fboTest;
 TestSceneHawk* testScene;
 
 Skybox* skybox;
+
+ForwardPass *regularPass, *particlePass;
 
 void Renderer::init(int window_width, int window_height) {
 	width = window_width;
@@ -106,7 +110,13 @@ void Renderer::init(int window_width, int window_height) {
 	fboTest = new Framebuffer(width, height, 2, false, true);
 
 	Renderer::resize(width, height);
+
+	regularPass = new ForwardPass();
+	particlePass = new ForwardPass();
+
     Renderer::passes.push_back(new DeferredPass(width, height));
+	Renderer::passes.push_back(regularPass);
+	Renderer::passes.push_back(particlePass);
 
 	lastTime = glfwGetTime();
 }
@@ -116,37 +126,41 @@ void Renderer::loop() {
     // START LOOP: NOTHING OUTSIDE OF THIS SHOULD BE HERE
     //             REFACTOR YOUR CODE!
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    testScene->loop();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     double dt = glfwGetTime() - lastTime;
     applyPerFrameData();
 
-    for(auto pass : passes)
+    extractObjects();
+
+    testScene->loop(); /* This is just temporary - all it does it do translation without having to create temporary components */
+
+    for (auto pass : passes)
     {
         pass->render();
     }
+    skybox->draw();
 
-    // END LOOP
-
-	//GLuint buffersToDraw[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-	//fboTest->bind(2, buffersToDraw);
-
-	//GameObject::SceneRoot.draw();
-	
-	skybox->draw();
-
-	//fboTest->unbind();
     dynamic_cast<DeferredPass*>(passes.front())->fbo->unbind();
     dynamic_cast<DeferredPass*>(passes.front())->fbo->bindTexture(0, 3);
-	//fboTest->bindTexture(0, 0);
-	switchShader(FBO_HDR);
-	//fboTest->draw();
+    switchShader(FBO_HDR);
     dynamic_cast<DeferredPass*>(passes.front())->fbo->draw();
 }
 
+void Renderer::extractObjects() {
+	GameObject::PassList passList;
+	GameObject::SceneRoot.extract(passList);
+
+	regularPass->setObjects(passList.forward);
+	regularPass->setLights(passList.light);
+	particlePass->setObjects(passList.particle);
+	
+}
+
 void Renderer::applyPerFrameData() {
-	for (int shaderId : shaderCameraDataList) {
+	for (int shaderId : shaderViewList) {
 		(*Renderer::getShader(shaderId))[VIEW_MATRIX] = camera->getCameraMatrix();
+	}
+	for (int shaderId : shaderCameraPosList) {
 		(*Renderer::getShader(shaderId))["cameraPos"] = Renderer::camera->transform.getWorldPosition();
 	}
 }
@@ -165,12 +179,11 @@ void Renderer::setEnvironment(int slot, float mipmapLevels) {
 }
 
 void Renderer::setIrradiance(glm::mat4 (&irradianceMatrix)[3]) {
-	(*shaderList[FORWARD_PBR_SHADER])["irradiance[0]"] = irradianceMatrix[0];
-	(*shaderList[FORWARD_PBR_SHADER])["irradiance[1]"] = irradianceMatrix[1];
-	(*shaderList[FORWARD_PBR_SHADER])["irradiance[2]"] = irradianceMatrix[2];
-	(*shaderList[FORWARD_PBR_SHADER_ANIM])["irradiance[0]"] = irradianceMatrix[0];
-	(*shaderList[FORWARD_PBR_SHADER_ANIM])["irradiance[1]"] = irradianceMatrix[1];
-	(*shaderList[FORWARD_PBR_SHADER_ANIM])["irradiance[2]"] = irradianceMatrix[2];
+    for (int shaderId : shaderEnvironmentList) {
+        ((*Renderer::getShader(shaderId)))["irradiance[0]"] = irradianceMatrix[0];
+        ((*Renderer::getShader(shaderId)))["irradiance[1]"] = irradianceMatrix[1];
+        ((*Renderer::getShader(shaderId)))["irradiance[2]"] = irradianceMatrix[2];
+    }
 }
 
 
