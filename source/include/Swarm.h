@@ -41,7 +41,7 @@ public:
 	glm::vec3 target;
 	float collisionRadius, neighborRadius;
 
-	Swarm(GameObject* model, int count);
+	Swarm(GameObject** models, int count);
 	~Swarm();
 
 	void init();

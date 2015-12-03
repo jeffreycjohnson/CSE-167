@@ -3,39 +3,46 @@
 #include "Timer.h"
 #include "ObjectLoader.h"
 #include <random>
+#include <time.h>
+#include <gtc/quaternion.hpp>
+#include <gtx/rotate_vector.hpp>
 
 unsigned int Swarm::currentID = 1; // Start at 1, ignore ID's of 0
 std::vector<BoidSphere*> Swarm::obstacles;
+GameObject* sphere;
+Material* mat;
+Texture* norm;
 
-Swarm::Swarm(GameObject* model, int count)
+Swarm::Swarm(GameObject** models, int count)
 {
+	id = -1;
 	glm::vec3 tmp;
 	for (int i = 0; i < count; i++)
 	{
-		// Move to outside
-		GameObject* go = loadScene("assets/test_sphere.obj");
-		Texture* blankNormal = new Texture("assets/blank_normal.png");
-		Material* sphereMat = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
-		(*sphereMat)["useTextures"] = false;
-		(*sphereMat)["testMetal"] = 0.5f;
-		(*sphereMat)["testRough"] = 0.5f;
-		(*sphereMat)["normalTex"] = blankNormal;
-		go->setMaterial(sphereMat);
-
-		neighbors.push_back(go);
+		neighbors.push_back(models[i]);
 		neighborVelocities.push_back(tmp);
 	}
+	sphere = loadScene("assets/test_sphere.obj");
+	mat = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
+	norm = new Texture("assets/test_sphere_normal.png");
+	(*mat)["useTextures"] = false;
+	(*mat)["testMetal"] = 0.5f;
+	(*mat)["testRough"] = 0.5f;
+	(*mat)["normalTex"] = norm;
+	sphere->setMaterial(mat);
 	init();
 }
 
 Swarm::~Swarm()
 {
-
+	delete sphere;
+	delete mat;
+	delete norm;
 }
 
 void Swarm::init()
 {
-	srand(glfwGetTime());
+	srand(time(NULL));
 	for (int i = 0; i < neighbors.size(); i++)
 	{
 		neighbors[i]->transform.position.x = ((float)rand() / RAND_MAX) * 10 - 5;
@@ -63,37 +70,57 @@ void Swarm::update(float deltaTime)
 
 	for (int i = 0; i < neighbors.size(); i++)
 	{
-		glm::vec3 tmp = neighborVelocities[i];
-		tmp *= Timer::deltaTime();
-		neighbors[i]->transform.translate(tmp);
+		neighbors[i]->transform.translate((float) Timer::deltaTime() * neighborVelocities[i]);
+
+		glm::vec3 up = glm::vec3(0, 1, 0);
+		glm::vec3 norm = glm::normalize(neighborVelocities[i]);
+		neighbors[i]->transform.setRotate(glm::quat_cast(glm::orientation(norm, up)));
+		neighbors[i]->transform.rotate(glm::angleAxis(atanf(1)*-2.f, glm::vec3(0, 1, 0)));
+		neighbors[i]->transform.rotate(glm::angleAxis(atanf(1)*4.f, glm::vec3(0, 0, 1)));
 
 		// Call GameObject's update after so they can override changes
 		neighbors[i]->update(deltaTime);
 	}
 
-	target.x = sin(Timer::time() / 2) * 50;
+	target.x = sin(Timer::time() / 2) * 20;
+	target.z = cos(Timer::time() / 2) * 20;
 }
 
 void Swarm::draw()
 {
 	for (int i = 0; i < neighbors.size(); i++)
 	{
+		// Look at velocity
+		/*
+		glm::quat prevRotation = neighbors[i]->transform.rotation;
+		glm::vec3 up = glm::vec3(0, 1, 0);
+		neighbors[i]->transform.rotation = glm::quat();
+		glm::vec3 tmp;
+		glm::vec3 norm = glm::normalize(neighborVelocities[i]);
+		float angle = glm::acos(glm::dot(norm, up));
+		tmp = glm::cross(norm, up);
+		tmp = glm::cross(tmp, up);
+		if (glm::dot(tmp, norm) > 0)
+			angle = -angle;
+
+		glm::vec3 cross = glm::normalize(glm::cross(norm, up));
+		//neighbors[i]->transform.rotate(glm::angleAxis(angle, cross));
+		//neighbors[i]->transform.rotate(prevRotation);
+		*/
+
 		neighbors[i]->draw();
+		//neighbors[i]->transform.rotation = prevRotation;
 	}
-	glm::vec3 prev = neighbors[0]->transform.position;
+	glm::vec3 prevPosition = neighbors[0]->transform.position;
 	neighbors[0]->transform.setPosition(target);
 	neighbors[0]->draw();
-	neighbors[0]->transform.setPosition(prev);
+	neighbors[0]->transform.setPosition(prevPosition);
 
 	for (int i = 0; i < obstacles.size(); i++)
 	{
-		glm::vec3 prev = neighbors[0]->transform.position;
-		glm::vec3 prevScale = neighbors[0]->transform.scaleFactor;
-		neighbors[0]->transform.setPosition(obstacles[i]->position);
-		neighbors[0]->transform.scaleFactor = { obstacles[i]->radius, obstacles[i]->radius, obstacles[i]->radius };
-		neighbors[0]->draw();
-		neighbors[0]->transform.setPosition(prev);
-		neighbors[0]->transform.scaleFactor = prevScale;
+		sphere->transform.setPosition(obstacles[i]->position);
+		sphere->transform.scaleFactor = { obstacles[i]->radius, obstacles[i]->radius, obstacles[i]->radius };
+		sphere->draw();
 	}
 }
 

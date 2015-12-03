@@ -25,7 +25,6 @@ GameObject *light2;
 GameObject *sphere[8][8];
 GameObject* emitter;
 GPUEmitter* emitterComponent;
-GameObject* boid;
 Swarm* swarm;
 BoidSphere* ob1, *ob2;
 
@@ -56,15 +55,30 @@ TestSceneHawk::TestSceneHawk()
 	emitter->transform.translate(0, 0, 2);
 	GameObject::SceneRoot.addChild(*emitter);
 
-	boid = loadScene("assets/test_sphere.obj");
-	swarm = new Swarm(boid, 50);
+	int count = 20;
+	GameObject** boids = new GameObject*[count];
+	for (int i = 0; i < count; i++)
+	{
+		boids[i] = loadScene("assets/bear2.dae");
+		boids[i]->transform.scale(0.25);
+		Texture* blankNormal = new Texture("assets/blank_normal.png");
+		Material* sphereMat = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
+		(*sphereMat)["useTextures"] = false;
+		(*sphereMat)["testMetal"] = 0.5f;
+		(*sphereMat)["testRough"] = 0.5f;
+		(*sphereMat)["normalTex"] = blankNormal;
+		boids[i]->setMaterial(sphereMat);
+		boids[i]->getComponent<Animation>()->play(0, true);
+	}
+
+	swarm = new Swarm(boids, count);
 	ob1 = new BoidSphere();
 	ob1->position = {-5, -6, 0};
 	ob1->radius = 5;
-	Swarm::addObstacle(ob1);
 	ob2 = new BoidSphere();
 	ob2->position = { 6, 5, 0 };
 	ob2->radius = 3;
+	Swarm::addObstacle(ob1);
 	Swarm::addObstacle(ob2);
 
 	bear = loadScene("assets/bear2.dae");
@@ -79,7 +93,7 @@ TestSceneHawk::TestSceneHawk()
 	bear->setMaterial(bearMat);
 	bear->getComponent<Animation>()->play(0, true);
 
-	GameObject::SceneRoot.addChild(*bear);
+	//GameObject::SceneRoot.addChild(*bear);
 
 	for (int x = 0; x < 8; ++x) {
 		for (int y = 0; y < 8; ++y) {
@@ -97,7 +111,7 @@ TestSceneHawk::TestSceneHawk()
 			(*sphereMat)["normalTex"] = testNormal;
 			sphere[x][y]->setMaterial(sphereMat);
 
-			GameObject::SceneRoot.addChild(*sphere[x][y]);
+			//GameObject::SceneRoot.addChild(*sphere[x][y]);
 		}
 	}
 
@@ -112,7 +126,7 @@ TestSceneHawk::TestSceneHawk()
 	light->addComponent<Light>(lightComponent);
 	light->setMaterial(sphereMat);
 
-	GameObject::SceneRoot.addChild(*light);
+	//GameObject::SceneRoot.addChild(*light);
 
 	light2 = loadScene("assets/test_sphere.obj");
 	sphereMat = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
@@ -125,7 +139,7 @@ TestSceneHawk::TestSceneHawk()
 	light2->addComponent<Light>(light2Component);
 	light2->setMaterial(sphereMat);
 
-	GameObject::SceneRoot.addChild(*light2);
+	//GameObject::SceneRoot.addChild(*light2);
 }
 
 void TestSceneHawk::loop() {
@@ -143,14 +157,14 @@ void TestSceneHawk::loop() {
 		}
 	}
 
+	swarm->update(Timer::time());
+	swarm->draw();
+
 	if (Input::getKeyDown("space"))
 		emitter->getComponent<GPUEmitter>()->play();
 
 	emitter->update(Timer::time());
 	emitter->draw();
-
-	swarm->update(Timer::time());
-	swarm->draw();
 
 	bear->getComponent<Animation>()->update(Timer::deltaTime());
 }
