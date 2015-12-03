@@ -112,7 +112,7 @@ void main () {
   float IOR = 1 + mat.z;
   //F0 is essentially specular color, as well as Fresnel term
   vec3 F0 = vec3(1,1,1) * pow((1.0 - IOR) / (1.0 + IOR), 2);
-  F0 = mix(F0, albedo.xyz, mat.r); //interpolate Fresnel with the color as metalness increases (with metalness=1, color => reflection color)
+  F0 = mix(F0, albedo.rgb, mat.r); //interpolate Fresnel with the color as metalness increases (with metalness=1, color => reflection color)
   F0 = mix(vec3(1,1,1) * dot(vec3(.33,.33,.33),F0), F0, mat.r); //my own improvement - could be wrong : desaturates Fresnel as metalness decreases
 
   if(uLightType == 3) {
@@ -122,7 +122,7 @@ void main () {
 							   dot(normal4, (irradiance[1] * normal4)),
 							   dot(normal4, (irradiance[2] * normal4)) );
 							   
-	  vec3 diffuseColor = ((1.0-mat.r) * albedo.xyz) * diffuseLight;
+	  vec3 diffuseColor = ((1.0-mat.r) * albedo.rgb) * diffuseLight;
 	  vec3 specColor = SpecularEnvMap(normal.xyz, view, a, F0);
 	  vec3 color = diffuseColor + specColor;
   
@@ -157,7 +157,7 @@ void main () {
 
 	  vec3 specColor = GGX_D(dotNH, a) * SpecularBRDF(uLightColor, normal.xyz, view, lightDir, a, F0, 1) * power;
 
-	  vec3 diffuseColor = ((1.0-mat.r) * albedo.xyz) * diffuseLight;
+	  vec3 diffuseColor = ((1.0-mat.r) * albedo.rgb) * diffuseLight;
 	  vec3 color = diffuseColor + specColor;
   
 

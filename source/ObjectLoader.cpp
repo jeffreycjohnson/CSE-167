@@ -7,8 +7,10 @@
 #include <assimp/Importer.hpp>      // C++ importer interface
 #include <assimp/scene.h>           // Output data structure
 #include <assimp/postprocess.h>		// Post processing flags
+#include <gtx/quaternion.hpp>
 
 #include "Animation.h"
+#include "Light.h"
 
 
 int counter = 0;
@@ -30,7 +32,14 @@ static GLenum getMapping(aiTextureMapMode mode)
     }
 }
 
-GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string filename, std::unordered_map<std::string, Transform*>& loadingAcceleration) {
+static std::string getPath(const std::string& name)
+{
+    auto index = name.find_last_of("\\/");
+    if (index == std::string::npos) return name;
+    return name.substr(0, index + 1);
+}
+
+GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string filename, std::unordered_map<std::string, Transform*>& loadingAcceleration, std::map<std::string, Light*>& lights) {
 	GameObject* nodeObject = new GameObject();
 
 	//add mesh to this object
@@ -43,6 +52,11 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
 	nodeObject->transform.scale(scale.x);
 	nodeObject->transform.translate(pos.x, pos.y, pos.z);
 	nodeObject->transform.rotate(glm::quat(rotate.w, rotate.x, rotate.y, rotate.z));
+
+    if(lights.count(currentNode->mName.C_Str()))
+    {
+        nodeObject->addComponent(lights[currentNode->mName.C_Str()]);
+    }
 
 	if (currentNode->mNumMeshes > 0) {
 		std::string name = currentNode->mName.C_Str();
@@ -63,7 +77,7 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
             aiTextureMapMode mode = aiTextureMapMode_Wrap;
             aMat->GetTexture(aiTextureType_DIFFUSE, 0, &path,
                 nullptr, nullptr, nullptr, nullptr, &mode);
-            auto tex = new Texture(path.C_Str(), true, getMapping(mode));
+            auto tex = new Texture(getPath(filename) + path.C_Str(), true, getMapping(mode));
             (*mat)["colorTex"] = tex;
         }
         else
@@ -80,26 +94,27 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
             aiTextureMapMode mode = aiTextureMapMode_Wrap;
             aMat->GetTexture(aiTextureType_NORMALS, 0, &path,
                 nullptr, nullptr, nullptr, nullptr, &mode);
-            auto tex = new Texture(path.C_Str(), false, getMapping(mode));
+            auto tex = new Texture(getPath(filename) + path.C_Str(), false, getMapping(mode));
             (*mat)["normalTex"] = tex;
         }
         else
         {
             (*mat)["normalTex"] = new Texture(glm::vec4(0.5, 0.5, 1, 1));
         }
-        if (aMat->GetTextureCount(aiTextureType_SHININESS) > 0)
+        if (aMat->GetTextureCount(aiTextureType_SPECULAR) > 0)
         {
             aiString path;
             aiTextureMapMode mode = aiTextureMapMode_Wrap;
-            aMat->GetTexture(aiTextureType_SHININESS, 0, &path,
+            aMat->GetTexture(aiTextureType_SPECULAR, 0, &path,
                 nullptr, nullptr, nullptr, nullptr, &mode);
-            auto tex = new Texture(path.C_Str(), false, getMapping(mode));
+            auto tex = new Texture(getPath(filename) + path.C_Str(), false, getMapping(mode));
             (*mat)["matTex"] = tex;
         }
         else
         {
             (*mat)["matTex"] = new Texture(glm::vec4(0, 0.45, 0.7, 1));
         }
+        mat->transparent = false;
         mesh->setMaterial(mat);
 
 		nodeObject->addComponent(mesh);
@@ -109,7 +124,7 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
 
 	//load child objects
 	for (unsigned int c = 0; c < currentNode->mNumChildren; ++c) {
-		nodeObject->addChild(*parseNode(scene, currentNode->mChildren[c], filename, loadingAcceleration));
+		nodeObject->addChild(*parseNode(scene, currentNode->mChildren[c], filename, loadingAcceleration, lights));
 	}
 	return nodeObject;
 }
@@ -139,16 +154,39 @@ GameObject* loadScene(const std::string& filename) {
 		throw;
 	}
 
+    std::map<std::string, Light*> lights;
+    for (unsigned int i = 0; i < scene->mNumLights; i++)
+    {
+        auto l = scene->mLights[i];
+
+        Light * light;
+        if (l->mType == aiLightSource_POINT)
+        {
+            light = new PointLight();
+        }
+        else if (l->mType == aiLightSource_DIRECTIONAL)
+        {
+            light = new DirectionalLight();
+        }
+        //TODO spotlights
+        else
+        {
+            light = new SpotLight();
+        }
+
+        light->color = glm::vec3(l->mColorDiffuse.r, l->mColorDiffuse.g, l->mColorDiffuse.b);
+        lights[l->mName.C_Str()] = light;
+    }
+
 
 	std::unordered_map<std::string, Transform*> loadingAcceleration;
 
-	GameObject* retScene = parseNode(scene, scene->mRootNode, filename, loadingAcceleration);
+	GameObject* retScene = parseNode(scene, scene->mRootNode, filename, loadingAcceleration, lights);
 
 	if (scene->HasAnimations()) {
 		retScene->addComponent(new Animation(scene, loadingAcceleration));
 		linkRoot(retScene->getComponent<Animation>(), &retScene->transform);
 	}
-
 
 	return retScene;
 }

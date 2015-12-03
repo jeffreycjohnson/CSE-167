@@ -34,8 +34,8 @@ void PointLight::deferredPass()
     (*Renderer::currentShader)["uLightType"] = 0;
     auto oldScale = gameObject->transform.scaleFactor;
     auto max = std::max(std::max(color.r, color.g), color.b);
-    gameObject->transform.scaleFactor = glm::vec3((-linearFalloff + sqrtf(linearFalloff * linearFalloff - 4.0 * (constantFalloff - 256.0 * max) * exponentialFalloff))
-        / (2.0 * exponentialFalloff));
+    gameObject->transform.scaleFactor = glm::vec3((-linearFalloff + sqrtf(linearFalloff * linearFalloff - 4.0f * (constantFalloff - 256.0f * max) * exponentialFalloff))
+        / (2.0f * exponentialFalloff));
     gameObject->transform.transformMatrixDirty = true;
     (*Renderer::currentShader)["uM_Matrix"] = gameObject->transform.getTransformMatrix();
     deferredHelper("Sphere");
