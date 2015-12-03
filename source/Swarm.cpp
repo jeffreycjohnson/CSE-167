@@ -24,7 +24,7 @@ Swarm::Swarm(GameObject** models, int count)
 	}
 	sphere = loadScene("assets/test_sphere.obj");
 	mat = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
-	norm = new Texture("assets/test_sphere_normal.png");
+	norm = new Texture("assets/test_sphere_normal.png", false);
 	(*mat)["useTextures"] = false;
 	(*mat)["testMetal"] = 0.5f;
 	(*mat)["testRough"] = 0.5f;

@@ -93,7 +93,7 @@ TestSceneHawk::TestSceneHawk()
 	bear->setMaterial(bearMat);
 	bear->getComponent<Animation>()->play(0, true);
 
-	//GameObject::SceneRoot.addChild(*bear);
+	GameObject::SceneRoot.addChild(*bear);
 
 	for (int x = 0; x < 8; ++x) {
 		for (int y = 0; y < 8; ++y) {
@@ -111,7 +111,7 @@ TestSceneHawk::TestSceneHawk()
 			(*sphereMat)["normalTex"] = testNormal;
 			sphere[x][y]->setMaterial(sphereMat);
 
-			//GameObject::SceneRoot.addChild(*sphere[x][y]);
+			GameObject::SceneRoot.addChild(*sphere[x][y]);
 		}
 	}
 
@@ -126,7 +126,7 @@ TestSceneHawk::TestSceneHawk()
 	light->addComponent<Light>(lightComponent);
 	light->setMaterial(sphereMat);
 
-	//GameObject::SceneRoot.addChild(*light);
+	GameObject::SceneRoot.addChild(*light);
 
 	light2 = loadScene("assets/test_sphere.obj");
 	sphereMat = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
@@ -139,7 +139,7 @@ TestSceneHawk::TestSceneHawk()
 	light2->addComponent<Light>(light2Component);
 	light2->setMaterial(sphereMat);
 
-	//GameObject::SceneRoot.addChild(*light2);
+	GameObject::SceneRoot.addChild(*light2);
 }
 
 void TestSceneHawk::loop() {
@@ -162,9 +162,6 @@ void TestSceneHawk::loop() {
 
 	if (Input::getKeyDown("space"))
 		emitter->getComponent<GPUEmitter>()->play();
-
-	emitter->update(Timer::time());
-	emitter->draw();
 
 	bear->getComponent<Animation>()->update(Timer::deltaTime());
 }
