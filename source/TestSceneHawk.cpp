@@ -61,12 +61,12 @@ TestSceneHawk::TestSceneHawk()
 	{
 		boids[i] = loadScene("assets/bear2.dae");
 		boids[i]->transform.scale(0.25);
-		Texture* blankNormal = new Texture("assets/blank_normal.png");
+		Texture* blankNormal = new Texture("assets/blank_normal.png", false);
 		Material* sphereMat = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
 		(*sphereMat)["useTextures"] = false;
 		(*sphereMat)["testMetal"] = 0.5f;
 		(*sphereMat)["testRough"] = 0.5f;
-		(*sphereMat)["normalTex"] = blankNormal;
+		(*sphereMat)["normalTex"] = bearNormal;
 		boids[i]->setMaterial(sphereMat);
 		boids[i]->getComponent<Animation>()->play(0, true);
 	}
