@@ -24,7 +24,7 @@ Swarm::Swarm(GameObject** models, int count)
 	}
 	sphere = loadScene("assets/test_sphere.obj");
 	mat = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
-	norm = new Texture("assets/test_sphere_normal.png");
+	norm = new Texture("assets/test_sphere_normal.png", false);
 	(*mat)["useTextures"] = false;
 	(*mat)["testMetal"] = 0.5f;
 	(*mat)["testRough"] = 0.5f;
@@ -72,18 +72,21 @@ void Swarm::update(float deltaTime)
 	{
 		neighbors[i]->transform.translate((float) Timer::deltaTime() * neighborVelocities[i]);
 
-		glm::vec3 up = glm::vec3(0, 1, 0);
-		glm::vec3 norm = glm::normalize(neighborVelocities[i]);
-		neighbors[i]->transform.setRotate(glm::quat_cast(glm::orientation(norm, up)));
-		neighbors[i]->transform.rotate(glm::angleAxis(atanf(1)*-2.f, glm::vec3(0, 1, 0)));
-		neighbors[i]->transform.rotate(glm::angleAxis(atanf(1)*4.f, glm::vec3(0, 0, 1)));
+		if (neighborVelocities[i].length() >= 1e-6f) {
+			glm::vec3 norm = glm::normalize(neighborVelocities[i]);
+			float theta = atan2f(norm.x, norm.z);
+			float planeDist = sqrtf(norm.x * norm.x + norm.z * norm.z);
+			float phi = -atan2f(norm.y, planeDist);
+			neighbors[i]->transform.setRotate(glm::angleAxis(theta, glm::vec3(0, 1, 0)));
+			neighbors[i]->transform.rotate(glm::angleAxis(phi - atanf(1)*2.f, glm::vec3(1, 0, 0)));
+		}
 
 		// Call GameObject's update after so they can override changes
 		neighbors[i]->update(deltaTime);
 	}
 
-	target.x = sin(Timer::time() / 2) * 20;
-	target.z = cos(Timer::time() / 2) * 20;
+	target.x = sin(Timer::time() / 2) * 10;
+	target.y = cos(Timer::time() / 2) * 10;
 }
 
 void Swarm::draw()
