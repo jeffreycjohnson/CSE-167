@@ -38,12 +38,12 @@ float tmp = 0;
 
 TestSceneHawk::TestSceneHawk()
 {
-	testNormal = new Texture("assets/test_sphere_normal.png");
+	testNormal = new Texture("assets/test_sphere_normal.png", false);
 	bearTex = new Texture("assets/bearTex2.jpg");
-    bearSpec = new Texture("assets/bearTex2_spec.png");
-    bearNormal = new Texture("assets/bearTex2_normal.jpg");
+    bearSpec = new Texture("assets/bearTex2_spec.png", false);
+    bearNormal = new Texture("assets/bearTex2_normal.jpg", false);
 
-	blankNormal = new Texture("assets/blank_normal.png");
+	blankNormal = new Texture("assets/blank_normal.png", false);
 
 	GameObject::SceneRoot.addChild(*scene);
 	scene->addChild(*Renderer::camera);

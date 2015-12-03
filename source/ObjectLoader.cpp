@@ -13,6 +13,23 @@
 
 int counter = 0;
 
+static GLenum getMapping(aiTextureMapMode mode)
+{
+    switch (mode)
+    {
+    case(aiTextureMapMode_Wrap) :
+        return GL_REPEAT;
+    case(aiTextureMapMode_Clamp) :
+        return GL_CLAMP_TO_EDGE;
+    case(aiTextureMapMode_Mirror) :
+        return GL_MIRRORED_REPEAT;
+    case(aiTextureMapMode_Decal) :
+        return GL_CLAMP_TO_BORDER;
+    default:
+        return GL_REPEAT;
+    }
+}
+
 GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string filename, std::unordered_map<std::string, Transform*>& loadingAcceleration) {
 	GameObject* nodeObject = new GameObject();
 
@@ -31,12 +48,61 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
 		std::string name = currentNode->mName.C_Str();
 		if (name == "defaultobject") name = filename + std::to_string(counter);
 
-		if (Mesh::meshMap.find(name) == Mesh::meshMap.end()) {
-			int meshIndex = *currentNode->mMeshes;
-			Mesh::loadMesh(name, scene->mMeshes[meshIndex]);
-		}
+        if (Mesh::meshMap.find(name) == Mesh::meshMap.end()) {
+            int meshIndex = *currentNode->mMeshes;
+            Mesh::loadMesh(name, scene->mMeshes[meshIndex]);
+        }
 
-		nodeObject->addComponent(new Mesh(name));
+        auto mesh = new Mesh(name);
+
+        auto aMat = scene->mMaterials[scene->mMeshes[*currentNode->mMeshes]->mMaterialIndex];
+        auto mat = new Material(Renderer::getShader(scene->mMeshes[*currentNode->mMeshes]->HasBones() ? DEFERRED_PBR_SHADER_ANIM : DEFERRED_PBR_SHADER));
+        if (aMat->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+        {
+            aiString path;
+            aiTextureMapMode mode = aiTextureMapMode_Wrap;
+            aMat->GetTexture(aiTextureType_DIFFUSE, 0, &path,
+                nullptr, nullptr, nullptr, nullptr, &mode);
+            auto tex = new Texture(path.C_Str(), true, getMapping(mode));
+            (*mat)["colorTex"] = tex;
+        }
+        else
+        {
+            aiColor3D color(0.f, 0.f, 0.f);
+            if(aMat->Get(AI_MATKEY_COLOR_DIFFUSE, color))
+                (*mat)["colorTex"] = new Texture(glm::vec4(color.r, color.g, color.b, 1));
+            else
+                (*mat)["colorTex"] = new Texture(glm::vec4(1));
+        }
+        if (aMat->GetTextureCount(aiTextureType_NORMALS) > 0)
+        {
+            aiString path;
+            aiTextureMapMode mode = aiTextureMapMode_Wrap;
+            aMat->GetTexture(aiTextureType_NORMALS, 0, &path,
+                nullptr, nullptr, nullptr, nullptr, &mode);
+            auto tex = new Texture(path.C_Str(), false, getMapping(mode));
+            (*mat)["normalTex"] = tex;
+        }
+        else
+        {
+            (*mat)["normalTex"] = new Texture(glm::vec4(0.5, 0.5, 1, 1));
+        }
+        if (aMat->GetTextureCount(aiTextureType_SHININESS) > 0)
+        {
+            aiString path;
+            aiTextureMapMode mode = aiTextureMapMode_Wrap;
+            aMat->GetTexture(aiTextureType_SHININESS, 0, &path,
+                nullptr, nullptr, nullptr, nullptr, &mode);
+            auto tex = new Texture(path.C_Str(), false, getMapping(mode));
+            (*mat)["matTex"] = tex;
+        }
+        else
+        {
+            (*mat)["matTex"] = new Texture(glm::vec4(0, 0.45, 0.7, 1));
+        }
+        mesh->setMaterial(mat);
+
+		nodeObject->addComponent(mesh);
 	}
 
 	loadingAcceleration[currentNode->mName.C_Str()] = &nodeObject->transform;
