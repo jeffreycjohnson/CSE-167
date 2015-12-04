@@ -60,8 +60,8 @@ int main()
 	{
         GameObject::SceneRoot.update(Timer::deltaTime());
 		Input::update();
-		Timer::update();
 		Renderer::loop();
+		Timer::update();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
