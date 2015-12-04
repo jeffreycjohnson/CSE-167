@@ -31,8 +31,13 @@ public:
 class DirectionalLight : public Light
 {
 public:
+    DirectionalLight(bool shadow = false);
+    ~DirectionalLight();
     void forwardPass(int index) override;
     void deferredPass() override;
+    void bindShadowMap();
+
+    Framebuffer * fbo;
 };
 
 class SpotLight : public Light

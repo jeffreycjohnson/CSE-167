@@ -21,6 +21,7 @@
 
 GameObject *scene = new GameObject();
 GameObject *camera = new GameObject();
+GameObject *sun;
 GameObject *bear;
 GameObject *light;
 GameObject *light2;
@@ -51,6 +52,11 @@ TestSceneHawk::TestSceneHawk()
     scene->addChild(*camera);
     camera->addComponent(Renderer::camera);
     camera->transform.translate(0, 0, 20);
+
+    sun = new GameObject();
+    sun->addComponent(new DirectionalLight(true));
+    sun->transform.translate(0, 0, 20);
+    GameObject::SceneRoot.addChild(*sun);
 
 	emitter = new GameObject();
 	emitterComponent = new GPUEmitter(emitter, "assets/particles/particle.png", true);

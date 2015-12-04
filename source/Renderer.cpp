@@ -2,7 +2,7 @@
 #include "Mesh.h"
 #include "Camera.h"
 #include "Framebuffer.h"
-#include <gtc/matrix_transform.inl>
+#include <gtc/matrix_transform.hpp>
 #include "Skybox.h"
 #include "TestSceneHawk.h"
 #include "Input.h"
@@ -18,10 +18,13 @@ int Renderer::height = 0;
 Shader* Renderer::currentShader;
 Shader* shaderList[SHADER_COUNT];
 int Renderer::shaderForwardLightList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM };
-int shaderViewList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER, PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING, SKYBOX_SHADER };
+int shaderViewList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER,
+    PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING, SKYBOX_SHADER,
+    SHADOW_SHADER, SHADOW_SHADER_ANIM};
 int shaderCameraPosList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 int shaderEnvironmentList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
-int shaderPerspectiveList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER, EMITTER_SHADER, EMITTER_BURST_SHADER, PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
+int shaderPerspectiveList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER, EMITTER_SHADER,
+    EMITTER_BURST_SHADER, PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 
 Camera* Renderer::camera = new Camera();
 
@@ -37,7 +40,8 @@ TestSceneHawk* testScene;
 
 Skybox* skybox;
 
-ForwardPass *regularPass, *particlePass;
+ForwardPass *regularPass, *particlePass, *shadowPass;
+DeferredPass *deferredPass;
 
 void Renderer::init(int window_width, int window_height) {
 	width = window_width;
@@ -96,6 +100,18 @@ void Renderer::init(int window_width, int window_height) {
 		"source/shaders/particle_trail.vert", "source/shaders/particle_trail.frag"
 		);
 
+    shaderList[SHADOW_SHADER] = new Shader(
+        "source/shaders/forward_pbr.vert", "source/shaders/shadow.frag"
+        );
+
+    shaderList[SHADOW_SHADER_ANIM] = new Shader(
+        "source/shaders/forward_pbr_skeletal.vert", "source/shaders/shadow.frag"
+        );
+
+    auto ortho = glm::ortho<float>(-25, 25, -25, 25, 0, 50);
+    (*shaderList[SHADOW_SHADER])["uP_Matrix"] = ortho;
+    (*shaderList[SHADOW_SHADER_ANIM])["uP_Matrix"] = ortho;
+
 	currentShader = shaderList[FORWARD_PBR_SHADER];
 	currentShader->use();
 
@@ -122,15 +138,18 @@ void Renderer::init(int window_width, int window_height) {
 	
 	fboTest = new Framebuffer(width, height, 2, false, true);
 
-	Renderer::resize(width, height);
+	resize(width, height);
 
 	regularPass = new ForwardPass();
 	particlePass = new ForwardPass();
+    shadowPass = new ShadowPass();
+    deferredPass = new DeferredPass(width, height);
 
-    Renderer::passes.push_back(new DeferredPass(width, height));
-	Renderer::passes.push_back(regularPass);
-	Renderer::passes.push_back(new SkyboxPass(skybox));
-	Renderer::passes.push_back(particlePass);
+    passes.push_back(shadowPass);
+    passes.push_back(deferredPass);
+	passes.push_back(regularPass);
+	passes.push_back(new SkyboxPass(skybox));
+	passes.push_back(particlePass);
 
 	lastTime = glfwGetTime();
 }
@@ -149,21 +168,23 @@ void Renderer::loop() {
 
 	testScene->loop(); /* This is just temporary - all it does it do translation without having to create temporary components */
 
-    dynamic_cast<DeferredPass*>(passes.front())->fbo->unbind();
-    dynamic_cast<DeferredPass*>(passes.front())->fbo->bindTexture(0, 3);
+    deferredPass->fbo->unbind();
+    deferredPass->fbo->bindTexture(0, 3);
     switchShader(FBO_HDR);
-    dynamic_cast<DeferredPass*>(passes.front())->fbo->draw();
+    deferredPass->fbo->draw();
 
 
 
 	if (Input::getKey("b"))
-		dynamic_cast<DeferredPass*>(passes.front())->fbo->blitAll();
+        deferredPass->fbo->blitAll();
 }
 
 void Renderer::extractObjects() {
 	GameObject::PassList passList;
 	GameObject::SceneRoot.extract(passList);
 
+    shadowPass->setLights(passList.light);
+    shadowPass->setObjects(passList.deferred);
 	regularPass->setObjects(passList.forward);
 	regularPass->setLights(passList.light);
 	particlePass->setObjects(passList.particle);

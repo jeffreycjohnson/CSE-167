@@ -2,6 +2,7 @@
 #include "Mesh.h"
 #include "Renderer.h"
 #include "GameObject.h"
+#include "Framebuffer.h"
 
 void Light::deferredHelper(const std::string& meshName)
 {
@@ -43,6 +44,20 @@ void PointLight::deferredPass()
     deferredHelper("Sphere");
 }
 
+DirectionalLight::DirectionalLight(bool shadow)
+{
+    if(shadow)
+    {
+        shadowCaster = shadow;
+        fbo = new Framebuffer(2048, 2048, 0, true, false);
+    }
+}
+
+DirectionalLight::~DirectionalLight()
+{
+    if(fbo) delete fbo;
+}
+
 void DirectionalLight::forwardPass(int index)
 {
 }
@@ -52,6 +67,14 @@ void DirectionalLight::deferredPass()
     (*Renderer::currentShader)["uLightType"] = 1;
     (*Renderer::currentShader)["uM_Matrix"] = glm::mat4();
     deferredHelper("Plane");
+}
+
+void DirectionalLight::bindShadowMap()
+{
+    if(fbo && shadowCaster)
+    {
+        fbo->bind(0, nullptr);
+    }
 }
 
 void SpotLight::forwardPass(int index)

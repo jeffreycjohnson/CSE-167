@@ -53,7 +53,8 @@ void Mesh::draw() {
 	Renderer::setModelMatrix(gameObject->transform.getTransformMatrix());
 
 	if ((Renderer::currentShader == Renderer::getShader(FORWARD_PBR_SHADER_ANIM) ||
-        Renderer::currentShader == Renderer::getShader(DEFERRED_PBR_SHADER_ANIM))&& animationRoot) {
+        Renderer::currentShader == Renderer::getShader(DEFERRED_PBR_SHADER_ANIM) ||
+        Renderer::currentShader == Renderer::getShader(SHADOW_SHADER_ANIM))&& animationRoot) {
 		BoneData & meshBoneData = boneIdMap.at(name);
 
 		for (AnimNodeData node : animationRoot->getAnimationData()) {
