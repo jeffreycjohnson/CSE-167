@@ -61,16 +61,7 @@ TestSceneHawk::TestSceneHawk()
 	GameObject** boids = new GameObject*[count];
 	for (int i = 0; i < count; i++)
 	{
-		boids[i] = loadScene("assets/bear2.dae");
-		boids[i]->transform.scale(0.25);
-		Texture* blankNormal = new Texture("assets/blank_normal.png", false);
-		Material* sphereMat = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
-		(*sphereMat)["useTextures"] = false;
-		(*sphereMat)["testMetal"] = 0.5f;
-		(*sphereMat)["testRough"] = 0.5f;
-		(*sphereMat)["normalTex"] = bearNormal;
-		boids[i]->setMaterial(sphereMat);
-		boids[i]->getComponent<Animation>()->play(0, true);
+		boids[i] = loadScene("assets/intercepter.dae");
 	}
 
 	swarm = new Swarm(boids, count);
