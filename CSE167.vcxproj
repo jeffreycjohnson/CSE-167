@@ -159,6 +159,7 @@
   <ItemGroup>
     <ClCompile Include="SkyboxPass.cpp" />
     <ClCompile Include="source\Animation.cpp" />
+    <ClCompile Include="source\BoxCollider.cpp" />
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\Component.cpp" />
     <ClCompile Include="source\DeferrerdPass.cpp" />
@@ -186,6 +187,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\include\Animation.h" />
+    <ClInclude Include="source\include\BoxCollider.h" />
     <ClInclude Include="source\include\Camera.h" />
     <ClInclude Include="source\include\Component.h" />
     <ClInclude Include="source\include\ForwardDecs.h" />

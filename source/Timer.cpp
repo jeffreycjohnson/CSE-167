@@ -12,7 +12,7 @@ float Timer::count;
 void Timer::init(float count)
 {
 	startTime = oldTime = currentTime = glfwGetTime();
-	mDeltaTime = mTime = mUnscaledDeltaTime = mUnscaledTime = cycleTime = 0;
+	mDeltaTime = mTime = mUnscaledDeltaTime = mUnscaledTime = cycleTime = 0.167;
 	mTimeScale = 1;
 	frames = 0;
 	Timer::count = count;
