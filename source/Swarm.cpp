@@ -78,7 +78,7 @@ void Swarm::update(float deltaTime)
 			float planeDist = sqrtf(norm.x * norm.x + norm.z * norm.z);
 			float phi = -atan2f(norm.y, planeDist);
 			neighbors[i]->transform.setRotate(glm::angleAxis(theta, glm::vec3(0, 1, 0)));
-			neighbors[i]->transform.rotate(glm::angleAxis(phi - atanf(1)*2.f, glm::vec3(1, 0, 0)));
+			neighbors[i]->transform.rotate(glm::angleAxis(phi, glm::vec3(1, 0, 0)));
 		}
 
 		// Call GameObject's update after so they can override changes
@@ -111,7 +111,7 @@ void Swarm::draw()
 		//neighbors[i]->transform.rotate(prevRotation);
 		*/
 
-		neighbors[i]->draw();
+		//neighbors[i]->draw();
 		//neighbors[i]->transform.rotation = prevRotation;
 	}
 	glm::vec3 prevPosition = neighbors[0]->transform.position;

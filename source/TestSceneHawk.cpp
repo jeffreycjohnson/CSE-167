@@ -17,6 +17,7 @@
 #include "Input.h"
 #include "Animation.h"
 #include "Light.h"
+#include "ParticleTrail.h"
 
 GameObject *scene = new GameObject();
 GameObject *camera = new GameObject();
@@ -44,6 +45,7 @@ TestSceneHawk::TestSceneHawk()
     bearNormal = new Texture("assets/bearTex2_normal.jpg", false);
 
 	blankNormal = new Texture("assets/blank_normal.png", false);
+	Texture* blueColor = new Texture("assets/blank_normal.png", true);
 
 	GameObject::SceneRoot.addChild(*scene);
     scene->addChild(*camera);
@@ -57,11 +59,23 @@ TestSceneHawk::TestSceneHawk()
 	emitter->transform.translate(0, 0, 2);
 	GameObject::SceneRoot.addChild(*emitter);
 
-	int count = 20;
+	int count = 30;
 	GameObject** boids = new GameObject*[count];
 	for (int i = 0; i < count; i++)
 	{
-		boids[i] = loadScene("assets/intercepter.dae");
+		boids[i] = new GameObject();
+		GameObject* boid = loadScene("assets/intercepter.dae");
+		boids[i]->addChild(*boid);
+		boids[i]->transform.scale(0.25);
+
+		/* Not quite working yet
+		ParticleTrail* trail = new ParticleTrail();
+		trail->material = new Material(Renderer::getShader(PARTICLE_TRAIL_SHADER));
+		(*trail->material)["size"] = 0.2f;
+		boids[i]->addComponent<ParticleTrail>(trail); */
+
+
+		GameObject::SceneRoot.addChild(*boids[i]);
 	}
 
 	swarm = new Swarm(boids, count);
@@ -136,7 +150,7 @@ TestSceneHawk::TestSceneHawk()
 }
 
 void TestSceneHawk::loop() {
-	scene->transform.rotate(glm::angleAxis(0.001f, glm::vec3(0, 1, 0)));
+	scene->transform.rotate(glm::angleAxis(0.01f, glm::vec3(0, 1, 0)));
 
 	tmp += 0.02f;
 	light->transform.setPosition(5 * sin(tmp), 5 * cos(tmp), 4);
@@ -155,8 +169,6 @@ void TestSceneHawk::loop() {
 
 	if (Input::getKeyDown("space"))
 		emitter->getComponent<GPUEmitter>()->play();
-
-	bear->getComponent<Animation>()->update(Timer::deltaTime());
 }
 
 TestSceneHawk::~TestSceneHawk()

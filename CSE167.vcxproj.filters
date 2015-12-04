@@ -96,6 +96,9 @@
     <ClCompile Include="SkyboxPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\ParticleTrail.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="source\BoxCollider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -170,6 +173,9 @@
     <ClInclude Include="source\include\Swarm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\include\ParticleTrail.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="source\include\BoxCollider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -209,6 +215,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="source\shaders\gpu_particle_burst.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="source\shaders\particle_trail.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="source\shaders\particle_trail.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

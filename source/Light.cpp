@@ -25,7 +25,7 @@ void PointLight::forwardPass(int index)
 {
 	for (int shaderId : Renderer::shaderForwardLightList) {
 		(*Renderer::getShader(shaderId))["uLightData[" + std::to_string(2*index) + "]"] = glm::vec4(gameObject->transform.position, 1.0);
-		(*Renderer::getShader(shaderId))["uLightData[" + std::to_string(2*index+1) + "]"] = glm::vec4(color, 10);
+		(*Renderer::getShader(shaderId))["uLightData[" + std::to_string(2*index+1) + "]"] = glm::vec4(color, 1);
 	}
 }
 

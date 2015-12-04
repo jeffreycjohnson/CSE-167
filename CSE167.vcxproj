@@ -163,6 +163,7 @@
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\Component.cpp" />
     <ClCompile Include="source\DeferrerdPass.cpp" />
+    <ClCompile Include="source\ParticleTrail.cpp" />
     <ClCompile Include="source\ForwardPass.cpp" />
     <ClCompile Include="source\Framebuffer.cpp" />
     <ClCompile Include="source\GameObject.cpp" />
@@ -190,6 +191,7 @@
     <ClInclude Include="source\include\BoxCollider.h" />
     <ClInclude Include="source\include\Camera.h" />
     <ClInclude Include="source\include\Component.h" />
+    <ClInclude Include="source\include\ParticleTrail.h" />
     <ClInclude Include="source\include\ForwardDecs.h" />
     <ClInclude Include="source\include\Framebuffer.h" />
     <ClInclude Include="source\include\GameObject.h" />
@@ -222,6 +224,8 @@
     <None Include="source\shaders\gpu_particle.frag" />
     <None Include="source\shaders\gpu_particle.vert" />
     <None Include="source\shaders\gpu_particle_burst.vert" />
+    <None Include="source\shaders\particle_trail.frag" />
+    <None Include="source\shaders\particle_trail.vert" />
     <None Include="source\shaders\skybox.frag" />
     <None Include="source\shaders\skybox.vert" />
   </ItemGroup>

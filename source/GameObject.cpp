@@ -3,6 +3,7 @@
 #include "GPUEmitter.h"
 #include "Renderer.h"
 #include "Light.h"
+#include "ParticleTrail.h"
 
 GameObject GameObject::SceneRoot;
 
@@ -60,10 +61,15 @@ void GameObject::extract(PassList & list)
 	if ((emitter = getComponent<GPUEmitter>()) != nullptr) {
 		list.particle.push_back(emitter);
 	}
+	ParticleTrail* trail;
+	if ((trail = getComponent<ParticleTrail>()) != nullptr) {
+		list.particle.push_back(trail);
+	}
 	Light* light;
 	if ((light = getComponent<Light>()) != nullptr) {
 		list.light.push_back(light);
 	}
+
 	for (auto child : transform.children) {
 		(child->gameObject)->extract(list);
 	}
