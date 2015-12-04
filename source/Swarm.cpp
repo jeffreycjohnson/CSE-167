@@ -111,7 +111,7 @@ void Swarm::draw()
 		//neighbors[i]->transform.rotate(prevRotation);
 		*/
 
-		neighbors[i]->draw();
+		//neighbors[i]->draw();
 		//neighbors[i]->transform.rotation = prevRotation;
 	}
 	glm::vec3 prevPosition = neighbors[0]->transform.position;

@@ -7,7 +7,7 @@
 
 #include <glfw3.h>
 
-#define SHADER_COUNT 9
+#define SHADER_COUNT 10
 #define FORWARD_PBR_SHADER_ANIM 0
 #define FORWARD_PBR_SHADER 1
 #define SKYBOX_SHADER 2
@@ -17,6 +17,7 @@
 #define DEFERRED_PBR_SHADER_ANIM 6
 #define DEFERRED_PBR_SHADER 7
 #define DEFERRED_SHADER_LIGHTING 8
+#define PARTICLE_TRAIL_SHADER 9
 
 struct GPUData {
 	int vaoHandle;
