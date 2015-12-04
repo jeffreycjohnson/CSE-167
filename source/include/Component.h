@@ -12,6 +12,8 @@ class Component
         virtual void update(float deltaTime);
 		virtual void draw();
         virtual void setGameObject(GameObject* go);
+
+		void OnCollisionEnter(GameObject* other);
 };
 
 #endif
