@@ -96,12 +96,20 @@ void Renderer::init(int window_width, int window_height) {
 	currentShader->use();
 
 	std::string cubeFilenames[6] = {
+		/*
 		"assets/grace/grace_px.hdr",
 		"assets/grace/grace_nx.hdr",
 		"assets/grace/grace_py.hdr",
 		"assets/grace/grace_ny.hdr",
 		"assets/grace/grace_pz.hdr",
-		"assets/grace/grace_nz.hdr" };
+		"assets/grace/grace_nz.hdr" 
+		*/
+		"assets/skybox/right.hdr",
+		"assets/skybox/left.hdr",
+		"assets/skybox/top.hdr",
+		"assets/skybox/bottom.hdr",
+		"assets/skybox/front.hdr",
+		"assets/skybox/back.hdr"};
 	skybox = new Skybox(cubeFilenames);
 	skybox->applyIrradiance();
 	skybox->applyTexture(5);
