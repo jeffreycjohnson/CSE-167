@@ -44,6 +44,7 @@ TestSceneHawk::TestSceneHawk()
     bearNormal = new Texture("assets/bearTex2_normal.jpg", false);
 
 	blankNormal = new Texture("assets/blank_normal.png", false);
+	Texture* blueColor = new Texture("assets/blank_normal.png", true);
 
 	GameObject::SceneRoot.addChild(*scene);
 	scene->addChild(*Renderer::camera);
@@ -60,24 +61,27 @@ TestSceneHawk::TestSceneHawk()
 	GameObject** boids = new GameObject*[count];
 	for (int i = 0; i < count; i++)
 	{
-		boids[i] = loadScene("assets/bear2.dae");
+		boids[i] = new GameObject();
+		GameObject* bearBoid = loadScene("assets/bear2.dae");
+		boids[i]->addChild(*bearBoid);
 		boids[i]->transform.scale(0.25);
 
+		/* Not quite working yet
 		ParticleTrail* trail = new ParticleTrail();
 		trail->material = new Material(Renderer::getShader(PARTICLE_TRAIL_SHADER));
 		(*trail->material)["size"] = 0.2f;
-		boids[i]->addComponent<ParticleTrail>(trail);
+		boids[i]->addComponent<ParticleTrail>(trail); */
 
-		GameObject::SceneRoot.addChild(*boids[i]);
-
-		Texture* blankNormal = new Texture("assets/blank_normal.png", false);
-		Material* sphereMat = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
-		(*sphereMat)["useTextures"] = false;
-		(*sphereMat)["testMetal"] = 0.5f;
-		(*sphereMat)["testRough"] = 0.5f;
+		Material* sphereMat = new Material(Renderer::getShader(DEFERRED_PBR_SHADER), false);
+		(*sphereMat)["useTextures"] = true;
+		(*sphereMat)["colorTex"] = blueColor;
+		(*sphereMat)["matTex"] = bearSpec;
 		(*sphereMat)["normalTex"] = bearNormal;
 		boids[i]->setMaterial(sphereMat);
-		boids[i]->getComponent<Animation>()->play(0, true);
+		bearBoid->getComponent<Animation>()->play(0, true);
+
+
+		GameObject::SceneRoot.addChild(*boids[i]);
 	}
 
 	swarm = new Swarm(boids, count);
