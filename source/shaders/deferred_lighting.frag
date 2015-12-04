@@ -154,8 +154,9 @@ void main () {
 	
 	  vec3 halfVec = normalize(view + lightDir);
 	  float dotNH = clamp(dot(normal.xyz, halfVec), 0.0, 1.0);
-
-	  vec3 specColor = GGX_D(dotNH, a) * SpecularBRDF(uLightColor, normal.xyz, view, lightDir, a, F0, 1) * power;
+	  
+	  float a2 = a*a;
+	  vec3 specColor = GGX_D(dotNH, a2*a2) * SpecularBRDF(uLightColor, normal.xyz, view, lightDir, a, F0, 1) * power;
 
 	  vec3 diffuseColor = ((1.0-mat.r) * albedo.rgb) * diffuseLight;
 	  vec3 color = diffuseColor + specColor;

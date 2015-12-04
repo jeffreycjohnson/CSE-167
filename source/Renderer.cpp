@@ -163,7 +163,7 @@ void Renderer::applyPerFrameData() {
 		(*Renderer::getShader(shaderId))[VIEW_MATRIX] = camera->getCameraMatrix();
 	}
 	for (int shaderId : shaderCameraPosList) {
-		(*Renderer::getShader(shaderId))["cameraPos"] = Renderer::camera->transform.getWorldPosition();
+		(*Renderer::getShader(shaderId))["cameraPos"] = Renderer::camera->gameObject->transform.getWorldPosition();
 	}
 }
 

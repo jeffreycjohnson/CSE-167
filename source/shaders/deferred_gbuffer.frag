@@ -31,10 +31,10 @@ void main()
     mat3 model = mat3(tangent, binormal, norm);
 
     norm = 2 * texture(normalTex, vTexCoord).xyz - vec3(1.0);
-    NormOut = vec4(normalize(model * norm), mat.y);
+    NormOut = vec4(normalize(model * norm), 1.45);
 
 	vec4 color = texture(colorTex, vTexCoord);
-    ColorOut = vec4(teamColor * (1-color.a) + color.rgb, mat.x);
-    PosOut = vec4(vPosition.xyz/vPosition.w, mat.z);
+    ColorOut = vec4(teamColor * (1-color.a) + color.rgb, 1.0);//mat.x);
+    PosOut = vec4(vPosition.xyz/vPosition.w, 0.25);//mat.z);
     foo = vec4(0);
 }

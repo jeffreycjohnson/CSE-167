@@ -163,7 +163,7 @@ void main () {
 
 
 
-	float power = uLightData[2*i+1].w / (lightDist * lightDist + 1);
+	float power = 1.0 / (lightDist * lightDist + 1);
     diffuseLight = diffuseLight + (uLightData[2*i+1].xyz * (clamp(dot(lightDir, normal) * power, 0.0, 1.0)));
 	
 	vec3 halfVec = normalize(view + lightDir);

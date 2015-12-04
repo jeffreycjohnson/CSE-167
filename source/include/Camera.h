@@ -4,7 +4,7 @@
 #include "ForwardDecs.h"
 #include "GameObject.h"
 
-class Camera : public GameObject
+class Camera : public Component
 {
 	public:
 		glm::mat4 getCameraMatrix();

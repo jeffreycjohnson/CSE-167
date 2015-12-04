@@ -18,7 +18,8 @@
 #include "Animation.h"
 #include "Light.h"
 
-GameObject* scene = new GameObject();
+GameObject *scene = new GameObject();
+GameObject *camera = new GameObject();
 GameObject *bear;
 GameObject *light;
 GameObject *light2;
@@ -45,8 +46,9 @@ TestSceneHawk::TestSceneHawk()
 	blankNormal = new Texture("assets/blank_normal.png", false);
 
 	GameObject::SceneRoot.addChild(*scene);
-	scene->addChild(*Renderer::camera);
-	Renderer::camera->transform.translate(0, 0, 20);
+    scene->addChild(*camera);
+    camera->addComponent(Renderer::camera);
+    camera->transform.translate(0, 0, 20);
 
 	emitter = new GameObject();
 	emitterComponent = new GPUEmitter(emitter, "assets/particles/particle.png", true);

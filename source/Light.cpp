@@ -38,9 +38,9 @@ void PointLight::deferredPass()
         / (2.0f * exponentialFalloff));
     gameObject->transform.transformMatrixDirty = true;
     (*Renderer::currentShader)["uM_Matrix"] = gameObject->transform.getTransformMatrix();
-    deferredHelper("Sphere");
     gameObject->transform.scaleFactor = oldScale;
     gameObject->transform.transformMatrixDirty = true;
+    deferredHelper("Sphere");
 }
 
 void DirectionalLight::forwardPass(int index)
