@@ -13,6 +13,7 @@
 #include "Timer.h"
 #include "ObjectLoader.h"
 #include "GPUEmitter.h"
+#include "BoxCollider.h"
 #include "Swarm.h"
 #include "Input.h"
 #include "Animation.h"
@@ -65,6 +66,9 @@ TestSceneHawk::TestSceneHawk()
 		GameObject* bearBoid = loadScene("assets/bear2.dae");
 		boids[i]->addChild(*bearBoid);
 		boids[i]->transform.scale(0.25);
+
+		BoxCollider* collider = new BoxCollider(glm::vec3(0, 3, 2), glm::vec3(5, 7, 9));
+		boids[i]->addComponent(collider);
 
 		/* Not quite working yet
 		ParticleTrail* trail = new ParticleTrail();
@@ -170,11 +174,18 @@ void TestSceneHawk::loop() {
 		}
 	}
 
+	BoxCollider::updateColliders();
+
 	swarm->update(Timer::time());
 	swarm->draw();
 
 	if (Input::getKeyDown("space"))
 		emitter->getComponent<GPUEmitter>()->play();
+}
+
+void TestSceneHawk::debugDraw()
+{
+	GameObject::SceneRoot.debugDraw();
 }
 
 TestSceneHawk::~TestSceneHawk()

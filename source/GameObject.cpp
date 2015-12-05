@@ -24,16 +24,20 @@ void GameObject::addChild(GameObject& go) {
 }
 
 void GameObject::draw() {
-	Mesh* mesh;
-	if ((mesh = getComponent<Mesh>()) != nullptr) {
-		mesh->draw();
-	}
-	GPUEmitter* emitter;
-	if ((emitter = getComponent<GPUEmitter>()) != nullptr) {
-		emitter->draw();
+	for (auto component : componentList) {
+		component->draw();
 	}
 	for (auto child : transform.children) {
 		(child->gameObject)->draw();
+	}
+}
+
+void GameObject::debugDraw() {
+	for (auto component : componentList) {
+		component->debugDraw();
+	}
+	for (auto child : transform.children) {
+		(child->gameObject)->debugDraw();
 	}
 }
 
@@ -82,5 +86,13 @@ void GameObject::setMaterial(Material *mat) {
 	}
 	for (auto child : transform.children) {
 		(child->gameObject)->setMaterial(mat);
+	}
+}
+
+void GameObject::onCollisionEnter(GameObject* other)
+{
+	for (int i = 0; i < componentList.size(); i++)
+	{
+		componentList[i]->onCollisionEnter(other);
 	}
 }

@@ -18,10 +18,10 @@ int Renderer::height = 0;
 Shader* Renderer::currentShader;
 Shader* shaderList[SHADER_COUNT];
 int Renderer::shaderForwardLightList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM };
-int shaderViewList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER, PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING, SKYBOX_SHADER };
+int shaderViewList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER, PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING, SKYBOX_SHADER, BASIC_SHADER };
 int shaderCameraPosList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 int shaderEnvironmentList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
-int shaderPerspectiveList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER, EMITTER_SHADER, EMITTER_BURST_SHADER, PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
+int shaderPerspectiveList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER, EMITTER_SHADER, EMITTER_BURST_SHADER, PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING, BASIC_SHADER };
 
 Camera* Renderer::camera = new Camera();
 
@@ -96,6 +96,10 @@ void Renderer::init(int window_width, int window_height) {
 		"source/shaders/particle_trail.vert", "source/shaders/particle_trail.frag"
 		);
 
+	shaderList[BASIC_SHADER] = new Shader(
+		"source/shaders/simple.vert", "source/shaders/simple.frag"
+		);
+
 	currentShader = shaderList[FORWARD_PBR_SHADER];
 	currentShader->use();
 
@@ -157,7 +161,13 @@ void Renderer::loop() {
 
 
 	if (Input::getKey("b"))
+	{
+		glDisable(GL_DEPTH_TEST);
+		Renderer::switchShader(BASIC_SHADER);
+		testScene->debugDraw();
+		glEnable(GL_DEPTH_TEST);
 		dynamic_cast<DeferredPass*>(passes.front())->fbo->blitAll();
+	}
 }
 
 void Renderer::extractObjects() {
