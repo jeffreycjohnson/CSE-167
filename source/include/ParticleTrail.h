@@ -13,7 +13,7 @@ public:
 	void update(float deltaTime) override;
 	void draw() override;
 
-
+	bool additive = true;
 	Material * material;
 private:
 	struct TrailPoint {
@@ -28,8 +28,11 @@ private:
 	GLuint vaoHandle;
 	GLuint meshBuffer;
 	
-	int maxPoints = 100;
+	const int maxPoints = 64;
 	float* megaArray;
+
+	const float addDelayTime = 0.32f;//in seconds
+	float currentDelayTime = 0;
 
 	void addPoint(glm::vec3 point);
 	void uploadData();

@@ -47,6 +47,11 @@ TestSceneHawk::TestSceneHawk()
 	blankNormal = new Texture("assets/blank_normal.png", false);
 	Texture* blueColor = new Texture("assets/blank_normal.png", true);
 
+	Material* trailMaterial = new Material(Renderer::getShader(PARTICLE_TRAIL_SHADER));
+	(*trailMaterial)["size"] = 0.32f;
+	(*trailMaterial)["trailLength"] = 64.f; //set it to maxPoints
+	(*trailMaterial)["colorTex"] = new Texture("assets/particle_trail.png");
+
 	GameObject::SceneRoot.addChild(*scene);
 	scene->addChild(*Renderer::camera);
 	Renderer::camera->transform.translate(0, 0, 20);
@@ -71,10 +76,7 @@ TestSceneHawk::TestSceneHawk()
 		boids[i]->addComponent(collider);
 
 		ParticleTrail* trail = new ParticleTrail();
-		trail->material = new Material(Renderer::getShader(PARTICLE_TRAIL_SHADER));
-		(*trail->material)["size"] = 0.32f;
-		(*trail->material)["trailLength"] = 14.f;
-		(*trail->material)["colorTex"] = new Texture("assets/particle_trail.png");
+		trail->material = trailMaterial;
 		boids[i]->addComponent<ParticleTrail>(trail);
 
 		Material* sphereMat = new Material(Renderer::getShader(DEFERRED_PBR_SHADER), false);

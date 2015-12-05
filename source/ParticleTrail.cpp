@@ -17,7 +17,7 @@ void ParticleTrail::uploadData() {
 	float distance = 0;
 	glm::vec3 lastPosition;
 	for (TrailPoint& currentPoint : pointList) {
-		distance += (arrayIndex == 0) ? 0 : glm::length(currentPoint.position - lastPosition);
+		distance += (arrayIndex == 0) ? 0 : 1;//glm::length(currentPoint.position - lastPosition);
 		lastPosition = currentPoint.position;
 
 		//add 2 points - one for each side of trail
@@ -65,8 +65,13 @@ ParticleTrail::~ParticleTrail()
 }
 
 void ParticleTrail::update(float dt) {
-	addPoint(gameObject->transform.getWorldPosition());
-	uploadData();
+	currentDelayTime += dt;
+	if (currentDelayTime >= addDelayTime) {
+		addPoint(gameObject->transform.getWorldPosition());
+		uploadData();
+
+		currentDelayTime -= addDelayTime;
+	}
 }
 
 void ParticleTrail::draw()
@@ -77,12 +82,22 @@ void ParticleTrail::draw()
 		Renderer::gpuData.vaoHandle = vaoHandle;
 	}
 
+	glEnable(GL_BLEND);
+	if (additive)
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	else
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glDepthMask(false);
 	
 	if (material) material->bind();
 
 	//TODO move
 	Renderer::setModelMatrix(glm::mat4(1));
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, pointList.size()*2);
+
+	glDepthMask(true);
+	glDisable(GL_BLEND);
 }
 
 void ParticleTrail::addPoint(glm::vec3 point)
