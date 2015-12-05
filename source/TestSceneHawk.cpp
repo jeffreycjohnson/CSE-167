@@ -70,11 +70,12 @@ TestSceneHawk::TestSceneHawk()
 		BoxCollider* collider = new BoxCollider(glm::vec3(0, 3, 2), glm::vec3(5, 7, 9));
 		boids[i]->addComponent(collider);
 
-		/* Not quite working yet
 		ParticleTrail* trail = new ParticleTrail();
 		trail->material = new Material(Renderer::getShader(PARTICLE_TRAIL_SHADER));
-		(*trail->material)["size"] = 0.2f;
-		boids[i]->addComponent<ParticleTrail>(trail); */
+		(*trail->material)["size"] = 0.32f;
+		(*trail->material)["trailLength"] = 14.f;
+		(*trail->material)["colorTex"] = new Texture("assets/particle_trail.png");
+		boids[i]->addComponent<ParticleTrail>(trail);
 
 		Material* sphereMat = new Material(Renderer::getShader(DEFERRED_PBR_SHADER), false);
 		(*sphereMat)["useTextures"] = true;
