@@ -38,6 +38,7 @@ public:
     void bindShadowMap();
 
     Framebuffer * fbo;
+    static glm::mat4 shadowMatrix;
 };
 
 class SpotLight : public Light

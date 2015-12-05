@@ -53,9 +53,17 @@ TestSceneHawk::TestSceneHawk()
     camera->addComponent(Renderer::camera);
     camera->transform.translate(0, 0, 20);
 
-    sun = new GameObject();
-    sun->addComponent(new DirectionalLight(true));
-    sun->transform.translate(0, 0, 20);
+    sun = loadScene("assets/test_sphere.obj");//new GameObject();
+    auto sunLight = new DirectionalLight(true);
+    sunLight->color = glm::vec3(0.5, 0.5, 0.5);
+    sun->addComponent(sunLight);
+    sun->transform.translate(0, 0, 10);
+    Material* m = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
+    (*m)["useTextures"] = false;
+    (*m)["testMetal"] = (0) / 7.f;
+    (*m)["testRough"] = (0) / 7.f;
+    (*m)["normalTex"] = blankNormal;
+    sun->setMaterial(m);
     GameObject::SceneRoot.addChild(*sun);
 
 	emitter = new GameObject();

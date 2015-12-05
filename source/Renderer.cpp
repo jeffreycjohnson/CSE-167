@@ -6,6 +6,7 @@
 #include "Skybox.h"
 #include "TestSceneHawk.h"
 #include "Input.h"
+#include "Light.h"
 
 
 #define MODEL_MATRIX "uM_Matrix"
@@ -14,6 +15,8 @@
 
 int Renderer::width = 0;
 int Renderer::height = 0;
+
+glm::mat4 Renderer::view, Renderer::perspective;
 
 Shader* Renderer::currentShader;
 Shader* shaderList[SHADER_COUNT];
@@ -108,9 +111,8 @@ void Renderer::init(int window_width, int window_height) {
         "source/shaders/forward_pbr_skeletal.vert", "source/shaders/shadow.frag"
         );
 
-    auto ortho = glm::ortho<float>(-25, 25, -25, 25, 0, 50);
-    (*shaderList[SHADOW_SHADER])["uP_Matrix"] = ortho;
-    (*shaderList[SHADOW_SHADER_ANIM])["uP_Matrix"] = ortho;
+    (*shaderList[SHADOW_SHADER])["uP_Matrix"] = DirectionalLight::shadowMatrix;
+    (*shaderList[SHADOW_SHADER_ANIM])["uP_Matrix"] = DirectionalLight::shadowMatrix;
 
 	currentShader = shaderList[FORWARD_PBR_SHADER];
 	currentShader->use();
@@ -192,8 +194,9 @@ void Renderer::extractObjects() {
 }
 
 void Renderer::applyPerFrameData() {
+    view = camera->getCameraMatrix();
 	for (int shaderId : shaderViewList) {
-		(*Renderer::getShader(shaderId))[VIEW_MATRIX] = camera->getCameraMatrix();
+		(*Renderer::getShader(shaderId))[VIEW_MATRIX] =view;
 	}
 	for (int shaderId : shaderCameraPosList) {
 		(*Renderer::getShader(shaderId))["cameraPos"] = Renderer::camera->gameObject->transform.getWorldPosition();
@@ -248,6 +251,6 @@ void Renderer::setModelMatrix(glm::mat4 transform) {
 void Renderer::resize(int width, int height) {
 	glViewport(0, 0, width, height);
 
-	glm::mat4 perspective = glm::perspective((float)(atan(1)*4.0f / 3.0f), width / (float)height, .1f, 100.f);
+	perspective = glm::perspective((float)(atan(1)*4.0f / 3.0f), width / (float)height, .1f, 100.f);
 	updatePerspective(perspective);
 }

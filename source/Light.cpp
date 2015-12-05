@@ -3,6 +3,10 @@
 #include "Renderer.h"
 #include "GameObject.h"
 #include "Framebuffer.h"
+#include <gtc/matrix_transform.hpp>
+#include <gtc/matrix_inverse.hpp>
+
+glm::mat4 DirectionalLight::shadowMatrix = glm::ortho<float>(-25, 25, -25, 25, 0, 50);
 
 void Light::deferredHelper(const std::string& meshName)
 {
@@ -17,7 +21,7 @@ void Light::deferredHelper(const std::string& meshName)
     (*Renderer::currentShader)["uLightPosition"] = gameObject->transform.getWorldPosition();
     (*Renderer::currentShader)["uLightColor"] = color;
     (*Renderer::currentShader)["uLightSize"] = radius;
-    (*Renderer::currentShader)["uLightDirection"] = glm::vec3(gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, -1, 0));
+    (*Renderer::currentShader)["uLightDirection"] = glm::vec3(gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, 1, 0));
     glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
     CHECK_ERROR();
 }
@@ -64,9 +68,16 @@ void DirectionalLight::forwardPass(int index)
 
 void DirectionalLight::deferredPass()
 {
+    glDisable(GL_STENCIL_TEST);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
     (*Renderer::currentShader)["uLightType"] = 1;
     (*Renderer::currentShader)["uM_Matrix"] = glm::mat4();
+    (*Renderer::currentShader)["uV_Matrix"] = glm::mat4();
+    (*Renderer::currentShader)["uP_Matrix"] = glm::mat4();
     deferredHelper("Plane");
+    (*Renderer::currentShader)["uV_Matrix"] = Renderer::view;
+    (*Renderer::currentShader)["uP_Matrix"] = Renderer::perspective;
 }
 
 void DirectionalLight::bindShadowMap()
@@ -74,6 +85,9 @@ void DirectionalLight::bindShadowMap()
     if(fbo && shadowCaster)
     {
         fbo->bind(0, nullptr);
+        auto mat = glm::affineInverse(gameObject->transform.getTransformMatrix());
+        (*Renderer::getShader(SHADOW_SHADER_ANIM))["uV_Matrix"] = mat;
+        (*Renderer::getShader(SHADOW_SHADER))["uV_Matrix"] = mat;
     }
 }
 

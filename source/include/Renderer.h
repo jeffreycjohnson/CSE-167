@@ -34,6 +34,8 @@ class Renderer
 		static GPUData gpuData;
         static std::list<RenderPass*> passes;
 
+        static glm::mat4 perspective, view;
+
 		static int shaderForwardLightList[2];
 
 		static void init(int w, int h);

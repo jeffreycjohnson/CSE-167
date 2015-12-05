@@ -3,7 +3,6 @@
 #include "Light.h"
 #include "Mesh.h"
 #include "Renderer.h"
-#include <gtc/matrix_transform.hpp>
 
 void ForwardPass::setObjects(const std::list<Component*>& list) {
 	objectList = list;
