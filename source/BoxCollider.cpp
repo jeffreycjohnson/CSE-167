@@ -135,8 +135,17 @@ void BoxCollider::updateColliders()
 	// Optimize with sweep and prune eventually, for now use brute force
 	for (int i = 0; i < colliders.size(); i++)
 	{
+		// Optimize erasing colliders? How often will this really happen?
+		if (colliders[i] == nullptr)
+		{
+			colliders.erase(colliders.begin() + i);
+		}
 		for (int e = i; e < colliders.size(); e++)
 		{
+			if (colliders[e] == nullptr)
+			{
+				colliders.erase(colliders.begin() + e);
+			}
 			if (i != e && checkCollision(i, e))
 			{
 				// Check for precise collision?
