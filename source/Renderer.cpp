@@ -6,6 +6,7 @@
 #include "Skybox.h"
 #include "TestSceneHawk.h"
 #include "Input.h"
+#include "Timer.h"
 
 
 #define MODEL_MATRIX "uM_Matrix"
@@ -24,6 +25,7 @@ int shaderEnvironmentList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEF
 int shaderPerspectiveList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER, EMITTER_SHADER, EMITTER_BURST_SHADER, PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING, BASIC_SHADER };
 
 Camera* Renderer::camera = new Camera();
+float Renderer::prevFOV = 1;
 
 GPUData Renderer::gpuData;
 
@@ -158,7 +160,13 @@ void Renderer::loop() {
     switchShader(FBO_HDR);
     dynamic_cast<DeferredPass*>(passes.front())->fbo->draw();
 
-
+	camera->update(Timer::deltaTime());
+	if (camera->getFOV() != prevFOV)
+	{
+		//glm::mat4 perspective = glm::perspective(camera->getFOV(), width / (float)height, .1f, 100.f);
+		//updatePerspective(perspective);
+		prevFOV = camera->getFOV();
+	}
 
 	if (Input::getKey("b"))
 	{
@@ -237,6 +245,9 @@ void Renderer::setModelMatrix(glm::mat4 transform) {
 void Renderer::resize(int width, int height) {
 	glViewport(0, 0, width, height);
 
-	glm::mat4 perspective = glm::perspective((float)(atan(1)*4.0f / 3.0f), width / (float)height, .1f, 100.f);
+	Renderer::width = width;
+	Renderer::height = height;
+
+	glm::mat4 perspective = glm::perspective(camera->getFOV(), width / (float)height, .1f, 100.f);
 	updatePerspective(perspective);
 }

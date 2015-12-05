@@ -1,5 +1,6 @@
 #include "Framebuffer.h"
 #include "Renderer.h"
+#include "Camera.h"
 #include <gtc/matrix_transform.hpp>
 
 
@@ -88,7 +89,7 @@ void Framebuffer::bind(int bufferCount, GLuint *buffersToDraw) {
 
 	//TODO use Renderer::resize()?
 	glViewport(0, 0, width, height);
-	glm::mat4 perspective = glm::perspective((float)(atan(1)*4.0f / 3.0f), width / (float)height, .1f, 100.f);
+	glm::mat4 perspective = glm::perspective(Renderer::camera->getFOV(), width / (float)height, .1f, 100.f);
 	Renderer::updatePerspective(perspective);
 }
 
@@ -96,7 +97,7 @@ void Framebuffer::unbind() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glViewport(0, 0, Renderer::getWindowWidth(), Renderer::getWindowHeight());
-	glm::mat4 perspective = glm::perspective((float)(atan(1)*4.0f / 3.0f), Renderer::getWindowWidth() / (float)Renderer::getWindowHeight(), .1f, 100.f);
+	glm::mat4 perspective = glm::perspective(Renderer::camera->getFOV(), Renderer::getWindowWidth() / (float)Renderer::getWindowHeight(), .1f, 100.f);
 	Renderer::updatePerspective(perspective);
 }
 

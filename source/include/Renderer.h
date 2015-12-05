@@ -58,6 +58,7 @@ class Renderer
 
 private:
     static int width, height;
+	static float prevFOV;
     Renderer() = delete;
 };
 
