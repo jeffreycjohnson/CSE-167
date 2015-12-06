@@ -40,9 +40,9 @@ void Camera::update(float deltaTime)
 	if (Input::getKeyDown("space"))
 		screenShake(0.5, 1);
 	if (Input::getKeyDown("down"))
-		fov += 0.75;
+		fov += 0.25;
 	if (Input::getKeyDown("up"))
-		fov -= 0.75;
+		fov -= 0.25;
 
 	if (fov != prevFOV)
 	{
