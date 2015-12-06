@@ -74,14 +74,14 @@ TestSceneHawk::TestSceneHawk()
 	emitter->transform.translate(0, 0, 2);
 	GameObject::SceneRoot.addChild(*emitter);
 
-	int count = 30;
+	int count = 10;
 	GameObject** boids = new GameObject*[count];
 	for (int i = 0; i < count; i++)
 	{
 		boids[i] = new GameObject();
 		GameObject* boid = loadScene("assets/intercepter.dae");
 		boids[i]->addChild(*boid);
-		boids[i]->transform.scale(0.25);
+		boids[i]->transform.scale(1);
 
 		BoxCollider* collider = new BoxCollider(glm::vec3(0, 3, 2), glm::vec3(5, 7, 9));
 		boids[i]->addComponent(collider);

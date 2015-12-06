@@ -23,6 +23,8 @@
 #define BASIC_SHADER 12
 #define FORWARD_UNLIT 13
 
+#define FORWARD_SHADER_LIGHT_MAX 5
+
 struct GPUData {
 	int vaoHandle;
 	int textureSlot[20];

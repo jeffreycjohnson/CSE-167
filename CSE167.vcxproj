@@ -177,6 +177,7 @@
     <ClCompile Include="source\Renderer.cpp" />
     <ClCompile Include="source\Shader.cpp" />
     <ClCompile Include="source\Skybox.cpp" />
+    <ClCompile Include="source\Sound.cpp" />
     <ClCompile Include="source\SkyboxPass.cpp" />
     <ClCompile Include="source\Swarm.cpp" />
     <ClCompile Include="source\TestSceneHawk.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="source\include\RenderPass.h" />
     <ClInclude Include="source\include\Shader.h" />
     <ClInclude Include="source\include\Skybox.h" />
+    <ClInclude Include="source\include\Sound.h" />
     <ClInclude Include="source\include\Swarm.h" />
     <ClInclude Include="source\include\TestSceneHawk.h" />
     <ClInclude Include="source\include\Texture.h" />

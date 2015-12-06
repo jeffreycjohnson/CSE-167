@@ -14,7 +14,9 @@ void ForwardPass::setLights(const std::list<Light*>& list) {
 
 void ForwardPass::render() {
 	unsigned int lightIndex = 0;
+	//TODO sort lights by importance?
 	for (Light* l : lightList) {
+		if (lightIndex > FORWARD_SHADER_LIGHT_MAX) break;
 		l->forwardPass(lightIndex++);
 	}
 	for (Component* c : objectList) {

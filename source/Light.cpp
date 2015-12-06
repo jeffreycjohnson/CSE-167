@@ -65,6 +65,10 @@ DirectionalLight::~DirectionalLight()
 
 void DirectionalLight::forwardPass(int index)
 {
+	for (int shaderId : Renderer::shaderForwardLightList) {
+		(*Renderer::getShader(shaderId))["uLightData[" + std::to_string(2 * index) + "]"] = glm::vec4(gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, 1, 0));
+		(*Renderer::getShader(shaderId))["uLightData[" + std::to_string(2 * index + 1) + "]"] = glm::vec4(color, 0);
+	}
 }
 
 void DirectionalLight::deferredPass()

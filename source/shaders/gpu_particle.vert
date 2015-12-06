@@ -32,6 +32,7 @@ uniform float minStartAngle;
 uniform float maxStartAngle;
 uniform float minAngularVelocity;
 uniform float maxAngularVelocity;
+uniform uint rotateTowardsVelocity; // 0 or 1
 
 out float opacity;
 out float angle;
@@ -78,7 +79,8 @@ void main()
 	vec2 velocity_screen = ((transformMatrix) * vec4(velocity - emitterVelocity + (tmpVec * t), 1.0)).xy;
 
     // Angle
-	angle = atan(velocity_screen.y, velocity_screen.x);//range(minStartAngle, maxStartAngle) + range(minAngularVelocity, maxAngularVelocity) * t;
+	angle = (rotateTowardsVelocity) * atan(velocity_screen.y, velocity_screen.x) 
+		+ (1u - rotateTowardsVelocity) * (range(minStartAngle, maxStartAngle) + range(minAngularVelocity, maxAngularVelocity) * t);
 
 	// Opacity
 	tmp = t / duration;

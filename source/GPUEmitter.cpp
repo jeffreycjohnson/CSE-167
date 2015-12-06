@@ -41,6 +41,7 @@ GPUEmitter::GPUEmitter(GameObject* go, string tex, bool burstEmitter)
 	maxStartAngleUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "maxStartAngle");
 	minAngularVelocityUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "minAngularVelocity");
 	maxAngularVelocityUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "maxAngularVelocity");
+	rotateTowardsVelocityUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "rotateTowardsVelocity");
 
 	prevPosition = gameObject->transform.position;
 	velocity = { 0, 0, 0 };
@@ -71,6 +72,7 @@ GPUEmitter::GPUEmitter(GameObject* go, string tex, bool burstEmitter)
 	enabled = false;
 	loop = false;
 	additive = true;
+	rotateTowardsVelocity = true;
 	startTime = Timer::time();
 }
 
@@ -260,6 +262,8 @@ GLuint GPUEmitter::genParticles()
 	glUniform1f(maxStartAngleUniform, maxStartAngle);
 	glUniform1f(minAngularVelocityUniform, minAngularVelocity);
 	glUniform1f(maxAngularVelocityUniform, maxAngularVelocity);
+	unsigned int rotateVel = rotateTowardsVelocity ? 1 : 0;
+	glUniform1ui(rotateTowardsVelocityUniform, rotateVel);
 
 	// We don't need the arrays anymore, since we already passed them to the GPU
 	if (!burst)
