@@ -2,11 +2,12 @@
 #include "Mesh.h"
 #include "Camera.h"
 #include "Framebuffer.h"
-#include <gtc/matrix_transform.inl>
+#include <gtc/matrix_transform.hpp>
 #include "Skybox.h"
 #include "TestSceneHawk.h"
 #include "Input.h"
 #include "Timer.h"
+#include "Light.h"
 
 
 #define MODEL_MATRIX "uM_Matrix"
@@ -16,13 +17,19 @@
 int Renderer::width = 0;
 int Renderer::height = 0;
 
+glm::mat4 Renderer::view, Renderer::perspective;
+
 Shader* Renderer::currentShader;
 Shader* shaderList[SHADER_COUNT];
 int Renderer::shaderForwardLightList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM };
-int shaderViewList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER, PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING, SKYBOX_SHADER, BASIC_SHADER };
+int shaderViewList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER,
+    PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING, SKYBOX_SHADER,
+    SHADOW_SHADER, SHADOW_SHADER_ANIM, BASIC_SHADER };
 int shaderCameraPosList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 int shaderEnvironmentList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
-int shaderPerspectiveList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER, EMITTER_SHADER, EMITTER_BURST_SHADER, PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING, BASIC_SHADER };
+int shaderPerspectiveList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER, EMITTER_SHADER,
+    EMITTER_BURST_SHADER, PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING,
+    BASIC_SHADER };
 
 Camera* Renderer::camera = new Camera();
 float Renderer::prevFOV = 1;
@@ -39,7 +46,8 @@ TestSceneHawk* testScene;
 
 Skybox* skybox;
 
-ForwardPass *regularPass, *particlePass;
+ForwardPass *regularPass, *particlePass, *shadowPass;
+DeferredPass *deferredPass;
 
 void Renderer::init(int window_width, int window_height) {
 	width = window_width;
@@ -98,6 +106,17 @@ void Renderer::init(int window_width, int window_height) {
 		"source/shaders/particle_trail.vert", "source/shaders/particle_trail.frag"
 		);
 
+    shaderList[SHADOW_SHADER] = new Shader(
+        "source/shaders/forward_pbr.vert", "source/shaders/shadow.frag"
+        );
+
+    shaderList[SHADOW_SHADER_ANIM] = new Shader(
+        "source/shaders/forward_pbr_skeletal.vert", "source/shaders/shadow.frag"
+        );
+
+    (*shaderList[SHADOW_SHADER])["uP_Matrix"] = DirectionalLight::shadowMatrix;
+    (*shaderList[SHADOW_SHADER_ANIM])["uP_Matrix"] = DirectionalLight::shadowMatrix;
+
 	shaderList[BASIC_SHADER] = new Shader(
 		"source/shaders/simple.vert", "source/shaders/simple.frag"
 		);
@@ -128,15 +147,18 @@ void Renderer::init(int window_width, int window_height) {
 	
 	fboTest = new Framebuffer(width, height, 2, false, true);
 
-	Renderer::resize(width, height);
+	resize(width, height);
 
 	regularPass = new ForwardPass();
 	particlePass = new ForwardPass();
+    shadowPass = new ShadowPass();
+    deferredPass = new DeferredPass(width, height);
 
-    Renderer::passes.push_back(new DeferredPass(width, height));
-	Renderer::passes.push_back(regularPass);
-	Renderer::passes.push_back(new SkyboxPass(skybox));
-	Renderer::passes.push_back(particlePass);
+    passes.push_back(shadowPass);
+    passes.push_back(deferredPass);
+	passes.push_back(regularPass);
+	passes.push_back(new SkyboxPass(skybox));
+	passes.push_back(particlePass);
 
 	lastTime = glfwGetTime();
 }
@@ -155,10 +177,10 @@ void Renderer::loop() {
 
 	testScene->loop(); /* This is just temporary - all it does it do translation without having to create temporary components */
 
-    dynamic_cast<DeferredPass*>(passes.front())->fbo->unbind();
-    dynamic_cast<DeferredPass*>(passes.front())->fbo->bindTexture(0, 3);
+    deferredPass->fbo->unbind();
+    deferredPass->fbo->bindTexture(0, 3);
     switchShader(FBO_HDR);
-    dynamic_cast<DeferredPass*>(passes.front())->fbo->draw();
+    deferredPass->fbo->draw();
 
 	camera->update(Timer::deltaTime());
 	if (camera->getFOV() != prevFOV)
@@ -174,14 +196,16 @@ void Renderer::loop() {
 		Renderer::switchShader(BASIC_SHADER);
 		testScene->debugDraw();
 		glEnable(GL_DEPTH_TEST);
-		dynamic_cast<DeferredPass*>(passes.front())->fbo->blitAll();
-	}
+        deferredPass->fbo->blitAll();
+}
 }
 
 void Renderer::extractObjects() {
 	GameObject::PassList passList;
 	GameObject::SceneRoot.extract(passList);
 
+    shadowPass->setLights(passList.light);
+    shadowPass->setObjects(passList.deferred);
 	regularPass->setObjects(passList.forward);
 	regularPass->setLights(passList.light);
 	particlePass->setObjects(passList.particle);
@@ -189,11 +213,12 @@ void Renderer::extractObjects() {
 }
 
 void Renderer::applyPerFrameData() {
+    view = camera->getCameraMatrix();
 	for (int shaderId : shaderViewList) {
-		(*Renderer::getShader(shaderId))[VIEW_MATRIX] = camera->getCameraMatrix();
+		(*Renderer::getShader(shaderId))[VIEW_MATRIX] =view;
 	}
 	for (int shaderId : shaderCameraPosList) {
-		(*Renderer::getShader(shaderId))["cameraPos"] = Renderer::camera->transform.getWorldPosition();
+		(*Renderer::getShader(shaderId))["cameraPos"] = Renderer::camera->gameObject->transform.getWorldPosition();
 	}
 }
 
@@ -248,6 +273,6 @@ void Renderer::resize(int width, int height) {
 	Renderer::width = width;
 	Renderer::height = height;
 
-	glm::mat4 perspective = glm::perspective(camera->getFOV(), width / (float)height, .1f, 100.f);
+	perspective = glm::perspective(camera->getFOV(), width / (float)height, .1f, 100.f);
 	updatePerspective(perspective);
 }

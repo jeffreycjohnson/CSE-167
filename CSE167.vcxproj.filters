@@ -93,9 +93,6 @@
     <ClCompile Include="source\ForwardPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SkyboxPass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\ParticleTrail.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -103,6 +100,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\Sound.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\SkyboxPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -227,6 +227,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="source\shaders\particle_trail.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="source\shaders\shadow.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

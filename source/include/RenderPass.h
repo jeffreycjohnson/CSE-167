@@ -17,8 +17,8 @@ class ForwardPass : public RenderPass
 public:
 	void setObjects(const std::list<Component*>& list);
 	void setLights(const std::list<Light*>& list);
-    void render() override;
-private:
+    virtual void render() override;
+protected:
 	std::list<Component*> objectList;
 	std::list<Light*> lightList;
 };
@@ -38,6 +38,12 @@ public:
 	SkyboxPass(Skybox* skybox);
 	void render() override;
 	Skybox* skybox;
+};
+
+class ShadowPass : public ForwardPass
+{
+public:
+    void render() override;
 };
 
 #endif

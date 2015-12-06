@@ -20,7 +20,9 @@
 #include "Light.h"
 #include "ParticleTrail.h"
 
-GameObject* scene = new GameObject();
+GameObject *scene = new GameObject();
+GameObject *camera = new GameObject();
+GameObject *sun;
 GameObject *bear;
 GameObject *light;
 GameObject *light2;
@@ -53,8 +55,22 @@ TestSceneHawk::TestSceneHawk()
 	(*trailMaterial)["colorTex"] = new Texture("assets/particle_trail.png");
 
 	GameObject::SceneRoot.addChild(*scene);
-	scene->addChild(*Renderer::camera);
-	Renderer::camera->transform.translate(0, 0, 20);
+    scene->addChild(*camera);
+    camera->addComponent(Renderer::camera);
+    camera->transform.translate(0, 0, 20);
+
+    sun = loadScene("assets/test_sphere.obj");//new GameObject();
+    auto sunLight = new DirectionalLight(true);
+    sunLight->color = glm::vec3(0.5, 0.5, 0.5);
+    sun->addComponent(sunLight);
+    sun->transform.translate(0, 0, 10);
+    Material* m = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
+    (*m)["useTextures"] = false;
+    (*m)["testMetal"] = (0) / 7.f;
+    (*m)["testRough"] = (0) / 7.f;
+    (*m)["normalTex"] = blankNormal;
+    sun->setMaterial(m);
+    GameObject::SceneRoot.addChild(*sun);
 
 	emitter = new GameObject();
 	emitterComponent = new GPUEmitter(emitter, "assets/particles/particle.png", true);
@@ -68,8 +84,8 @@ TestSceneHawk::TestSceneHawk()
 	for (int i = 0; i < count; i++)
 	{
 		boids[i] = new GameObject();
-		GameObject* bearBoid = loadScene("assets/bear2.dae");
-		boids[i]->addChild(*bearBoid);
+		GameObject* boid = loadScene("assets/intercepter.dae");
+		boids[i]->addChild(*boid);
 		boids[i]->transform.scale(0.25);
 
 		BoxCollider* collider = new BoxCollider(glm::vec3(0, 3, 2), glm::vec3(5, 7, 9));
@@ -78,14 +94,6 @@ TestSceneHawk::TestSceneHawk()
 		ParticleTrail* trail = new ParticleTrail();
 		trail->material = trailMaterial;
 		boids[i]->addComponent<ParticleTrail>(trail);
-
-		Material* sphereMat = new Material(Renderer::getShader(DEFERRED_PBR_SHADER), false);
-		(*sphereMat)["useTextures"] = true;
-		(*sphereMat)["colorTex"] = blueColor;
-		(*sphereMat)["matTex"] = bearSpec;
-		(*sphereMat)["normalTex"] = bearNormal;
-		boids[i]->setMaterial(sphereMat);
-		bearBoid->getComponent<Animation>()->play(0, true);
 
 
 		GameObject::SceneRoot.addChild(*boids[i]);

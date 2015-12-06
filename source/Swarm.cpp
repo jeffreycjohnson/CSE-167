@@ -116,7 +116,7 @@ void Swarm::draw()
 	}
 	glm::vec3 prevPosition = neighbors[0]->transform.position;
 	neighbors[0]->transform.setPosition(target);
-	neighbors[0]->draw();
+	//neighbors[0]->draw();
 	neighbors[0]->transform.setPosition(prevPosition);
 
 	for (int i = 0; i < obstacles.size(); i++)

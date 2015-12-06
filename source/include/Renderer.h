@@ -7,7 +7,7 @@
 
 #include <glfw3.h>
 
-#define SHADER_COUNT 11
+#define SHADER_COUNT 13
 #define FORWARD_PBR_SHADER_ANIM 0
 #define FORWARD_PBR_SHADER 1
 #define SKYBOX_SHADER 2
@@ -18,7 +18,9 @@
 #define DEFERRED_PBR_SHADER 7
 #define DEFERRED_SHADER_LIGHTING 8
 #define PARTICLE_TRAIL_SHADER 9
-#define BASIC_SHADER 10
+#define SHADOW_SHADER 10
+#define SHADOW_SHADER_ANIM 11
+#define BASIC_SHADER 12
 
 struct GPUData {
 	int vaoHandle;
@@ -32,6 +34,8 @@ class Renderer
 		static Camera* camera;
 		static GPUData gpuData;
         static std::list<RenderPass*> passes;
+
+        static glm::mat4 perspective, view;
 
 		static int shaderForwardLightList[2];
 

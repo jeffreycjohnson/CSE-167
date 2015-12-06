@@ -6,6 +6,13 @@
 #include "Framebuffer.h"
 #include "Renderer.h"
 #include <functional>
+#include <gtc/matrix_inverse.hpp>
+
+const static glm::mat4 bias(
+    0.5, 0.0, 0.0, 0.0,
+    0.0, 0.5, 0.0, 0.0,
+    0.0, 0.0, 0.5, 0.0,
+    0.5, 0.5, 0.5, 1.0);
 
 DeferredPass::DeferredPass(int resx, int resy)
 {
@@ -63,6 +70,7 @@ void DeferredPass::render()
     (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["colorTex"] = 0;
     (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["normalTex"] = 1;
     (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["posTex"] = 2;
+    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["shadowTex"] = 3;
     CHECK_ERROR();
 
     std::function<void(GameObject*)> lightPass = [&](GameObject* obj)
@@ -70,7 +78,8 @@ void DeferredPass::render()
         auto l = obj->getComponent<Light>();
         if (l)
         {
-            if (!dynamic_cast<DirectionalLight*>(l))
+            auto d = dynamic_cast<DirectionalLight*>(l);
+            if (!d)
             {
                 glDrawBuffer(GL_NONE);
                 glDisable(GL_CULL_FACE);
@@ -89,6 +98,11 @@ void DeferredPass::render()
             {
                 glCullFace(GL_BACK);
                 glDisable(GL_STENCIL_TEST);
+                if(d->shadowCaster && d->fbo)
+                {
+                    d->fbo->bindDepthTexture(3);
+                    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["uShadow_Matrix"] = bias * DirectionalLight::shadowMatrix * glm::affineInverse(d->gameObject->transform.getTransformMatrix());
+                }
             }
 
             glEnable(GL_BLEND);
@@ -124,6 +138,8 @@ void DeferredPass::render()
     (*Renderer::currentShader)["uV_Matrix"] = glm::mat4();
     (*Renderer::currentShader)["uP_Matrix"] = glm::mat4();
     glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
+    (*Renderer::currentShader)["uV_Matrix"] = Renderer::view;
+    (*Renderer::currentShader)["uP_Matrix"] = Renderer::perspective;
     CHECK_ERROR();
 
     // TODO : Render Ambient

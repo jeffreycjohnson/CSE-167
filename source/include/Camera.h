@@ -5,7 +5,7 @@
 #include "GameObject.h"
 #include "Transform.h"
 
-class Camera : public GameObject
+class Camera : public Component
 {
 	private:
 		float shakeAmount, startShakeAmount, shakeDuration, startShakeDuration;

@@ -9,6 +9,7 @@ const float PI = 3.14159265359;
 uniform sampler2D colorTex; //color texture - rgb: color | a: metalness
 uniform sampler2D normalTex; //normal texture - rgb: normal | a: IOR
 uniform sampler2D posTex; //position texture - rgb: position | a: roughness
+uniform sampler2DShadow shadowTex;
 
 uniform samplerCube environment; //the environment cubemap to sample reflections from
 uniform float environment_mipmap; //the number of mipmaps the environment map has (used to select mipmap based on roughness)
@@ -23,6 +24,7 @@ uniform vec3 uLightDirection;
 uniform float uLightSize = 1.0f;
 uniform vec2 uScreenSize;
 uniform int uLightType;
+uniform mat4 uShadow_Matrix;
 
 
 //main algorithm from http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html
@@ -99,6 +101,7 @@ vec3 SpecularEnvMap(vec3 normal, vec3 view, float a, vec3 F0) {
 
 void main () {
   vec4 albedo = texture(colorTex, gl_FragCoord.xy / uScreenSize);
+  if(albedo.xyz == vec3(0)) discard;
   vec4 pos = texture(posTex, gl_FragCoord.xy / uScreenSize);
   vec4 normal = texture(normalTex, gl_FragCoord.xy / uScreenSize);
   vec3 mat = vec3(albedo.a, pos.w, normal.w);
@@ -126,27 +129,31 @@ void main () {
 	  vec3 specColor = SpecularEnvMap(normal.xyz, view, a, F0);
 	  vec3 color = diffuseColor + specColor;
   
-
 	  frag_color = vec4(color, 1.0);
   }
   else {
 	  vec3 lightDir;
 	  float lightDist;
+	  float shadow = 1;
 	  if(uLightType == 0) {
 		  lightDir = uLightPosition - pos.xyz;
 		  lightDist = length(lightDir);
+
+		  //Spherical light algorithm from http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf
+		  float sphereRadius = uLightSize;
+		  vec3 reflectedRay = reflect(-view, normal.xyz);
+		  vec3 centerToRay = dot(lightDir, reflectedRay) * reflectedRay - lightDir;
+		  lightDir = normalize(lightDir + centerToRay * clamp(sphereRadius / length(centerToRay), 0.0, 1.0));
+		  //todo normalize based on sphere size
 	  }
 	  else {
 		  lightDir = uLightDirection;
-		  lightDist = length((uLightPosition - pos.xyz));
+		  lightDist = 0;
+  
+		  vec3 shadowPos = (uShadow_Matrix * vec4(pos.xyz, 1.0)).xyz / (uShadow_Matrix * vec4(pos.xyz, 1.0)).w;
+		  shadowPos.z -= max(0.05 * (1.0 - dot(normal.xyz, lightDir)), 0.005);
+		  shadow = texture(shadowTex, shadowPos, 0);
 	  }
-
-	  //Spherical light algorithm from http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf
-	  float sphereRadius = uLightSize;
-	  vec3 reflectedRay = reflect(-view, normal.xyz);
-	  vec3 centerToRay = dot(lightDir, reflectedRay) * reflectedRay - lightDir;
-	  lightDir = normalize(lightDir + centerToRay * clamp(sphereRadius / length(centerToRay), 0.0, 1.0));
-	  //todo normalize based on sphere size
 
 
 	  float power = 1.0 / (lightDist * lightDist + 1.0);
@@ -154,13 +161,13 @@ void main () {
 	
 	  vec3 halfVec = normalize(view + lightDir);
 	  float dotNH = clamp(dot(normal.xyz, halfVec), 0.0, 1.0);
-
-	  vec3 specColor = GGX_D(dotNH, a) * SpecularBRDF(uLightColor, normal.xyz, view, lightDir, a, F0, 1) * power;
+	  
+	  float a2 = a*a;
+	  vec3 specColor = GGX_D(dotNH, a2*a2) * SpecularBRDF(uLightColor, normal.xyz, view, lightDir, a, F0, 1) * power;
 
 	  vec3 diffuseColor = ((1.0-mat.r) * albedo.rgb) * diffuseLight;
 	  vec3 color = diffuseColor + specColor;
-  
 
-	  frag_color = vec4(color, 1.0);
+	  frag_color = vec4(color * shadow, 1.0);
   }
 }

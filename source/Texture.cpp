@@ -1,7 +1,15 @@
 #include "Texture.h"
 #include <SOIL/SOIL.h>
+#include <unordered_map>
+
+std::unordered_map<std::string, GLuint> textures;
 
 Texture::Texture(std::string filename, bool srgb, GLenum wrap) {
+    if(textures.count(filename))
+    {
+        textureHandle = textures[filename];
+        return;
+    }
     glGenTextures(1, &textureHandle);
 
     glBindTexture(GL_TEXTURE_2D, textureHandle);
@@ -38,6 +46,8 @@ Texture::Texture(std::string filename, bool srgb, GLenum wrap) {
 
 	glBindTexture(GL_TEXTURE_2D, 0);
     CHECK_ERROR();
+
+    textures[filename] = textureHandle;
 }
 
 Texture::Texture(GLuint handle) : textureHandle(handle) {

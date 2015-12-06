@@ -62,7 +62,7 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
 		std::string name = currentNode->mName.C_Str();
 		if (name == "defaultobject") name = filename + std::to_string(counter);
 
-        if (Mesh::meshMap.find(name) == Mesh::meshMap.end()) {
+        if (!Mesh::meshMap.count(name)) {
             int meshIndex = *currentNode->mMeshes;
             Mesh::loadMesh(name, scene->mMeshes[meshIndex]);
         }
@@ -73,11 +73,9 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
         auto mat = new Material(Renderer::getShader(scene->mMeshes[*currentNode->mMeshes]->HasBones() ? DEFERRED_PBR_SHADER_ANIM : DEFERRED_PBR_SHADER));
         if (aMat->GetTextureCount(aiTextureType_DIFFUSE) > 0)
         {
-            aiString path;
-            aiTextureMapMode mode = aiTextureMapMode_Wrap;
-            aMat->GetTexture(aiTextureType_DIFFUSE, 0, &path,
-                nullptr, nullptr, nullptr, nullptr, &mode);
-            auto tex = new Texture(getPath(filename) + path.C_Str(), true, getMapping(mode));
+            aiString path("intercepter_albedo.png");
+            aMat->GetTexture(aiTextureType_DIFFUSE, 0, &path);
+            auto tex = new Texture(getPath(filename) + path.C_Str(), true);
             (*mat)["colorTex"] = tex;
         }
         else
@@ -91,10 +89,8 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
         if (aMat->GetTextureCount(aiTextureType_NORMALS) > 0)
         {
             aiString path;
-            aiTextureMapMode mode = aiTextureMapMode_Wrap;
-            aMat->GetTexture(aiTextureType_NORMALS, 0, &path,
-                nullptr, nullptr, nullptr, nullptr, &mode);
-            auto tex = new Texture(getPath(filename) + path.C_Str(), false, getMapping(mode));
+            aMat->GetTexture(aiTextureType_NORMALS, 0, &path);
+            auto tex = new Texture(getPath(filename) + path.C_Str(), false);
             (*mat)["normalTex"] = tex;
         }
         else
@@ -104,10 +100,8 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
         if (aMat->GetTextureCount(aiTextureType_SPECULAR) > 0)
         {
             aiString path;
-            aiTextureMapMode mode = aiTextureMapMode_Wrap;
-            aMat->GetTexture(aiTextureType_SPECULAR, 0, &path,
-                nullptr, nullptr, nullptr, nullptr, &mode);
-            auto tex = new Texture(getPath(filename) + path.C_Str(), false, getMapping(mode));
+            aMat->GetTexture(aiTextureType_SPECULAR, 0, &path);
+            auto tex = new Texture(getPath(filename) + path.C_Str(), false);
             (*mat)["matTex"] = tex;
         }
         else
@@ -115,6 +109,7 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
             (*mat)["matTex"] = new Texture(glm::vec4(0, 0.45, 0.7, 1));
         }
         mat->transparent = false;
+        (*mat)["useTextures"] = true;
         mesh->setMaterial(mat);
 
 		nodeObject->addComponent(mesh);

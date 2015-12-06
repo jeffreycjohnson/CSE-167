@@ -60,6 +60,10 @@ void GameObject::extract(PassList & list)
 		if (mesh->material && mesh->material->transparent) {
 			list.forward.push_back(mesh);
 		}
+        else
+        {
+            list.deferred.push_back(mesh);
+        }
 	}
 	GPUEmitter* emitter;
 	if ((emitter = getComponent<GPUEmitter>()) != nullptr) {

@@ -12,10 +12,10 @@
   </asset>
   <library_images>
     <image id="intercepter_albedo_png" name="intercepter_albedo_png">
-      <init_from>intercepter_albedo.png</init_from>
+      <init_from>lowres/intercepter_albedo.png</init_from>
     </image>
     <image id="intercepter_prb_png" name="intercepter_prb_png">
-      <init_from>intercepter_prb.png</init_from>
+      <init_from>lowres/intercepter_prb.png</init_from>
     </image>
   </library_images>
   <library_effects>

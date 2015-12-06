@@ -157,7 +157,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="SkyboxPass.cpp" />
     <ClCompile Include="source\Animation.cpp" />
     <ClCompile Include="source\BoxCollider.cpp" />
     <ClCompile Include="source\Camera.cpp" />
@@ -179,6 +178,7 @@
     <ClCompile Include="source\Shader.cpp" />
     <ClCompile Include="source\Skybox.cpp" />
     <ClCompile Include="source\Sound.cpp" />
+    <ClCompile Include="source\SkyboxPass.cpp" />
     <ClCompile Include="source\Swarm.cpp" />
     <ClCompile Include="source\TestSceneHawk.cpp" />
     <ClCompile Include="source\Texture.cpp" />
@@ -228,6 +228,7 @@
     <None Include="source\shaders\gpu_particle_burst.vert" />
     <None Include="source\shaders\particle_trail.frag" />
     <None Include="source\shaders\particle_trail.vert" />
+    <None Include="source\shaders\shadow.frag" />
     <None Include="source\shaders\skybox.frag" />
     <None Include="source\shaders\skybox.vert" />
   </ItemGroup>
