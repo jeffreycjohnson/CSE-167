@@ -9,6 +9,7 @@
 #include "glew.h"
 
 class Animation;
+class BoxCollider;
 class Camera;
 class Component;
 class Framebuffer;
