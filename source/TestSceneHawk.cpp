@@ -13,6 +13,7 @@
 #include "Timer.h"
 #include "ObjectLoader.h"
 #include "GPUEmitter.h"
+#include "BoxCollider.h"
 #include "Swarm.h"
 #include "Input.h"
 #include "Animation.h"
@@ -48,6 +49,11 @@ TestSceneHawk::TestSceneHawk()
 	blankNormal = new Texture("assets/blank_normal.png", false);
 	Texture* blueColor = new Texture("assets/blank_normal.png", true);
 
+	Material* trailMaterial = new Material(Renderer::getShader(PARTICLE_TRAIL_SHADER));
+	(*trailMaterial)["size"] = 0.32f;
+	(*trailMaterial)["trailLength"] = 64.f; //set it to maxPoints
+	(*trailMaterial)["colorTex"] = new Texture("assets/particle_trail.png");
+
 	GameObject::SceneRoot.addChild(*scene);
     scene->addChild(*camera);
     camera->addComponent(Renderer::camera);
@@ -82,11 +88,12 @@ TestSceneHawk::TestSceneHawk()
 		boids[i]->addChild(*boid);
 		boids[i]->transform.scale(0.25);
 
-		/* Not quite working yet
+		BoxCollider* collider = new BoxCollider(glm::vec3(0, 3, 2), glm::vec3(5, 7, 9));
+		boids[i]->addComponent(collider);
+
 		ParticleTrail* trail = new ParticleTrail();
-		trail->material = new Material(Renderer::getShader(PARTICLE_TRAIL_SHADER));
-		(*trail->material)["size"] = 0.2f;
-		boids[i]->addComponent<ParticleTrail>(trail); */
+		trail->material = trailMaterial;
+		boids[i]->addComponent<ParticleTrail>(trail);
 
 
 		GameObject::SceneRoot.addChild(*boids[i]);
@@ -178,11 +185,18 @@ void TestSceneHawk::loop() {
 		}
 	}
 
+	BoxCollider::updateColliders();
+
 	swarm->update(Timer::time());
 	swarm->draw();
 
 	if (Input::getKeyDown("space"))
 		emitter->getComponent<GPUEmitter>()->play();
+}
+
+void TestSceneHawk::debugDraw()
+{
+	GameObject::SceneRoot.debugDraw();
 }
 
 TestSceneHawk::~TestSceneHawk()

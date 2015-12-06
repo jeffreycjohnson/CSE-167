@@ -1,14 +1,15 @@
 #version 330
 
+in float vDistance;
 in float vDir;
 
-uniform sampler2D inputTex;
+uniform float trailLength;
+uniform sampler2D colorTex;
 
 
 layout(location = 0) out vec4 fragColor;
 
 void main() {
-	//vec3 color = texture(inputTex, vTexCoord).rgb;
-	float strength = 1-abs(vDir);
-    fragColor = vec4(1*5,5*strength, 5*strength*strength, 0.5*strength);
+	vec2 texCoord = vec2(vDir * 0.5 + 0.5,  clamp((trailLength - vDistance) / trailLength, 0.0, 1.0));
+    fragColor = vec4(1,1,1, texCoord.y) * texture(colorTex, texCoord);
 }

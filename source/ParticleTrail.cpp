@@ -6,19 +6,44 @@
 #define FLOAT_SIZE 4
 #define VERTEX_ATTRIB_LOCATION 0
 #define NORMAL_ATTRIB_LOCATION 1
-#define DIR_ATTRIB_LOCATION 2
+#define DIST_ATTRIB_LOCATION 2
+#define DIR_ATTRIB_LOCATION 3
 
-void ParticleTrail::uploadData(std::vector<float> &megaArray) {
-	if (megaArray.size() > 0) {
+void ParticleTrail::uploadData() {
+	if (pointList.size() < 1) {
+		return;
+	}
+	int arrayIndex=0;
+	float distance = 0;
+	glm::vec3 lastPosition;
+	for (TrailPoint& currentPoint : pointList) {
+		distance += (arrayIndex == 0) ? 0 : 1;//glm::length(currentPoint.position - lastPosition);
+		lastPosition = currentPoint.position;
+
+		//add 2 points - one for each side of trail
+		for (int corner : {1, -1}) {
+			for (int dimen = 0; dimen < 3; ++dimen) {
+				megaArray[arrayIndex++] = currentPoint.position[dimen];
+			}
+			for (int dimen = 0; dimen < 3; ++dimen) {
+				megaArray[arrayIndex++] = currentPoint.normal[dimen];
+			}
+			megaArray[arrayIndex++] = distance;
+			megaArray[arrayIndex++] = corner;
+		}
+	}
+
+	if (arrayIndex > 2 * (elementStride * maxPoints)) throw "Out of range";
+
 		glBindVertexArray(vaoHandle);
 		glBindBuffer(GL_ARRAY_BUFFER, meshBuffer);
-		glBufferData(GL_ARRAY_BUFFER, megaArray.size() * sizeof(float), &(megaArray[0]), GL_STREAM_DRAW);
-		int stride = FLOAT_SIZE * (3 + 3 + 1);
+		glBufferData(GL_ARRAY_BUFFER, arrayIndex * sizeof(float), megaArray, GL_STREAM_DRAW);
+		int stride = FLOAT_SIZE * (elementStride);
 		int currentOffset = 0;
 		glVertexAttribPointer(VERTEX_ATTRIB_LOCATION, 3, GL_FLOAT, false, stride, (GLvoid*)0); currentOffset += (FLOAT_SIZE * 3);
 		glVertexAttribPointer(NORMAL_ATTRIB_LOCATION, 3, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (FLOAT_SIZE * 3);
+		glVertexAttribPointer(DIST_ATTRIB_LOCATION, 1, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (FLOAT_SIZE * 1);
 		glVertexAttribPointer(DIR_ATTRIB_LOCATION, 1, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (FLOAT_SIZE * 1);
-	}
 }
 ParticleTrail::ParticleTrail()
 {
@@ -27,20 +52,25 @@ ParticleTrail::ParticleTrail()
 	glBindVertexArray(vaoHandle);
 	glEnableVertexAttribArray(VERTEX_ATTRIB_LOCATION);
 	glEnableVertexAttribArray(NORMAL_ATTRIB_LOCATION);
+	glEnableVertexAttribArray(DIST_ATTRIB_LOCATION);
 	glEnableVertexAttribArray(DIR_ATTRIB_LOCATION);
 
+	megaArray = new float[2 * (elementStride * maxPoints)];
 }
 
 
 ParticleTrail::~ParticleTrail()
 {
+	delete[] megaArray;
 }
 
 void ParticleTrail::update(float dt) {
-	waitTime += dt;
-	if (waitTime > 1) {
+	currentDelayTime += dt;
+	if (currentDelayTime >= addDelayTime) {
 		addPoint(gameObject->transform.getWorldPosition());
-		uploadData(pointList);
+		uploadData();
+
+		currentDelayTime -= addDelayTime;
 	}
 }
 
@@ -52,46 +82,45 @@ void ParticleTrail::draw()
 		Renderer::gpuData.vaoHandle = vaoHandle;
 	}
 
+	glEnable(GL_BLEND);
+	if (additive)
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	else
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glDepthMask(false);
 	
 	if (material) material->bind();
 
 	//TODO move
 	Renderer::setModelMatrix(glm::mat4(1));
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, pointList.size()/3);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, pointList.size()*2);
+
+	glDepthMask(true);
+	glDisable(GL_BLEND);
 }
 
 void ParticleTrail::addPoint(glm::vec3 point)
 {
-	int strideElements = (3 + 3 + 1);
 	glm::vec3 normal (1,0,0);
 
-
-	if (pointList.size() > 2*strideElements) {
-		normal = point - glm::vec3(pointList[pointList.size() - 2 * strideElements], 
-			                                      pointList[pointList.size() - 2 * strideElements + 1],
-			                                      pointList[pointList.size() - 2 * strideElements + 2]);
+	if (pointList.size() > 0) {
+		normal = point - pointList.front().position;
 		if (glm::length(normal) < 0.001) {
-			normal = glm::vec3(pointList[pointList.size() - 2 * strideElements +3],
-				pointList[pointList.size() - 2 * strideElements + 4],
-				pointList[pointList.size() - 2 * strideElements + 5]);
-		} else {
+			normal = pointList.front().normal;
+		}
+		else {
 			normal = glm::normalize(normal);
 		}
 		if (isnan(normal.z)) throw;
 	}
-	for (int t = 0; t < 3; ++t) {
-		pointList.push_back(point[t]);
-	}
-	for (int t = 0; t < 3; ++t) {
-		pointList.push_back(normal[t]);
-	}
-	pointList.push_back(-1);
 
-	for (int t = 0; t < 3; ++t) {
-		pointList.push_back(point[t]);
+	TrailPoint newTrailPoint;
+	newTrailPoint.position = point;
+	newTrailPoint.normal = normal;
+	pointList.push_front(newTrailPoint);
+
+	while (pointList.size() > maxPoints) {
+		pointList.pop_back();
 	}
-	for (int t = 0; t < 3; ++t) {
-		pointList.push_back(normal[t]);
-	}
-	pointList.push_back(1);
 }

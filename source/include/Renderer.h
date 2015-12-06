@@ -7,7 +7,7 @@
 
 #include <glfw3.h>
 
-#define SHADER_COUNT 12
+#define SHADER_COUNT 13
 #define FORWARD_PBR_SHADER_ANIM 0
 #define FORWARD_PBR_SHADER 1
 #define SKYBOX_SHADER 2
@@ -20,6 +20,7 @@
 #define PARTICLE_TRAIL_SHADER 9
 #define SHADOW_SHADER 10
 #define SHADOW_SHADER_ANIM 11
+#define BASIC_SHADER 12
 
 struct GPUData {
 	int vaoHandle;
@@ -61,6 +62,7 @@ class Renderer
 
 private:
     static int width, height;
+	static float prevFOV;
     Renderer() = delete;
 };
 

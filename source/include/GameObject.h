@@ -58,11 +58,14 @@ public:
     void addChild(GameObject& go);
 
 	void draw();
+	void debugDraw();
     void update(float deltaTime);
 
 	void extract(PassList& list);
 
 	void setMaterial(Material *mat);
+
+	void onCollisionEnter(GameObject* other);
 
 protected:
     std::vector<Component*> componentList;

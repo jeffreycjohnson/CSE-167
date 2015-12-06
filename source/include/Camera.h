@@ -3,11 +3,25 @@
 
 #include "ForwardDecs.h"
 #include "GameObject.h"
+#include "Transform.h"
 
 class Camera : public Component
 {
+	private:
+		float shakeAmount, startShakeAmount, shakeDuration, startShakeDuration;
+		bool isShaking;
+		float currentFOV, prevFOV, fovStartTime;
+
 	public:
+		Transform offset;
+		float fov, fovDuration;
+
+		Camera();
+		~Camera();
 		glm::mat4 getCameraMatrix();
+		void update(float deltaTime);
+		void screenShake(float amount, float duration);
+		float getFOV();
 };
 
 #endif

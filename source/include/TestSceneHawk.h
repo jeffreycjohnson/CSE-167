@@ -7,5 +7,6 @@ public:
 	~TestSceneHawk();
 
 	void loop();
+	void debugDraw();
 };
 

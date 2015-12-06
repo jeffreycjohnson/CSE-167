@@ -85,8 +85,8 @@ void Swarm::update(float deltaTime)
 		neighbors[i]->update(deltaTime);
 	}
 
-	target.x = sin(Timer::time() / 2) * 10;
-	target.y = cos(Timer::time() / 2) * 10;
+	target.x = sin(Timer::time() / 2) * 50;
+	//target.y = cos(Timer::time() / 2) * 10;
 }
 
 void Swarm::draw()

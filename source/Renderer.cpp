@@ -6,6 +6,7 @@
 #include "Skybox.h"
 #include "TestSceneHawk.h"
 #include "Input.h"
+#include "Timer.h"
 #include "Light.h"
 
 
@@ -23,13 +24,15 @@ Shader* shaderList[SHADER_COUNT];
 int Renderer::shaderForwardLightList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM };
 int shaderViewList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER,
     PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING, SKYBOX_SHADER,
-    SHADOW_SHADER, SHADOW_SHADER_ANIM};
+    SHADOW_SHADER, SHADOW_SHADER_ANIM, BASIC_SHADER };
 int shaderCameraPosList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 int shaderEnvironmentList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 int shaderPerspectiveList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER, EMITTER_SHADER,
-    EMITTER_BURST_SHADER, PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
+    EMITTER_BURST_SHADER, PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING,
+    BASIC_SHADER };
 
 Camera* Renderer::camera = new Camera();
+float Renderer::prevFOV = 1;
 
 GPUData Renderer::gpuData;
 
@@ -114,6 +117,10 @@ void Renderer::init(int window_width, int window_height) {
     (*shaderList[SHADOW_SHADER])["uP_Matrix"] = DirectionalLight::shadowMatrix;
     (*shaderList[SHADOW_SHADER_ANIM])["uP_Matrix"] = DirectionalLight::shadowMatrix;
 
+	shaderList[BASIC_SHADER] = new Shader(
+		"source/shaders/simple.vert", "source/shaders/simple.frag"
+		);
+
 	currentShader = shaderList[FORWARD_PBR_SHADER];
 	currentShader->use();
 
@@ -175,10 +182,22 @@ void Renderer::loop() {
     switchShader(FBO_HDR);
     deferredPass->fbo->draw();
 
-
+	camera->update(Timer::deltaTime());
+	if (camera->getFOV() != prevFOV)
+	{
+		//glm::mat4 perspective = glm::perspective(camera->getFOV(), width / (float)height, .1f, 100.f);
+		//updatePerspective(perspective);
+		prevFOV = camera->getFOV();
+	}
 
 	if (Input::getKey("b"))
+	{
+		glDisable(GL_DEPTH_TEST);
+		Renderer::switchShader(BASIC_SHADER);
+		testScene->debugDraw();
+		glEnable(GL_DEPTH_TEST);
         deferredPass->fbo->blitAll();
+}
 }
 
 void Renderer::extractObjects() {
@@ -251,6 +270,9 @@ void Renderer::setModelMatrix(glm::mat4 transform) {
 void Renderer::resize(int width, int height) {
 	glViewport(0, 0, width, height);
 
-	perspective = glm::perspective((float)(atan(1)*4.0f / 3.0f), width / (float)height, .1f, 100.f);
+	Renderer::width = width;
+	Renderer::height = height;
+
+	perspective = glm::perspective(camera->getFOV(), width / (float)height, .1f, 100.f);
 	updatePerspective(perspective);
 }

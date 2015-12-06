@@ -13,7 +13,8 @@ class Component
 		virtual void draw();
         virtual void setGameObject(GameObject* go);
 
-		void OnCollisionEnter(GameObject* other);
+		virtual void debugDraw();
+		virtual void onCollisionEnter(GameObject* other);
 };
 
 #endif

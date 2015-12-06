@@ -1,7 +1,7 @@
 #pragma once
 #include "ForwardDecs.h"
 #include "Component.h"
-#include <vector>
+#include <deque>
 
 class ParticleTrail :
 	public Component
@@ -13,15 +13,29 @@ public:
 	void update(float deltaTime) override;
 	void draw() override;
 
+	bool additive = true;
 	Material * material;
 private:
-	float waitTime = 0; //quick variable to prevent drawing during initial boid movements
+	struct TrailPoint {
+		glm::vec3 position;
+		glm::vec3 normal;
+		//added before shader upload //
+		/* float distance - distance from front of trail */
+		/* float corner */
+	};
+	const int elementStride = 3 + 3 + 1 + 1; //number of floats per point
+
 	GLuint vaoHandle;
 	GLuint meshBuffer;
-	float maxLength;
-	int maxPoints;
+	
+	const int maxPoints = 64;
+	float* megaArray;
+
+	const float addDelayTime = 0.32f;//in seconds
+	float currentDelayTime = 0;
+
 	void addPoint(glm::vec3 point);
-	void uploadData(std::vector<float> &megaArray);
-	std::vector<float> pointList;
+	void uploadData();
+	std::deque<TrailPoint> pointList;
 };
 
