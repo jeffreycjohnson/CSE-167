@@ -26,8 +26,8 @@ uniform float environment_mipmap; //the number of mipmaps the environment map ha
 //world space camera position, to get view vector
 uniform vec3 cameraPos;
 
-//light data - (position.xyz, lightType) followed by (lightColor.xyz, strength)
-const int lightCount = 2;
+//light data - (position.xyz, unused) followed by (lightColor.xyz, lightType)
+const int lightCount = 5;
 uniform vec4 uLightData[2*lightCount];
 
 //tmp variables to set the metalness and roughness instead of a texture
@@ -151,19 +151,23 @@ void main () {
   vec3 specColor = SpecularEnvMap(normal, view, a, F0);
   
   for (int i=0; i < lightCount; ++i) {
-    vec3 lightDir =  (uLightData[2*i] - vPosition).xyz;
-    float lightDist = length(lightDir);
+	float lightType = uLightData[2*i+1].w;
+	float power = 1;
+	vec3 lightDir = normalize(uLightData[2*i].xyz);
+	if (lightType == 1) {
+		lightDir =  (uLightData[2*i] - vPosition).xyz;
+		float lightDist = length(lightDir);
 
-	//Spherical light algorithm from http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf
-	float sphereRadius = uLightData[2*i].w;
-	vec3 reflectedRay = reflect(-view, normal);
-	vec3 centerToRay = dot(lightDir, reflectedRay) * reflectedRay - lightDir;
-	lightDir = normalize(lightDir + centerToRay * clamp(sphereRadius / length(centerToRay), 0.0, 1.0));
-	//todo normalize based on sphere size
+		//Spherical light algorithm from http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf
+		float sphereRadius = uLightData[2*i].w;
+		vec3 reflectedRay = reflect(-view, normal);
+		vec3 centerToRay = dot(lightDir, reflectedRay) * reflectedRay - lightDir;
+		lightDir = normalize(lightDir + centerToRay * clamp(sphereRadius / length(centerToRay), 0.0, 1.0));
+		//todo normalize based on sphere size
 
+		power = 1.0 / (lightDist * lightDist + 1);
+	}
 
-
-	float power = 1.0 / (lightDist * lightDist + 1);
     diffuseLight = diffuseLight + (uLightData[2*i+1].xyz * (clamp(dot(lightDir, normal) * power, 0.0, 1.0)));
 	
 	vec3 halfVec = normalize(view + lightDir);
