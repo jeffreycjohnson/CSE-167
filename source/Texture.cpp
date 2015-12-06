@@ -16,6 +16,11 @@ Texture::Texture(std::string filename, bool srgb, GLenum wrap) {
 	int width = -1;
 	int height = -1;
     unsigned char * image = SOIL_load_image(filename.c_str(), &width, &height, 0, SOIL_LOAD_RGBA);
+    if (width == -1) {
+        LOG(filename + ": Error during loading -> " + SOIL_last_result());
+        throw;
+    }
+
     unsigned char * buffer = static_cast<unsigned char *>(malloc(width * height * 4));
     for (int x = 0; x < width; x++)
     {
@@ -27,7 +32,6 @@ Texture::Texture(std::string filename, bool srgb, GLenum wrap) {
             }
         }
     }
-	if (width == -1) throw;
     glTexImage2D(GL_TEXTURE_2D, 0, srgb ? GL_SRGB_ALPHA : GL_RGBA, width, height, 0, GL_RGBA,
         GL_UNSIGNED_BYTE, buffer);
     free(buffer);

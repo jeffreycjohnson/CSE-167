@@ -112,7 +112,7 @@ vec3 SpecularEnvMap(vec3 normal, vec3 view, float a, vec3 F0) {
 
 
 void main () {
-  vec3 albedo = texture(colorTex, vTexCoord).rgb;
+  vec4 albedo = texture(colorTex, vTexCoord);
   vec3 mat = texture(matTex, vTexCoord).rgb;
 
   //Test values - remove these for objects with textures
@@ -120,7 +120,7 @@ void main () {
 	  mat.r = testMetal;
 	  mat.g = 0.45;
 	  mat.b = testRough;
-	  albedo = vec3(0.1, 0.1, 0.75);
+	  albedo = vec4(0.1, 0.1, 0.75, 1);
   }
   //end test values-------------------------------------
 
@@ -136,7 +136,7 @@ void main () {
   float IOR = 1 + mat.g;
   //F0 is essentially specular color, as well as Fresnel term
   vec3 F0 = vec3(1,1,1) * pow((1.0 - IOR) / (1.0 + IOR), 2);
-  F0 = mix(F0, albedo, mat.r); //interpolate Fresnel with the color as metalness increases (with metalness=1, color => reflection color)
+  F0 = mix(F0, albedo.rgb, mat.r); //interpolate Fresnel with the color as metalness increases (with metalness=1, color => reflection color)
   F0 = mix(vec3(1,1,1) * dot(vec3(.33,.33,.33),F0), F0, mat.r); //my own improvement - could be wrong : desaturates Fresnel as metalness decreases
 
 
@@ -173,11 +173,11 @@ void main () {
 	specColor += GGX_D(dotNH, a2*a2) * SpecularBRDF(uLightData[2*i+1].xyz, normal, view, lightDir, a, F0, 1) * power;
   }
 
-  vec3 diffuseColor = ((1.0-mat.r) * albedo) * diffuseLight;
+  vec3 diffuseColor = ((1.0-mat.r) * albedo.rgb) * diffuseLight;
   vec3 color = diffuseColor + specColor;
   
 
-  frag_color = vec4(color, 1.0);
+  frag_color = vec4(color, albedo.a);
   frag_normal = vec4(normal, 1.0);
   frag_material = vec4(mat, 1.0);
 }

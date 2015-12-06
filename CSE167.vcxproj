@@ -221,12 +221,15 @@
     <None Include="source\shaders\forward_pbr.frag" />
     <None Include="source\shaders\forward_pbr.vert" />
     <None Include="source\shaders\forward_pbr_skeletal.vert" />
+    <None Include="source\shaders\forward_unlit.frag" />
     <None Include="source\shaders\gpu_particle.frag" />
     <None Include="source\shaders\gpu_particle.vert" />
     <None Include="source\shaders\gpu_particle_burst.vert" />
     <None Include="source\shaders\particle_trail.frag" />
     <None Include="source\shaders\particle_trail.vert" />
     <None Include="source\shaders\shadow.frag" />
+    <None Include="source\shaders\simple.frag" />
+    <None Include="source\shaders\simple.vert" />
     <None Include="source\shaders\skybox.frag" />
     <None Include="source\shaders\skybox.vert" />
   </ItemGroup>

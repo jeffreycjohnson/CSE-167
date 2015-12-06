@@ -70,10 +70,19 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
         auto mesh = new Mesh(name);
 
         auto aMat = scene->mMaterials[scene->mMeshes[*currentNode->mMeshes]->mMaterialIndex];
-        auto mat = new Material(Renderer::getShader(scene->mMeshes[*currentNode->mMeshes]->HasBones() ? DEFERRED_PBR_SHADER_ANIM : DEFERRED_PBR_SHADER));
+        auto found = name.find("Forward") != std::string::npos;
+        Material * mat;
+        if (found) {
+            mat = new Material(Renderer::getShader(scene->mMeshes[*currentNode->mMeshes]->HasBones() ? FORWARD_PBR_SHADER_ANIM : FORWARD_UNLIT));
+            mat->transparent = true;
+        }
+        else {
+            mat = new Material(Renderer::getShader(scene->mMeshes[*currentNode->mMeshes]->HasBones() ? DEFERRED_PBR_SHADER_ANIM : DEFERRED_PBR_SHADER));
+            mat->transparent = false;
+        }
         if (aMat->GetTextureCount(aiTextureType_DIFFUSE) > 0)
         {
-            aiString path("intercepter_albedo.png");
+            aiString path;
             aMat->GetTexture(aiTextureType_DIFFUSE, 0, &path);
             auto tex = new Texture(getPath(filename) + path.C_Str(), true);
             (*mat)["colorTex"] = tex;
@@ -108,7 +117,6 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
         {
             (*mat)["matTex"] = new Texture(glm::vec4(0, 0.45, 0.7, 1));
         }
-        mat->transparent = false;
         (*mat)["useTextures"] = true;
         mesh->setMaterial(mat);
 

@@ -226,5 +226,8 @@
     <None Include="source\shaders\shadow.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="source\shaders\forward_unlit.frag" />
+    <None Include="source\shaders\simple.frag" />
+    <None Include="source\shaders\simple.vert" />
   </ItemGroup>
 </Project>

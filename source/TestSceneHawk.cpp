@@ -21,7 +21,7 @@
 #include "ParticleTrail.h"
 
 GameObject *scene = new GameObject();
-GameObject *camera = new GameObject();
+GameObject *camera;
 GameObject *sun;
 GameObject *bear;
 GameObject *light;
@@ -54,16 +54,11 @@ TestSceneHawk::TestSceneHawk()
 	(*trailMaterial)["trailLength"] = 64.f; //set it to maxPoints
 	(*trailMaterial)["colorTex"] = new Texture("assets/particle_trail.png");
 
-	GameObject::SceneRoot.addChild(*scene);
-    scene->addChild(*camera);
-    camera->addComponent(Renderer::camera);
-    camera->transform.translate(0, 0, 20);
-
     sun = loadScene("assets/test_sphere.obj");//new GameObject();
     auto sunLight = new DirectionalLight(true);
     sunLight->color = glm::vec3(0.5, 0.5, 0.5);
     sun->addComponent(sunLight);
-    sun->transform.translate(0, 0, 10);
+    sun->transform.translate(0, 0, 25);
     Material* m = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
     (*m)["useTextures"] = false;
     (*m)["testMetal"] = (0) / 7.f;
@@ -168,6 +163,12 @@ TestSceneHawk::TestSceneHawk()
 	light2->setMaterial(sphereMat);
 
 	GameObject::SceneRoot.addChild(*light2);
+
+    GameObject::SceneRoot.addChild(*scene);
+    camera = loadScene("assets/cockpit.fbx");
+    scene->addChild(*camera);
+    camera->addComponent(Renderer::camera);
+    camera->transform.translate(0, 0, 20);
 }
 
 void TestSceneHawk::loop() {
