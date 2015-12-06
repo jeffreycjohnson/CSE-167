@@ -14,6 +14,8 @@ private:
 	bool colliding;
 
 public:
+	bool passive;
+
 	BoxCollider(glm::vec3 offset, glm::vec3 dimensions);
 	~BoxCollider();
 	void update(float deltaTime);

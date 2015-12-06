@@ -20,6 +20,7 @@ BoxCollider::BoxCollider(glm::vec3 offset, glm::vec3 dimensions)
 	points[7] = offset + glm::vec3(-halfW, -halfH, -halfD);
 	colliders.push_back(this);
 	colliding = false;
+	passive = true;
 }
 
 BoxCollider::~BoxCollider()
@@ -136,21 +137,24 @@ void BoxCollider::updateColliders()
 	for (int i = 0; i < colliders.size(); i++)
 	{
 		// Optimize erasing colliders? How often will this really happen?
-		if (colliders[i] == nullptr)
+		while (colliders[i] == nullptr)
 		{
 			colliders.erase(colliders.begin() + i);
 		}
-		for (int e = i; e < colliders.size(); e++)
+		if (!colliders[i]->passive)
 		{
-			if (colliders[e] == nullptr)
+			for (int e = i; e < colliders.size(); e++)
 			{
-				colliders.erase(colliders.begin() + e);
-			}
-			if (i != e && checkCollision(i, e))
-			{
-				// Check for precise collision?
-				colliders[i]->gameObject->onCollisionEnter(colliders[e]->gameObject);
-				colliders[e]->gameObject->onCollisionEnter(colliders[i]->gameObject);
+				while (colliders[e] == nullptr)
+				{
+					colliders.erase(colliders.begin() + e);
+				}
+				if (i != e && checkCollision(i, e))
+				{
+					// Check for precise collision?
+					colliders[i]->gameObject->onCollisionEnter(colliders[e]->gameObject);
+					colliders[e]->gameObject->onCollisionEnter(colliders[i]->gameObject);
+				}
 			}
 		}
 	}

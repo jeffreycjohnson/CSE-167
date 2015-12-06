@@ -5,6 +5,7 @@
 #include "Material.h"
 #include "Input.h"
 #include "Timer.h"
+#include "Sound.h"
 #include <glfw3.h>
 #include "ObjectLoader.h"
 #include <iostream>
@@ -46,6 +47,7 @@ int main()
     glewExperimental = GL_TRUE;
     glewInit();
 	glfwSwapInterval(1);
+	Sound::init();
 	Renderer::init(width, height);
 	Input::init(window);
 	Input::setCursor("assets/cursor/cursor.png", 32, 32);
@@ -60,6 +62,7 @@ int main()
 	{
         GameObject::SceneRoot.update(Timer::deltaTime());
 		Input::update();
+		Sound::updateFMOD();
 		Renderer::loop();
 		Timer::update();
 

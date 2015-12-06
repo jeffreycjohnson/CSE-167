@@ -9,16 +9,13 @@
 #include "Skybox.h"
 #include "Renderer.h"
 #include "Texture.h"
-
-#include "Timer.h"
 #include "ObjectLoader.h"
-#include "GPUEmitter.h"
 #include "BoxCollider.h"
 #include "Swarm.h"
-#include "Input.h"
 #include "Animation.h"
 #include "Light.h"
 #include "ParticleTrail.h"
+#include "Sound.h"
 
 GameObject *scene = new GameObject();
 GameObject *camera = new GameObject();
@@ -57,7 +54,13 @@ TestSceneHawk::TestSceneHawk()
 	GameObject::SceneRoot.addChild(*scene);
     scene->addChild(*camera);
     camera->addComponent(Renderer::camera);
-    camera->transform.translate(0, 0, 20);
+	camera->transform.setPosition(0, 0, 20);
+	camera->transform.getWorldPosition(); // Force matrix updates to prevent loud initial sounds
+	Renderer::camera->getCameraMatrix();
+	camera->update(0);
+
+	Sound* camSound = new Sound("cabin", false, true, 1);
+	camera->addComponent(camSound);
 
     sun = loadScene("assets/test_sphere.obj");//new GameObject();
     auto sunLight = new DirectionalLight(true);
@@ -120,6 +123,9 @@ TestSceneHawk::TestSceneHawk()
 	(*bearMat)["normalTex"] = bearNormal;
 	bear->setMaterial(bearMat);
 	bear->getComponent<Animation>()->play(0, true);
+
+	Sound* bearSound = new Sound("laser", false, false, 1);
+	bear->addComponent(bearSound);
 
 	GameObject::SceneRoot.addChild(*bear);
 
@@ -191,7 +197,17 @@ void TestSceneHawk::loop() {
 	swarm->draw();
 
 	if (Input::getKeyDown("space"))
+		Renderer::camera->screenShake(0.5, 1);
+	if (Input::getKeyDown("down"))
+		Renderer::camera->fov += 0.25;
+	if (Input::getKeyDown("up"))
+		Renderer::camera->fov -= 0.25;
+	if (Input::getKeyDown("space"))
 		emitter->getComponent<GPUEmitter>()->play();
+	if (Input::getKeyDown("space"))
+		bear->getComponent<Sound>()->play();
+	if (Input::getKeyDown("left control"))
+		camera->getComponent<Sound>()->toggle();
 }
 
 void TestSceneHawk::debugDraw()

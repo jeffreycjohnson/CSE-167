@@ -104,14 +104,16 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)Dependencies\;$(ProjectDir)Dependencies\SOIL;$(ProjectDir)Dependencies\glfw\include\GLFW;$(ProjectDir)Dependencies\glew\include\GL;$(ProjectDir)Dependencies\glm\glm;$(ProjectDir)source\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Dependencies\;$(ProjectDir)Dependencies\fmod;$(ProjectDir)Dependencies\SOIL;$(ProjectDir)Dependencies\glfw\include\GLFW;$(ProjectDir)Dependencies\glew\include\GL;$(ProjectDir)Dependencies\glm\glm;$(ProjectDir)source\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
+      <AdditionalUsingDirectories>
+      </AdditionalUsingDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>assimp.lib;SOIL.lib;glfw3_d.lib;glew32.lib;glu32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;SOIL.lib;glfw3_d.lib;glew32.lib;glu32.lib;opengl32.lib;fmod_vc.lib;fmod64_vc.lib;fmodL64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)Dependencies;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -144,7 +146,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)Dependencies\;$(ProjectDir)Dependencies\SOIL;$(ProjectDir)Dependencies\glfw\include\GLFW;$(ProjectDir)Dependencies\glew\include\GL;$(ProjectDir)Dependencies\glm\glm;$(ProjectDir)source\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Dependencies\;$(ProjectDir)Dependencies\fmod;$(ProjectDir)Dependencies\SOIL;$(ProjectDir)Dependencies\glfw\include\GLFW;$(ProjectDir)Dependencies\glew\include\GL;$(ProjectDir)Dependencies\glm\glm;$(ProjectDir)source\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -152,7 +154,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>assimp.lib;SOIL.lib;glfw3.lib;glew32.lib;glu32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;SOIL.lib;glfw3.lib;glew32.lib;glu32.lib;opengl32.lib;fmod_vc.lib;fmod64_vc.lib;fmodL64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)Dependencies;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
