@@ -7,10 +7,10 @@
 #include <vector>
 
 #define MAX_COHERE_SPEED 100.0f
-#define MAX_SPEED 20.0f
+#define MAX_SPEED 40.0f
 #define DAMPING 200.0f
-#define SEPARATION_DISTANCE 10.0f
-#define AVOID_DISTANCE 20.0f
+#define SEPARATION_DISTANCE 80.0f
+#define AVOID_DISTANCE 200.0f
 
 struct BoidSphere : public GameObject
 {

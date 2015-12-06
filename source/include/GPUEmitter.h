@@ -15,7 +15,7 @@ private:
 		maxStartSizeUniform, minEndSizeUniform, maxEndSizeUniform, burstSeedUniform, 
 		minStartColorUniform, maxStartColorUniform, minEndColorUniform, maxEndColorUniform, 
 		minStartAngleUniform, maxStartAngleUniform, minAngularVelocityUniform, maxAngularVelocityUniform,
-		startOpacityUniform, endOpacityUniform;
+		startOpacityUniform, endOpacityUniform, rotateTowardsVelocityUniform;
 	glm::vec3 prevPosition, velocity;
 	Texture* texture;
 	Shader* shader;
@@ -24,7 +24,7 @@ private:
 	int* quadCorners;
 	unsigned int* seeds;
 	float startTime; // For burst
-	bool burst, trigger;
+	bool burst, trigger, rotateTowardsVelocity;
 
 	GLuint genParticles();
 

@@ -31,6 +31,7 @@ uniform float minStartAngle;
 uniform float maxStartAngle;
 uniform float minAngularVelocity;
 uniform float maxAngularVelocity;
+uniform uint rotateTowardsVelocity; // 0 or 1
 
 // Burst specific
 uniform float startTime;
@@ -62,8 +63,8 @@ void main()
 	t = elapsedTime - startTime;
 
 	// Velocity
-	tmpVec = range(minVelocity, maxVelocity);
-	pos.xyz += (tmpVec + emitterVelocity) * t;
+	vec3 velocity = range(minVelocity, maxVelocity);
+	pos.xyz += (velocity + emitterVelocity) * t;
 
 	// Acceleration
 	tmpVec = range(minAcceleration, maxAcceleration);
@@ -73,12 +74,16 @@ void main()
 	tmp = (1 - t / duration) * range(minStartSize, maxStartSize) + (t / duration) * range(minEndSize, maxEndSize);
 
 	// Billboard particles
-	pos = uV_Matrix * uM_Matrix * pos;
+	mat4 transformMatrix = uV_Matrix * uM_Matrix;
+	pos = transformMatrix * pos;
 	pos.x += (texCoord.x - 0.5f) * tmp; // Multiply by size
 	pos.y += (texCoord.y - 0.5f) * tmp;
 
+	vec2 velocity_screen = ((transformMatrix) * vec4(velocity - emitterVelocity + (tmpVec * t), 1.0)).xy;
+
 	// Angle
-	angle = range(minStartAngle, maxStartAngle) + range(minAngularVelocity, maxAngularVelocity) * t;
+	angle = (rotateTowardsVelocity) * atan(velocity_screen.y, velocity_screen.x) 
+		+ (1u - rotateTowardsVelocity) * (range(minStartAngle, maxStartAngle) + range(minAngularVelocity, maxAngularVelocity) * t);
 
 	// Opacity
 	tmp = t / duration;
