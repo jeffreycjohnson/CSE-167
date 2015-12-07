@@ -5,8 +5,9 @@
 #include "Framebuffer.h"
 #include <gtc/matrix_transform.hpp>
 #include <gtc/matrix_inverse.hpp>
+#include "Camera.h"
 
-glm::mat4 DirectionalLight::shadowMatrix = glm::ortho<float>(-25, 25, -25, 25, 0, 50);
+glm::mat4 DirectionalLight::shadowMatrix = glm::ortho<float>(-25, 25, -25, 25, -50, 50);
 
 void Light::deferredHelper(const std::string& meshName)
 {
@@ -94,6 +95,11 @@ void DirectionalLight::bindShadowMap()
         (*Renderer::getShader(SHADOW_SHADER_ANIM))["uV_Matrix"] = mat;
         (*Renderer::getShader(SHADOW_SHADER))["uV_Matrix"] = mat;
     }
+}
+
+void DirectionalLight::update(float)
+{
+    gameObject->transform.translate(Renderer::camera->gameObject->transform.getWorldPosition() - gameObject->transform.getWorldPosition());
 }
 
 void SpotLight::forwardPass(int index)

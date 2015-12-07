@@ -36,6 +36,7 @@ public:
     void forwardPass(int index) override;
     void deferredPass() override;
     void bindShadowMap();
+    void update(float) override;
 
     Framebuffer * fbo;
     static glm::mat4 shadowMatrix;
