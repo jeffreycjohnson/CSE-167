@@ -60,7 +60,7 @@ TestSceneHawk::TestSceneHawk()
 
 	cruiser = loadScene("assets/cruiserPrototype.fbx");
 	cruiser->transform.setPosition(-5, 0, 10);
-	cruiser->transform.scale(0.15);
+	cruiser->transform.scale(0.25);
 	cruiser->addComponent<BoidAvoid>(new BoidAvoid(1));
 	GameObject::SceneRoot.addChild(*cruiser);
 

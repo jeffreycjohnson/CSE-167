@@ -7,8 +7,8 @@
 
 #include <glfw3.h>
 
-#define NEAR_DEPTH 0.1f
-#define FAR_DEPTH 100.f
+#define NEAR_DEPTH 0.2f
+#define FAR_DEPTH 1000.f
 
 #define SHADER_COUNT 14
 #define FORWARD_PBR_SHADER_ANIM 0
