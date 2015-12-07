@@ -16,6 +16,9 @@
 #include "Light.h"
 #include "ParticleTrail.h"
 #include "Sound.h"
+#include "PlayerController.h"
+#include <gtx/rotate_vector.hpp>
+
 
 GameObject *scene = new GameObject();
 GameObject *camera;
@@ -55,7 +58,8 @@ TestSceneHawk::TestSceneHawk()
     auto sunLight = new DirectionalLight(true);
     sunLight->color = glm::vec3(0.5, 0.5, 0.5);
     sun->addComponent(sunLight);
-    sun->transform.translate(0, 0, 25);
+    sun->transform.translate(5, 8.5, -1.5);
+	sun->transform.setRotate(glm::quat_cast(glm::orientation(glm::vec3(0.5, 0.85, -0.15), glm::vec3(0, 1, 0))));
     Material* m = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
     (*m)["useTextures"] = false;
     (*m)["testMetal"] = (0) / 7.f;
@@ -175,10 +179,13 @@ TestSceneHawk::TestSceneHawk()
 
 	Sound* camSound = new Sound("cabin", false, true, 1);
 	camera->addComponent(camSound);
+
+	PlayerController* controller = new PlayerController();
+	camera->addComponent(controller);
 }
 
 void TestSceneHawk::loop() {
-	scene->transform.rotate(glm::angleAxis(0.01f, glm::vec3(0, 1, 0)));
+	//scene->transform.rotate(glm::angleAxis(0.01f, glm::vec3(0, 1, 0)));
 
 	tmp += 0.02f;
 	light->transform.setPosition(5 * sin(tmp), 5 * cos(tmp), 4);
@@ -198,7 +205,7 @@ void TestSceneHawk::loop() {
 	swarm->draw();
 
 	if (Input::getMouseDown("mouse 0"))
-		Renderer::camera->screenShake(0.02, 0.25);
+		Renderer::camera->screenShake(0.01, 0.25);
 	if (Input::getKeyDown("down"))
 		Renderer::camera->fov += 0.5;
 	if (Input::getKeyDown("up"))

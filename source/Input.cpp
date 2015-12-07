@@ -138,7 +138,7 @@ void Input::init(GLFWwindow* win)
 	data.altNegativeButton = "left";
 	data.joystick = Joystick::JOYSTICK_1;
 	data.axis = AxisType::X;
-	data.dead = 0.1f;
+	data.dead = 0.2f;
 	data.sensitivity = 0.25f;
 	data.invert = false;
 	addInput(data);
@@ -149,7 +149,7 @@ void Input::init(GLFWwindow* win)
 	data.altPositiveButton = "down";
 	data.altNegativeButton = "up";
 	data.joystick = Joystick::JOYSTICK_1;
-	data.axis = AxisType::SCROLL_Y;
+	data.axis = AxisType::Y;
 	addInput(data);
 
 	data.name = "roll";
@@ -159,6 +159,16 @@ void Input::init(GLFWwindow* win)
 	data.altNegativeButton = "";
 	data.joystick = Joystick::JOYSTICK_3;
 	data.axis = AxisType::X;
+	addInput(data);
+
+	data.name = "thrust";
+	data.positiveButton = "f";
+	data.negativeButton = "r";
+	data.altPositiveButton = "joystick button 1";
+	data.altNegativeButton = "joystick button 0";
+	data.joystick = Joystick::JOYSTICK_2;
+	data.axis = AxisType::X;
+	data.invert = true;
 	addInput(data);
 }
 
@@ -244,10 +254,10 @@ float Input::getAxis(std::string name)
 	InputData data = inputs[name];
 	float result = 0;
 
-	float pos = getAxisHelper(inputMap[data.positiveButton], data);
-	float neg = -getAxisHelper(inputMap[data.negativeButton], data);
-	float altpos = getAxisHelper(inputMap[data.altPositiveButton], data);
-	float altneg = -getAxisHelper(inputMap[data.altNegativeButton], data);
+	float pos = data.positiveButton != "" ? getAxisHelper(inputMap[data.positiveButton], data) : 0;
+	float neg = data.negativeButton != "" ? -getAxisHelper(inputMap[data.negativeButton], data): 0;
+	float altpos = data.altPositiveButton != "" ? getAxisHelper(inputMap[data.altPositiveButton], data) : 0;
+	float altneg = data.altNegativeButton != "" ? -getAxisHelper(inputMap[data.altNegativeButton], data) : 0;
 
 	// Find max value of each button
 	if (abs(pos) < abs(neg))

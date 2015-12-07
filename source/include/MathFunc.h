@@ -6,8 +6,8 @@
 class MathFunc
 {
 public:
-	static glm::vec3 Lerp(glm::vec3, glm::vec3, float);
-	static float Lerp(float, float, float);
+	static glm::vec3 Lerp(glm::vec3 a, glm::vec3 b, float time);
+	static float Lerp(float a, float b, float time);
 };
 
 #endif

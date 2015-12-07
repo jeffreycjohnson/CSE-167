@@ -16,6 +16,15 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{b86542ff-74a8-43be-8801-208f8725c59b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Scripts">
+      <UniqueIdentifier>{728ac89f-1ee0-4035-b370-f042843b46ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripts\Header Files">
+      <UniqueIdentifier>{12226428-cc53-4e84-912b-88d066e2e5ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripts\Source Files">
+      <UniqueIdentifier>{62d0683a-a729-4fe8-ae5e-22243073f48d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Shader.cpp">
@@ -105,6 +114,9 @@
     <ClCompile Include="source\SkyboxPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\scripts\PlayerController.cpp">
+      <Filter>Scripts\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\include\Camera.h">
@@ -184,6 +196,9 @@
     </ClInclude>
     <ClInclude Include="source\include\Sound.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\scripts\include\PlayerController.h">
+      <Filter>Scripts\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

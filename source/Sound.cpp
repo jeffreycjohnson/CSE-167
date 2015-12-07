@@ -52,7 +52,7 @@ void Sound::play()
 {
 	if (playing)
 	{
-		result = channel->stop();
+		// Possible leak, does FMOD handle deleting sound instances for playSound?
 		result = system->playSound(soundMap[name], 0, true, &channel);
 		channel->setVolume(volume);
 		if (looping)
