@@ -11,6 +11,7 @@
 #define DAMPING 200.0f
 #define SEPARATION_DISTANCE 150.0f
 #define AVOID_DISTANCE 240.0f
+#define TARGET_BOUNDS 200.0f
 
 struct BoidSphere : public GameObject
 {
@@ -26,7 +27,8 @@ private:
 	static std::vector<BoidSphere*> obstacles;
 
 	int id;
-	glm::vec3 averagePosition;
+	float startTime, waitTime, waitAmount;
+	glm::vec3 averagePosition, prevTarget, currentTarget;
 	std::vector<GameObject*> neighbors;
 	std::vector<glm::vec3> neighborVelocities;
 

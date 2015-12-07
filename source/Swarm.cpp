@@ -2,6 +2,7 @@
 #include "Renderer.h"
 #include "Timer.h"
 #include "ObjectLoader.h"
+#include "MathFunc.h"
 #include <random>
 #include <time.h>
 #include <gtc/quaternion.hpp>
@@ -85,16 +86,47 @@ void Swarm::update(float deltaTime)
 		neighbors[i]->update(deltaTime);
 	}
 
-	target.x = sin(Timer::time() / 2) * 100;
-	//target.y = cos(Timer::time() / 2) * 10;
+	float distance = glm::length(target - currentTarget);
+	if (abs(distance) < 0.001)
+	{
+		prevTarget = target;
+		glm::vec3 direction(((float)rand() / RAND_MAX - 0.5), ((float)rand() / RAND_MAX - 0.5), ((float)rand() / RAND_MAX - 0.5));
+		direction = glm::normalize(direction);
+		direction *= MAX_SPEED * 6; // Set distance
+		direction += target; // Offset from current location
+
+		if (direction.x > TARGET_BOUNDS)
+			direction.x = TARGET_BOUNDS;
+		else if (direction.x < -TARGET_BOUNDS)
+			direction.x = -TARGET_BOUNDS;
+
+		if (direction.y > TARGET_BOUNDS)
+			direction.y = TARGET_BOUNDS;
+		else if (direction.y < -TARGET_BOUNDS)
+			direction.y = -TARGET_BOUNDS;
+
+		if (direction.z > TARGET_BOUNDS)
+			direction.z = TARGET_BOUNDS;
+		else if (direction.z < -TARGET_BOUNDS)
+			direction.z = -TARGET_BOUNDS;
+
+		target = direction;
+
+		startTime = waitTime = Timer::time();
+		waitAmount = glm::length(target - prevTarget);
+	}
+	else
+	{
+		float targetDistance = glm::length(target - prevTarget);
+		currentTarget = MathFunc::Lerp(prevTarget, target, (Timer::time() - startTime) / (targetDistance / MAX_SPEED / 2));
+	}
 }
 
 void Swarm::draw()
 {
-	glm::vec3 prevPosition = neighbors[0]->transform.position;
-	neighbors[0]->transform.setPosition(target);
-	//neighbors[0]->draw();
-	neighbors[0]->transform.setPosition(prevPosition);
+	sphere->transform.setPosition(currentTarget);
+	sphere->transform.scaleFactor = glm::vec3(1, 1, 1);
+	sphere->draw();
 
 	for (int i = 0; i < obstacles.size(); i++)
 	{
@@ -175,7 +207,7 @@ glm::vec3 Swarm::separate(int current)
 
 glm::vec3 Swarm::travel(int current)
 {
-	glm::vec3 tmp = (target - neighbors[current]->transform.position);
+	glm::vec3 tmp = (currentTarget - neighbors[current]->transform.position);
 	tmp /= 5;
 	tmp = limitSpeed(tmp, MAX_SPEED);
 	return  tmp;

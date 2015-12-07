@@ -225,6 +225,7 @@ void TestSceneHawk::loop() {
 	BoxCollider::updateColliders();
 
 	swarm->update(Timer::time());
+	swarm->draw();
 	if (Input::getKey("b"))
 	{
 		swarm->draw();
