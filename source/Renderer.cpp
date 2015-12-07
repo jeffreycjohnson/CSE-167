@@ -24,12 +24,12 @@ Shader* shaderList[SHADER_COUNT];
 int Renderer::shaderForwardLightList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM };
 int shaderViewList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER,
     PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING, SKYBOX_SHADER,
-    SHADOW_SHADER, SHADOW_SHADER_ANIM, BASIC_SHADER };
+    SHADOW_SHADER, SHADOW_SHADER_ANIM, BASIC_SHADER, FORWARD_UNLIT };
 int shaderCameraPosList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 int shaderEnvironmentList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 int shaderPerspectiveList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER, EMITTER_SHADER,
     EMITTER_BURST_SHADER, PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING,
-    BASIC_SHADER };
+    BASIC_SHADER, FORWARD_UNLIT };
 
 Camera* Renderer::camera = new Camera();
 float Renderer::prevFOV = 1;
@@ -121,6 +121,10 @@ void Renderer::init(int window_width, int window_height) {
 		"source/shaders/simple.vert", "source/shaders/simple.frag"
 		);
 
+    shaderList[FORWARD_UNLIT] = new Shader(
+        "source/shaders/forward_pbr.vert", "source/shaders/forward_unlit.frag"
+        );
+
 	currentShader = shaderList[FORWARD_PBR_SHADER];
 	currentShader->use();
 
@@ -156,8 +160,8 @@ void Renderer::init(int window_width, int window_height) {
 
     passes.push_back(shadowPass);
     passes.push_back(deferredPass);
+    passes.push_back(new SkyboxPass(skybox));
 	passes.push_back(regularPass);
-	passes.push_back(new SkyboxPass(skybox));
 	passes.push_back(particlePass);
 
 	lastTime = glfwGetTime();

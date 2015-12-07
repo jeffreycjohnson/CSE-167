@@ -134,6 +134,9 @@ void Sound::init()
 	SoundClass laser;
 	system->createSound("assets/sounds/laser.mp3", FMOD_3D, NULL, &laser);
 	soundMap.insert({ "laser", laser });
+	SoundClass gun;
+	system->createSound("assets/sounds/gun.wav", FMOD_2D, NULL, &gun);
+	soundMap.insert({ "gun", gun });
 	// Add more sounds as we need
 }
 

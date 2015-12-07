@@ -18,7 +18,7 @@
 #include "Sound.h"
 
 GameObject *scene = new GameObject();
-GameObject *camera = new GameObject();
+GameObject *camera;
 GameObject *sun;
 GameObject *bear;
 GameObject *light;
@@ -51,22 +51,11 @@ TestSceneHawk::TestSceneHawk()
 	(*trailMaterial)["trailLength"] = 64.f; //set it to maxPoints
 	(*trailMaterial)["colorTex"] = new Texture("assets/particle_trail.png");
 
-	GameObject::SceneRoot.addChild(*scene);
-    scene->addChild(*camera);
-    camera->addComponent(Renderer::camera);
-	camera->transform.setPosition(0, 0, 20);
-	camera->transform.getWorldPosition(); // Force matrix updates to prevent loud initial sounds
-	Renderer::camera->getCameraMatrix();
-	camera->update(0);
-
-	Sound* camSound = new Sound("cabin", false, true, 1);
-	camera->addComponent(camSound);
-
     sun = loadScene("assets/test_sphere.obj");//new GameObject();
     auto sunLight = new DirectionalLight(true);
     sunLight->color = glm::vec3(0.5, 0.5, 0.5);
     sun->addComponent(sunLight);
-    sun->transform.translate(0, 0, 10);
+    sun->transform.translate(0, 0, 25);
     Material* m = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
     (*m)["useTextures"] = false;
     (*m)["testMetal"] = (0) / 7.f;
@@ -124,7 +113,7 @@ TestSceneHawk::TestSceneHawk()
 	bear->setMaterial(bearMat);
 	bear->getComponent<Animation>()->play(0, true);
 
-	Sound* bearSound = new Sound("laser", false, false, 1);
+	Sound* bearSound = new Sound("gun", false, false, 1);
 	bear->addComponent(bearSound);
 
 	GameObject::SceneRoot.addChild(*bear);
@@ -174,6 +163,18 @@ TestSceneHawk::TestSceneHawk()
 	light2->setMaterial(sphereMat);
 
 	GameObject::SceneRoot.addChild(*light2);
+
+    GameObject::SceneRoot.addChild(*scene);
+    camera = loadScene("assets/cockpit.fbx");
+    scene->addChild(*camera);
+    camera->addComponent(Renderer::camera);
+	camera->transform.setPosition(0, 0, 20);
+	camera->transform.getWorldPosition(); // Force matrix updates to prevent loud initial sounds
+	Renderer::camera->getCameraMatrix();
+	camera->update(0);
+
+	Sound* camSound = new Sound("cabin", false, true, 1);
+	camera->addComponent(camSound);
 }
 
 void TestSceneHawk::loop() {
@@ -196,15 +197,15 @@ void TestSceneHawk::loop() {
 	swarm->update(Timer::time());
 	swarm->draw();
 
-	if (Input::getKeyDown("space"))
-		Renderer::camera->screenShake(0.5, 1);
+	if (Input::getMouseDown("mouse 0"))
+		Renderer::camera->screenShake(0.02, 0.25);
 	if (Input::getKeyDown("down"))
-		Renderer::camera->fov += 0.25;
+		Renderer::camera->fov += 0.5;
 	if (Input::getKeyDown("up"))
-		Renderer::camera->fov -= 0.25;
+		Renderer::camera->fov -= 0.5;
 	if (Input::getKeyDown("space"))
 		emitter->getComponent<GPUEmitter>()->play();
-	if (Input::getKeyDown("space"))
+	if (Input::getMouseDown("mouse 0"))
 		bear->getComponent<Sound>()->play();
 	if (Input::getKeyDown("left control"))
 		camera->getComponent<Sound>()->toggle();
