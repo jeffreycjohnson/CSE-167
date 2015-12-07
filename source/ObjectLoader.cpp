@@ -12,6 +12,8 @@
 #include "Animation.h"
 #include "Light.h"
 
+std::unordered_multimap<std::string, std::function<Component*(GameObject*)>> componentMap;
+
 
 int counter = 0;
 
@@ -40,28 +42,28 @@ static std::string getPath(const std::string& name)
 }
 
 GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string filename, std::unordered_map<std::string, Transform*>& loadingAcceleration, std::map<std::string, Light*>& lights) {
-	GameObject* nodeObject = new GameObject();
+    GameObject* nodeObject = new GameObject();
 
-	//add mesh to this object
-	aiVector3D pos;
-	aiVector3D scale;
-	aiQuaternion rotate;
+    //add mesh to this object
+    aiVector3D pos;
+    aiVector3D scale;
+    aiQuaternion rotate;
 
-	currentNode->mTransformation.Decompose(scale, rotate, pos);
+    currentNode->mTransformation.Decompose(scale, rotate, pos);
 
-	nodeObject->transform.scale(scale.x);
-	nodeObject->transform.translate(pos.x, pos.y, pos.z);
-	nodeObject->transform.rotate(glm::quat(rotate.w, rotate.x, rotate.y, rotate.z));
+    nodeObject->transform.scale(scale.x);
+    nodeObject->transform.translate(pos.x, pos.y, pos.z);
+    nodeObject->transform.rotate(glm::quat(rotate.w, rotate.x, rotate.y, rotate.z));
 
-    if(lights.count(currentNode->mName.C_Str()))
+    std::string name = currentNode->mName.C_Str();
+    if (name == "defaultobject") name = filename + std::to_string(counter);
+
+    if (lights.count(name))
     {
-        nodeObject->addComponent(lights[currentNode->mName.C_Str()]);
+        nodeObject->addComponent(lights[name]);
     }
 
-	if (currentNode->mNumMeshes > 0) {
-		std::string name = currentNode->mName.C_Str();
-		if (name == "defaultobject") name = filename + std::to_string(counter);
-
+    if (currentNode->mNumMeshes > 0) {
         if (!Mesh::meshMap.count(name)) {
             int meshIndex = *currentNode->mMeshes;
             Mesh::loadMesh(name, scene->mMeshes[meshIndex]);
@@ -90,7 +92,7 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
         else
         {
             aiColor3D color(0.f, 0.f, 0.f);
-            if(aMat->Get(AI_MATKEY_COLOR_DIFFUSE, color))
+            if (aMat->Get(AI_MATKEY_COLOR_DIFFUSE, color))
                 (*mat)["colorTex"] = new Texture(glm::vec4(color.r, color.g, color.b, 1));
             else
                 (*mat)["colorTex"] = new Texture(glm::vec4(1));
@@ -120,15 +122,24 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
         (*mat)["useTextures"] = true;
         mesh->setMaterial(mat);
 
-		nodeObject->addComponent(mesh);
-	}
+        nodeObject->addComponent(mesh);
+    }
 
-	loadingAcceleration[currentNode->mName.C_Str()] = &nodeObject->transform;
+    loadingAcceleration[currentNode->mName.C_Str()] = &nodeObject->transform;
 
-	//load child objects
-	for (unsigned int c = 0; c < currentNode->mNumChildren; ++c) {
-		nodeObject->addChild(*parseNode(scene, currentNode->mChildren[c], filename, loadingAcceleration, lights));
-	}
+    //load child objects
+    for (unsigned int c = 0; c < currentNode->mNumChildren; ++c) {
+        nodeObject->addChild(*parseNode(scene, currentNode->mChildren[c], filename, loadingAcceleration, lights));
+    }
+
+    auto components = componentMap.equal_range(name);
+    if (components.first != componentMap.end())
+    {
+        while (components.first != components.second) {
+            nodeObject->addComponent(components.first->second(nodeObject));
+            ++components.first;
+        }
+    }
 	return nodeObject;
 }
 
