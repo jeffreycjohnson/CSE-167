@@ -117,6 +117,12 @@
     <ClCompile Include="source\scripts\PlayerController.cpp">
       <Filter>Scripts\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\BoidAvoid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Turret.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\include\Camera.h">
@@ -200,6 +206,12 @@
     <ClInclude Include="source\scripts\include\PlayerController.h">
       <Filter>Scripts\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\include\BoidAvoid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\Turret.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="source\shaders\forward_pbr.frag">
@@ -247,8 +259,14 @@
     <None Include="source\shaders\shadow.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\forward_unlit.frag" />
-    <None Include="source\shaders\simple.frag" />
-    <None Include="source\shaders\simple.vert" />
+    <None Include="source\shaders\forward_unlit.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="source\shaders\simple.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="source\shaders\simple.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

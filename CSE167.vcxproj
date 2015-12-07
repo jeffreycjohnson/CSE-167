@@ -162,6 +162,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="source\Animation.cpp" />
+    <ClCompile Include="source\BoidAvoid.cpp" />
     <ClCompile Include="source\BoxCollider.cpp" />
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\Component.cpp" />
@@ -189,11 +190,13 @@
     <ClCompile Include="source\Texture.cpp" />
     <ClCompile Include="source\Timer.cpp" />
     <ClCompile Include="source\Transform.cpp" />
+    <ClCompile Include="source\Turret.cpp" />
     <ClCompile Include="source\Util.cpp" />
     <ClCompile Include="source\WebWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\include\Animation.h" />
+    <ClInclude Include="source\include\BoidAvoid.h" />
     <ClInclude Include="source\include\BoxCollider.h" />
     <ClInclude Include="source\include\Camera.h" />
     <ClInclude Include="source\include\Component.h" />
@@ -218,6 +221,7 @@
     <ClInclude Include="source\include\Texture.h" />
     <ClInclude Include="source\include\Timer.h" />
     <ClInclude Include="source\include\Transform.h" />
+    <ClInclude Include="source\include\Turret.h" />
     <ClInclude Include="source\include\WebWindow.h" />
     <ClInclude Include="source\scripts\include\PlayerController.h" />
   </ItemGroup>

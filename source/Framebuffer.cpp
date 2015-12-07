@@ -89,7 +89,7 @@ void Framebuffer::bind(int bufferCount, GLuint *buffersToDraw) {
 
 	//TODO use Renderer::resize()?
 	glViewport(0, 0, width, height);
-	glm::mat4 perspective = glm::perspective(Renderer::camera->getFOV(), width / (float)height, .1f, 100.f);
+	glm::mat4 perspective = glm::perspective(Renderer::camera->getFOV(), width / (float)height, NEAR_DEPTH, FAR_DEPTH);
 	Renderer::updatePerspective(perspective);
 }
 
@@ -97,7 +97,7 @@ void Framebuffer::unbind() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glViewport(0, 0, Renderer::getWindowWidth(), Renderer::getWindowHeight());
-	glm::mat4 perspective = glm::perspective(Renderer::camera->getFOV(), Renderer::getWindowWidth() / (float)Renderer::getWindowHeight(), .1f, 100.f);
+	glm::mat4 perspective = glm::perspective(Renderer::camera->getFOV(), Renderer::getWindowWidth() / (float)Renderer::getWindowHeight(), NEAR_DEPTH, FAR_DEPTH);
 	Renderer::updatePerspective(perspective);
 }
 

@@ -201,7 +201,7 @@ void Renderer::loop() {
 		testScene->debugDraw();
 		glEnable(GL_DEPTH_TEST);
         deferredPass->fbo->blitAll();
-}
+	}
 }
 
 void Renderer::extractObjects() {
@@ -277,6 +277,6 @@ void Renderer::resize(int width, int height) {
 	Renderer::width = width;
 	Renderer::height = height;
 
-	perspective = glm::perspective(camera->getFOV(), width / (float)height, .1f, 100.f);
+	perspective = glm::perspective(camera->getFOV(), width / (float)height, NEAR_DEPTH, FAR_DEPTH);
 	updatePerspective(perspective);
 }

@@ -132,7 +132,18 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
         nodeObject->addChild(*parseNode(scene, currentNode->mChildren[c], filename, loadingAcceleration, lights));
     }
 
-    auto components = componentMap.equal_range(name);
+	//To auto load components, use name before period
+	//This way we can load e.g. Turret.001 and Turret.002
+	// as Turret
+	std::string compTypeName;
+	std::size_t dividerPos = name.find('.'); //Note: apparently in Collada files '.' becomes '_'
+	if (dividerPos != std::string::npos) {
+		compTypeName = name.substr(0, dividerPos);
+	} else {
+		compTypeName = name;
+	}
+
+    auto components = componentMap.equal_range(compTypeName);
     if (components.first != componentMap.end())
     {
         while (components.first != components.second) {

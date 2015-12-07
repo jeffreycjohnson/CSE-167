@@ -18,7 +18,8 @@
 #include "Sound.h"
 #include "PlayerController.h"
 #include <gtx/rotate_vector.hpp>
-
+#include "BoidAvoid.h"
+#include "Turret.h"
 
 GameObject *scene = new GameObject();
 GameObject *camera;
@@ -38,6 +39,8 @@ Texture* blankNormal;
 
 float tmp = 0;
 
+GameObject* cruiser;
+
 
 TestSceneHawk::TestSceneHawk()
 {
@@ -45,9 +48,28 @@ TestSceneHawk::TestSceneHawk()
 	bearTex = new Texture("assets/bearTex2.jpg");
     bearSpec = new Texture("assets/bearTex2_spec.png", false);
     bearNormal = new Texture("assets/bearTex2_normal.jpg", false);
+	Texture* cruiserTex = new Texture("assets/cruiser_tex.png");
 
 	blankNormal = new Texture("assets/blank_normal.png", false);
 	Texture* blueColor = new Texture("assets/blank_normal.png", true);
+
+
+	addComponentMapping("boidAvoid", BoidAvoid::loadBoidAvoid);
+	addComponentMapping("TurretPlaceholder", Turret::loadTurret);
+
+
+	cruiser = loadScene("assets/cruiserPrototype.fbx");
+	cruiser->transform.setPosition(-5, 0, 10);
+	cruiser->transform.scale(0.15);
+	cruiser->addComponent<BoidAvoid>(new BoidAvoid(1));
+	GameObject::SceneRoot.addChild(*cruiser);
+
+	for (int a = 0; a < 10; ++a) {
+		GameObject* asteroid = loadScene("assets/asteroid3.fbx");
+		//bad not psudo random location generation, just something quick to position asteroids
+		asteroid->transform.translate(10*sin(a*21498), 10*sin(a*581209), 10*sin(a*12934));
+		GameObject::SceneRoot.addChild(*asteroid);
+	}
 
 	Material* trailMaterial = new Material(Renderer::getShader(PARTICLE_TRAIL_SHADER));
 	(*trailMaterial)["size"] = 0.32f;
@@ -96,14 +118,14 @@ TestSceneHawk::TestSceneHawk()
 	}
 
 	swarm = new Swarm(boids, count);
-	ob1 = new BoidSphere();
+	/*ob1 = new BoidSphere();
 	ob1->position = {-5, -6, 0};
 	ob1->radius = 5;
 	ob2 = new BoidSphere();
 	ob2->position = { 6, 5, 0 };
-	ob2->radius = 3;
-	Swarm::addObstacle(ob1);
-	Swarm::addObstacle(ob2);
+	ob2->radius = 3;*/
+//	Swarm::addObstacle(ob1);
+//	Swarm::addObstacle(ob2);
 
 	bear = loadScene("assets/bear2.dae");
 	bear->transform.rotate(glm::angleAxis(atanf(1)*1.f, glm::vec3(1, 0, 0)));
@@ -185,12 +207,13 @@ TestSceneHawk::TestSceneHawk()
 }
 
 void TestSceneHawk::loop() {
-	//scene->transform.rotate(glm::angleAxis(0.01f, glm::vec3(0, 1, 0)));
 
 	tmp += 0.02f;
 	light->transform.setPosition(5 * sin(tmp), 5 * cos(tmp), 4);
 
 	light2->transform.setPosition(-5 * sin(tmp), -5 * cos(tmp), 4);
+
+	cruiser->transform.rotate(glm::angleAxis(0.0075f, glm::vec3(1, 0, 0)));
 	
 	for (int x = 0; x < 8; ++x) {
 		for (int y = 0; y < 8; ++y) {
@@ -202,7 +225,10 @@ void TestSceneHawk::loop() {
 	BoxCollider::updateColliders();
 
 	swarm->update(Timer::time());
-	swarm->draw();
+	if (Input::getKey("b"))
+	{
+		swarm->draw();
+	}
 
 	if (Input::getMouseDown("mouse 0"))
 		Renderer::camera->screenShake(0.01, 0.25);

@@ -15,8 +15,8 @@
 struct BoidSphere : public GameObject
 {
 	unsigned int id;
-	glm::vec3 position;
-	float radius;
+	Transform* transform;
+	float radius; //note - this isn't used right now - scale of transform is instead
 };
 
 class Swarm

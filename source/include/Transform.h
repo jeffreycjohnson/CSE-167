@@ -59,6 +59,8 @@ class Transform : public Component
         glm::mat4 getTransformMatrix();
 
 		glm::vec3 getWorldPosition();
+
+		float getWorldScale();
 };
 
 #endif

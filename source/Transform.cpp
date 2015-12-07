@@ -77,3 +77,7 @@ glm::vec4 originPoint(0, 0, 0, 1);
 glm::vec3 Transform::getWorldPosition() {
 	return glm::vec3(getTransformMatrix() * originPoint);
 }
+
+float Transform::getWorldScale() {
+	return (glm::length(glm::vec3(getTransformMatrix()[0])));
+}

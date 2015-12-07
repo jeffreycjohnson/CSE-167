@@ -91,29 +91,6 @@ void Swarm::update(float deltaTime)
 
 void Swarm::draw()
 {
-	for (int i = 0; i < neighbors.size(); i++)
-	{
-		// Look at velocity
-		/*
-		glm::quat prevRotation = neighbors[i]->transform.rotation;
-		glm::vec3 up = glm::vec3(0, 1, 0);
-		neighbors[i]->transform.rotation = glm::quat();
-		glm::vec3 tmp;
-		glm::vec3 norm = glm::normalize(neighborVelocities[i]);
-		float angle = glm::acos(glm::dot(norm, up));
-		tmp = glm::cross(norm, up);
-		tmp = glm::cross(tmp, up);
-		if (glm::dot(tmp, norm) > 0)
-			angle = -angle;
-
-		glm::vec3 cross = glm::normalize(glm::cross(norm, up));
-		//neighbors[i]->transform.rotate(glm::angleAxis(angle, cross));
-		//neighbors[i]->transform.rotate(prevRotation);
-		*/
-
-		//neighbors[i]->draw();
-		//neighbors[i]->transform.rotation = prevRotation;
-	}
 	glm::vec3 prevPosition = neighbors[0]->transform.position;
 	neighbors[0]->transform.setPosition(target);
 	//neighbors[0]->draw();
@@ -121,8 +98,8 @@ void Swarm::draw()
 
 	for (int i = 0; i < obstacles.size(); i++)
 	{
-		sphere->transform.setPosition(obstacles[i]->position);
-		sphere->transform.scaleFactor = { obstacles[i]->radius, obstacles[i]->radius, obstacles[i]->radius };
+		sphere->transform.setPosition(obstacles[i]->transform->getWorldPosition());
+		sphere->transform.scaleFactor = obstacles[i]->transform->getWorldScale() * glm::vec3(1, 1, 1);
 		sphere->draw();
 	}
 }
@@ -218,11 +195,14 @@ glm::vec3 Swarm::avoidObstacles(int current)
 			continue;
 		}
 
-		d = glm::length(neighbors[current]->transform.position - obstacles[i]->position);
-		d = (d - obstacles[i]->radius);
+		glm::vec3 currentObstaclePosition = obstacles[i]->transform->getWorldPosition();
+		float currentObstacleRadius = obstacles[i]->transform->getWorldScale();
+
+		d = glm::length(neighbors[current]->transform.position - currentObstaclePosition);
+		d = (d - currentObstacleRadius);
 		if (d > 0 && d < AVOID_DISTANCE + neighbors.size() / 4.0f)
 		{
-			mean += glm::normalize(neighbors[current]->transform.position - obstacles[i]->position) / (d / ((AVOID_DISTANCE + neighbors.size() / 4.0f)));
+			mean += glm::normalize(neighbors[current]->transform.position - currentObstaclePosition) / (d / ((AVOID_DISTANCE + neighbors.size() / 4.0f)));
 		}
 	}
 	mean /= obstacles.size() - hasSelf;
