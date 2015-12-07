@@ -99,6 +99,13 @@ vec3 SpecularEnvMap(vec3 normal, vec3 view, float a, vec3 F0) {
 	return color;
 }
 
+const vec2 poissonDisk[4] = vec2[](
+   vec2( -0.94201624, -0.39906216 ),
+   vec2( 0.94558609, -0.76890725 ),
+   vec2( -0.094184101, -0.92938870 ),
+   vec2( 0.34495938, 0.29387760 )
+ );
+
 void main () {
   vec4 albedo = texture(colorTex, gl_FragCoord.xy / uScreenSize);
   if(albedo.xyz == vec3(0)) discard;
@@ -152,7 +159,12 @@ void main () {
   
 		  vec3 shadowPos = (uShadow_Matrix * vec4(pos.xyz, 1.0)).xyz / (uShadow_Matrix * vec4(pos.xyz, 1.0)).w;
 		  shadowPos.z -= max(0.05 * (1.0 - dot(normal.xyz, lightDir)), 0.005);
-		  shadow = texture(shadowTex, shadowPos, 0);
+		  vec2 texelSize = 1.0 / textureSize(shadowTex, 0);
+		  for(int i = 0; i < 4; i++) {
+			vec3 offset = vec3(poissonDisk[i] * texelSize, 0);
+			shadow += texture(shadowTex, shadowPos + offset, 0);
+		  }
+		  shadow /= 4;
 	  }
 
 
