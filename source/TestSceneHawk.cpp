@@ -30,7 +30,6 @@ GameObject *light2;
 GameObject *sphere[8][8];
 GameObject* emitter;
 GPUEmitter* emitterComponent;
-Swarm* swarm;
 BoidSphere* ob1, *ob2;
 
 Texture* testNormal;
@@ -46,8 +45,8 @@ TestSceneHawk::TestSceneHawk()
 {
 	testNormal = new Texture("assets/test_sphere_normal.png", false);
 	bearTex = new Texture("assets/bearTex2.jpg");
-    bearSpec = new Texture("assets/bearTex2_spec.png", false);
-    bearNormal = new Texture("assets/bearTex2_normal.jpg", false);
+	bearSpec = new Texture("assets/bearTex2_spec.png", false);
+	bearNormal = new Texture("assets/bearTex2_normal.jpg", false);
 	Texture* cruiserTex = new Texture("assets/cruiser_tex.png");
 
 	blankNormal = new Texture("assets/blank_normal.png", false);
@@ -67,7 +66,7 @@ TestSceneHawk::TestSceneHawk()
 	for (int a = 0; a < 10; ++a) {
 		GameObject* asteroid = loadScene("assets/asteroid3.fbx");
 		//bad not psudo random location generation, just something quick to position asteroids
-		asteroid->transform.translate(10*sin(a*21498), 10*sin(a*581209), 10*sin(a*12934));
+		asteroid->transform.translate(10 * sin(a * 21498), 10 * sin(a * 581209), 10 * sin(a * 12934));
 		GameObject::SceneRoot.addChild(*asteroid);
 	}
 
@@ -76,19 +75,19 @@ TestSceneHawk::TestSceneHawk()
 	(*trailMaterial)["trailLength"] = 64.f; //set it to maxPoints
 	(*trailMaterial)["colorTex"] = new Texture("assets/particle_trail.png");
 
-    sun = loadScene("assets/test_sphere.obj");//new GameObject();
-    auto sunLight = new DirectionalLight(true);
-    sunLight->color = glm::vec3(0.5, 0.5, 0.5);
-    sun->addComponent(sunLight);
-    sun->transform.translate(5, 8.5, -1.5);
+	sun = loadScene("assets/test_sphere.obj");//new GameObject();
+	auto sunLight = new DirectionalLight(true);
+	sunLight->color = glm::vec3(0.5, 0.5, 0.5);
+	sun->addComponent(sunLight);
+	sun->transform.translate(5, 8.5, -1.5);
 	sun->transform.setRotate(glm::quat_cast(glm::orientation(glm::vec3(0.5, 0.85, -0.15), glm::vec3(0, 1, 0))));
-    Material* m = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
-    (*m)["useTextures"] = false;
-    (*m)["testMetal"] = (0) / 7.f;
-    (*m)["testRough"] = (0) / 7.f;
-    (*m)["normalTex"] = blankNormal;
-    sun->setMaterial(m);
-    GameObject::SceneRoot.addChild(*sun);
+	Material* m = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
+	(*m)["useTextures"] = false;
+	(*m)["testMetal"] = (0) / 7.f;
+	(*m)["testRough"] = (0) / 7.f;
+	(*m)["normalTex"] = blankNormal;
+	sun->setMaterial(m);
+	GameObject::SceneRoot.addChild(*sun);
 
 	emitter = new GameObject();
 	emitterComponent = new GPUEmitter(emitter, "assets/particles/particle.png", true);
@@ -97,27 +96,34 @@ TestSceneHawk::TestSceneHawk()
 	emitter->transform.translate(0, 0, 2);
 	GameObject::SceneRoot.addChild(*emitter);
 
-	int count = 10;
-	GameObject** boids = new GameObject*[count];
-	for (int i = 0; i < count; i++)
+	int numSquads = 40;
+	int minCount = 3;
+	int maxCount = 7;
+	for (int i = 0; i < numSquads; i++)
 	{
-		boids[i] = new GameObject();
-		GameObject* boid = loadScene("assets/intercepter.dae");
-		boids[i]->addChild(*boid);
-		boids[i]->transform.scale(1);
+		int count = rand() % (maxCount - minCount) + minCount;
+		GameObject** boids = new GameObject*[rand()];
+		for (int i = 0; i < count; i++)
+		{
+			boids[i] = new GameObject();
+			GameObject* boid = loadScene("assets/intercepter.dae");
+			boids[i]->addChild(*boid);
+			boids[i]->transform.scale(1);
 
-		BoxCollider* collider = new BoxCollider(glm::vec3(0, 3, 2), glm::vec3(5, 7, 9));
-		boids[i]->addComponent(collider);
+			BoxCollider* collider = new BoxCollider(glm::vec3(0, 3, 2), glm::vec3(5, 7, 9));
+			boids[i]->addComponent(collider);
 
-		ParticleTrail* trail = new ParticleTrail();
-		trail->material = trailMaterial;
-		boids[i]->addComponent<ParticleTrail>(trail);
+			ParticleTrail* trail = new ParticleTrail();
+			trail->material = trailMaterial;
+			boids[i]->addComponent<ParticleTrail>(trail);
 
-
-		GameObject::SceneRoot.addChild(*boids[i]);
+			GameObject::SceneRoot.addChild(*boids[i]);
+		}
+		GameObject* swarm = new GameObject();
+		Swarm* swarmComponent = new Swarm(boids, count);
+		swarm->addComponent(swarmComponent);
+		GameObject::SceneRoot.addChild(*swarm);
 	}
-
-	swarm = new Swarm(boids, count);
 	/*ob1 = new BoidSphere();
 	ob1->position = {-5, -6, 0};
 	ob1->radius = 5;
@@ -223,13 +229,6 @@ void TestSceneHawk::loop() {
 	}
 
 	BoxCollider::updateColliders();
-
-	swarm->update(Timer::time());
-	swarm->draw();
-	if (Input::getKey("b"))
-	{
-		swarm->draw();
-	}
 
 	if (Input::getMouseDown("mouse 0"))
 		Renderer::camera->screenShake(0.01, 0.25);

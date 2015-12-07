@@ -11,7 +11,7 @@
 #define DAMPING 200.0f
 #define SEPARATION_DISTANCE 150.0f
 #define AVOID_DISTANCE 240.0f
-#define TARGET_BOUNDS 200.0f
+#define BOUNDS 400.0f
 
 struct BoidSphere : public GameObject
 {
@@ -20,7 +20,7 @@ struct BoidSphere : public GameObject
 	float radius; //note - this isn't used right now - scale of transform is instead
 };
 
-class Swarm
+class Swarm : public Component
 {
 private:
 	static unsigned int currentID;
@@ -50,6 +50,7 @@ public:
 
 	void update(float deltaTime);
 	void draw();
+	void debugDraw();
 
 	static void addObstacle(BoidSphere* newObstacle);
 };

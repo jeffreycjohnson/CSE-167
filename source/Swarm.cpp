@@ -95,20 +95,20 @@ void Swarm::update(float deltaTime)
 		direction *= MAX_SPEED * 6; // Set distance
 		direction += target; // Offset from current location
 
-		if (direction.x > TARGET_BOUNDS)
-			direction.x = TARGET_BOUNDS;
-		else if (direction.x < -TARGET_BOUNDS)
-			direction.x = -TARGET_BOUNDS;
+		if (direction.x > BOUNDS)
+			direction.x = BOUNDS;
+		else if (direction.x < -BOUNDS)
+			direction.x = -BOUNDS;
 
-		if (direction.y > TARGET_BOUNDS)
-			direction.y = TARGET_BOUNDS;
-		else if (direction.y < -TARGET_BOUNDS)
-			direction.y = -TARGET_BOUNDS;
+		if (direction.y > BOUNDS)
+			direction.y = BOUNDS;
+		else if (direction.y < -BOUNDS)
+			direction.y = -BOUNDS;
 
-		if (direction.z > TARGET_BOUNDS)
-			direction.z = TARGET_BOUNDS;
-		else if (direction.z < -TARGET_BOUNDS)
-			direction.z = -TARGET_BOUNDS;
+		if (direction.z > BOUNDS)
+			direction.z = BOUNDS;
+		else if (direction.z < -BOUNDS)
+			direction.z = -BOUNDS;
 
 		target = direction;
 
@@ -123,6 +123,11 @@ void Swarm::update(float deltaTime)
 }
 
 void Swarm::draw()
+{
+	
+}
+
+void Swarm::debugDraw()
 {
 	sphere->transform.setPosition(currentTarget);
 	sphere->transform.scaleFactor = glm::vec3(1, 1, 1);
