@@ -11,7 +11,7 @@
 #define DAMPING 200.0f
 #define SEPARATION_DISTANCE 150.0f
 #define AVOID_DISTANCE 240.0f
-#define BOUNDS 400.0f
+#define BOUNDS 100.0f
 
 struct BoidSphere : public GameObject
 {

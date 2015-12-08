@@ -86,7 +86,8 @@ void BoxCollider::setGameObject(GameObject* go)
 
 void BoxCollider::onCollisionEnter(GameObject* other)
 {
-	colliding = true;
+	if (!passive)
+		colliding = true;
 }
 
 void BoxCollider::drawDebugCube(glm::vec3 list[])
@@ -137,19 +138,19 @@ void BoxCollider::updateColliders()
 	for (int i = 0; i < colliders.size(); i++)
 	{
 		// Optimize erasing colliders? How often will this really happen?
-		while (colliders[i] == nullptr)
+		while (i < colliders.size() && (colliders[i] == nullptr || colliders[i]->gameObject == nullptr))
 		{
 			colliders.erase(colliders.begin() + i);
 		}
-		if (!colliders[i]->passive)
+		if (i < colliders.size() && !colliders[i]->passive)
 		{
-			for (int e = i; e < colliders.size(); e++)
+			for (int e = 0; e < colliders.size(); e++)
 			{
-				while (colliders[e] == nullptr)
+				while (e < colliders.size() && (colliders[e] == nullptr || colliders[e]->gameObject == nullptr))
 				{
 					colliders.erase(colliders.begin() + e);
 				}
-				if (i != e && checkCollision(i, e))
+				if (e < colliders.size() && i != e && checkCollision(i, e))
 				{
 					// Check for precise collision?
 					colliders[i]->gameObject->onCollisionEnter(colliders[e]->gameObject);
@@ -165,17 +166,19 @@ bool BoxCollider::checkCollision(int aIndex, int bIndex)
 	BoxCollider* a = colliders[aIndex];
 	BoxCollider* b = colliders[bIndex];
 
-	bool collideX = false, collideY = false, collideZ = false;
+	if (a != nullptr && b != nullptr)
+	{
+		bool collideX = false, collideY = false, collideZ = false;
 
-	if (a->xmin <= b->xmax && b->xmin <= a->xmax)
-		collideX = true;
-	if (a->ymin <= b->ymax && b->ymin <= a->ymax)
-		collideY = true;
-	if (a->zmin <= b->zmax && b->zmin <= a->zmax)
-		collideZ = true;
+		if (a->xmin <= b->xmax && b->xmin <= a->xmax)
+			collideX = true;
+		if (a->ymin <= b->ymax && b->ymin <= a->ymax)
+			collideY = true;
+		if (a->zmin <= b->zmax && b->zmin <= a->zmax)
+			collideZ = true;
 
-	if (collideX && collideY && collideZ)
-		return true;
-	else
-		return false;
+		if (collideX && collideY && collideZ)
+			return true;
+	}
+	return false;
 }

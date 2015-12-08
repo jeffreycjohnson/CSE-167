@@ -20,6 +20,7 @@
 #include <gtx/rotate_vector.hpp>
 #include "BoidAvoid.h"
 #include "Turret.h"
+#include "BoxCollider.h"
 
 GameObject *scene = new GameObject();
 GameObject *camera;
@@ -40,6 +41,7 @@ float tmp = 0;
 
 GameObject* cruiser;
 
+void generatePrefabs();
 
 TestSceneHawk::TestSceneHawk()
 {
@@ -96,7 +98,7 @@ TestSceneHawk::TestSceneHawk()
 	emitter->transform.translate(0, 0, 2);
 	GameObject::SceneRoot.addChild(*emitter);
 
-	int numSquads = 40;
+	int numSquads = 1;
 	int minCount = 3;
 	int maxCount = 7;
 	for (int i = 0; i < numSquads; i++)
@@ -110,8 +112,8 @@ TestSceneHawk::TestSceneHawk()
 			boids[i]->addChild(*boid);
 			boids[i]->transform.scale(1);
 
-			BoxCollider* collider = new BoxCollider(glm::vec3(0, 3, 2), glm::vec3(5, 7, 9));
-			boids[i]->addComponent(collider);
+			//BoxCollider* collider = new BoxCollider(glm::vec3(0, 3, 2), glm::vec3(5, 7, 9));
+			//boids[i]->addComponent(collider);
 
 			ParticleTrail* trail = new ParticleTrail();
 			trail->material = trailMaterial;
@@ -148,12 +150,15 @@ TestSceneHawk::TestSceneHawk()
 	Sound* bearSound = new Sound("gun", false, false, 1);
 	bear->addComponent(bearSound);
 
+	BoxCollider* collider = new BoxCollider({ 0, 0, 0 }, { 1, 1, 1 });
+	bear->addComponent(collider);
+
 	GameObject::SceneRoot.addChild(*bear);
 
 	for (int x = 0; x < 8; ++x) {
 		for (int y = 0; y < 8; ++y) {
 			sphere[x][y] = loadScene("assets/test_sphere.obj");
-			
+
 			float xDist = 2 * (x - 3.5);
 			float yDist = 2 * (y - 3.5);
 			float zDist = sin(x + y);
@@ -232,8 +237,6 @@ void TestSceneHawk::loop() {
 
 	if (Input::getMouseDown("mouse 0"))
 		Renderer::camera->screenShake(0.01, 0.25);
-	if (Input::getKeyDown("space"))
-		emitter->getComponent<GPUEmitter>()->play();
 	if (Input::getMouseDown("mouse 0"))
 		bear->getComponent<Sound>()->play();
 	if (Input::getKeyDown("left control"))

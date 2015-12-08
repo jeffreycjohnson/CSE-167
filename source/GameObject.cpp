@@ -9,11 +9,15 @@ GameObject GameObject::SceneRoot;
 
 GameObject::GameObject() {
 	transform.setGameObject(this);
+	dead = false;
 }
 
 GameObject::~GameObject() {
 	for (auto child : transform.children) {
 		delete (child)->gameObject;
+	}
+	for (auto component : componentList) {
+		delete component;
 	}
 }
 
@@ -21,6 +25,10 @@ void GameObject::addChild(GameObject& go) {
     transform.children.push_back(&go.transform);
     go.transform.parent = &transform;
     go.transform.transformMatrixDirty = true;
+}
+
+void GameObject::destroy() {
+	dead = true;
 }
 
 void GameObject::draw() {
@@ -43,9 +51,14 @@ void GameObject::debugDraw() {
 
 void GameObject::update(float deltaTime)
 {
-    for(auto object : transform.children)
+	Transform* object;
+	for (int i = 0; i < transform.children.size(); i++)
     {
-        object->gameObject->update(deltaTime);
+		object = transform.children[i];
+		if (object->gameObject->dead)
+			transform.children.erase(transform.children.begin() + i);
+		else
+			object->gameObject->update(deltaTime);
     }
     for (auto component : componentList)
     {

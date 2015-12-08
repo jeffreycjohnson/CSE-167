@@ -17,6 +17,7 @@ public:
 	};
 
 	Transform transform;
+	bool dead;
 
     static GameObject SceneRoot;
 
@@ -56,6 +57,7 @@ public:
     }
 
     void addChild(GameObject& go);
+	void destroy();
 
 	void draw();
 	void debugDraw();

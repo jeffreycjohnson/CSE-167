@@ -171,10 +171,10 @@ void Input::init(GLFWwindow* win)
 	addInput(data);
 
 	data.name = "fire";
-	data.positiveButton = "mouse 0";
-	data.negativeButton = "";
-	data.altPositiveButton = "space";
-	data.altNegativeButton = "";
+	data.positiveButton = "";
+	data.negativeButton = "mouse 0";
+	data.altPositiveButton = "";
+	data.altNegativeButton = "space";
 	data.joystick = Joystick::JOYSTICK_2;
 	data.axis = AxisType::X;
 	data.invert = true; // Right trigger
