@@ -159,6 +159,7 @@ void main () {
   
 		  vec3 shadowPos = (uShadow_Matrix * vec4(pos.xyz, 1.0)).xyz / (uShadow_Matrix * vec4(pos.xyz, 1.0)).w;
 		  shadowPos.z -= max(0.05 * (1.0 - dot(normal.xyz, lightDir)), 0.005);
+		  shadowPos.z = min(shadowPos.z, 0.9999);
 		  vec2 texelSize = 1.0 / textureSize(shadowTex, 0);
 		  for(int i = 0; i < 4; i++) {
 			vec3 offset = vec3(poissonDisk[i] * texelSize, 0);
