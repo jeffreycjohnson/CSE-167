@@ -25,7 +25,7 @@ GLuint indices[INDEX_COUNT] = { 0, 1, 2, 0, 2, 3 };
 #define CUBE_FACES 6
 #define SH_COUNT 9
 
-#define sample_count 1
+#define sample_count 4
 
 
 bool Skybox::loaded = false;
@@ -324,8 +324,8 @@ glm::vec3 Skybox::sampleTexture(ImageData& environment, glm::vec3 sampleDirectio
 			y = y*0.5 + 0.5;
 			z = z*0.5 + 0.5;
 			face = (x > 0) ? 0 : 1;
-			s = environment.width[face] * ((x>0) ? 1-z : z);
-			t = environment.height[face] * y;
+			s = (environment.width[face]-1) * ((x>0) ? 1-z : z);
+			t = (environment.height[face]-1) * y;
 			for (int c = 0; c < 3; ++c) {
 				retVal[c] = environment.imageArray[face][(s + t*environment.width[face])*environment.channels[face] + c];
 			}
@@ -336,8 +336,8 @@ glm::vec3 Skybox::sampleTexture(ImageData& environment, glm::vec3 sampleDirectio
 			x = x*0.5 + 0.5;
 			z = z*0.5 + 0.5;
 			face = (y < 0) ? 2 : 3;
-			s = environment.width[face] * x;
-			t = environment.height[face] * ((y>0) ? 1-z : z);
+			s = (environment.width[face] - 1) * x;
+			t = (environment.height[face] - 1) * ((y>0) ? 1-z : z);
 			for (int c = 0; c < 3; ++c) {
 				retVal[c] = environment.imageArray[face][(s + t*environment.width[face])*environment.channels[face] + c];
 			}
@@ -348,8 +348,8 @@ glm::vec3 Skybox::sampleTexture(ImageData& environment, glm::vec3 sampleDirectio
 			x = x*0.5 + 0.5;
 			y = y*0.5 + 0.5;
 			face = (z > 0) ? 4 : 5;
-			s = environment.width[face] * ((z<0) ? 1-x : x);
-			t = environment.height[face] * y;
+			s = (environment.width[face]-1) * ((z<0) ? 1-x : x);
+			t = (environment.height[face]-1) * y;
 			for (int c = 0; c < 3; ++c) {
 				retVal[c] = environment.imageArray[face][(s + t*environment.width[face])*environment.channels[face] + c];
 			}

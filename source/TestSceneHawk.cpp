@@ -47,7 +47,6 @@ TestSceneHawk::TestSceneHawk()
 	bearTex = new Texture("assets/bearTex2.jpg");
 	bearSpec = new Texture("assets/bearTex2_spec.png", false);
 	bearNormal = new Texture("assets/bearTex2_normal.jpg", false);
-	Texture* cruiserTex = new Texture("assets/cruiser_tex.png");
 
 	blankNormal = new Texture("assets/blank_normal.png", false);
 	Texture* blueColor = new Texture("assets/blank_normal.png", true);
@@ -59,7 +58,7 @@ TestSceneHawk::TestSceneHawk()
 
 	cruiser = loadScene("assets/cruiserPrototype.fbx");
 	cruiser->transform.setPosition(-5, 0, 10);
-	cruiser->transform.scale(0.25);
+	cruiser->transform.scale(0.5);
 	cruiser->addComponent<BoidAvoid>(new BoidAvoid(1));
 	GameObject::SceneRoot.addChild(*cruiser);
 
@@ -219,7 +218,7 @@ void TestSceneHawk::loop() {
 
 	light2->transform.setPosition(-5 * sin(tmp), -5 * cos(tmp), 4);
 
-	cruiser->transform.rotate(glm::angleAxis(0.0075f, glm::vec3(1, 0, 0)));
+	//cruiser->transform.rotate(glm::angleAxis(0.0075f, glm::vec3(1, 0, 0)));
 	
 	for (int x = 0; x < 8; ++x) {
 		for (int y = 0; y < 8; ++y) {
