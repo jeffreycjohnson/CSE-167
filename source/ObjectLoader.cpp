@@ -72,10 +72,16 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
         auto mesh = new Mesh(name);
 
         auto aMat = scene->mMaterials[scene->mMeshes[*currentNode->mMeshes]->mMaterialIndex];
-        auto found = name.find("Forward") != std::string::npos;
+        auto foundForward = name.find("Forward") != std::string::npos;
+        auto foundEmit = name.find("Emit") != std::string::npos;
         Material * mat;
-        if (found) {
+        if (foundForward) {
             mat = new Material(Renderer::getShader(scene->mMeshes[*currentNode->mMeshes]->HasBones() ? FORWARD_PBR_SHADER_ANIM : FORWARD_UNLIT));
+            mat->transparent = true;
+        }
+        else if(foundEmit)
+        {
+            mat = new Material(Renderer::getShader(FORWARD_EMISSIVE));
             mat->transparent = true;
         }
         else {

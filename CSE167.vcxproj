@@ -228,6 +228,7 @@
   <ItemGroup>
     <None Include="source\shaders\deferred_gbuffer.frag" />
     <None Include="source\shaders\deferred_lighting.frag" />
+    <None Include="source\shaders\emissive.frag" />
     <None Include="source\shaders\fbo.vert" />
     <None Include="source\shaders\fbo_hdr.frag" />
     <None Include="source\shaders\forward_pbr.frag" />

@@ -268,5 +268,6 @@
     <None Include="source\shaders\simple.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="source\shaders\emissive.frag" />
   </ItemGroup>
 </Project>
