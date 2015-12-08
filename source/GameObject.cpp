@@ -4,12 +4,14 @@
 #include "Renderer.h"
 #include "Light.h"
 #include "ParticleTrail.h"
+#include "BoxCollider.h"
 
 GameObject GameObject::SceneRoot;
 
 GameObject::GameObject() {
 	transform.setGameObject(this);
 	dead = false;
+	visible = true;
 }
 
 GameObject::~GameObject() {
@@ -32,11 +34,14 @@ void GameObject::destroy() {
 }
 
 void GameObject::draw() {
-	for (auto component : componentList) {
-		component->draw();
-	}
-	for (auto child : transform.children) {
-		(child->gameObject)->draw();
+	if (visible) {
+		for (auto component : componentList) {
+			if (component->visible)
+				component->draw();
+		}
+		for (auto child : transform.children) {
+			(child->gameObject)->draw();
+		}
 	}
 }
 
@@ -56,7 +61,14 @@ void GameObject::update(float deltaTime)
     {
 		object = transform.children[i];
 		if (object->gameObject->dead)
+		{
+			BoxCollider* collider;
+			if ((collider = getComponent<BoxCollider>()) != nullptr) {
+				collider->remove();
+			}
+			delete object->gameObject;
 			transform.children.erase(transform.children.begin() + i);
+		}
 		else
 			object->gameObject->update(deltaTime);
     }
@@ -108,8 +120,15 @@ void GameObject::setMaterial(Material *mat) {
 
 void GameObject::onCollisionEnter(GameObject* other)
 {
-	for (int i = 0; i < componentList.size(); i++)
+	if (this != nullptr)
 	{
-		componentList[i]->onCollisionEnter(other);
+		for (int i = 0; i < componentList.size(); i++)
+		{
+			componentList[i]->onCollisionEnter(other);
+		}
+	}
+	else
+	{
+		// Weird shit happened and code will sometimes run here
 	}
 }

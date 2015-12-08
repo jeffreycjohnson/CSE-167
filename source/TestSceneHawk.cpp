@@ -21,6 +21,7 @@
 #include "BoidAvoid.h"
 #include "Turret.h"
 #include "BoxCollider.h"
+#include "Fighter.h"
 
 GameObject *scene = new GameObject();
 GameObject *camera;
@@ -111,8 +112,11 @@ TestSceneHawk::TestSceneHawk()
 			boids[i]->addChild(*boid);
 			boids[i]->transform.scale(1);
 
-			//BoxCollider* collider = new BoxCollider(glm::vec3(0, 3, 2), glm::vec3(5, 7, 9));
-			//boids[i]->addComponent(collider);
+			BoxCollider* collider = new BoxCollider(glm::vec3(0, 3, 2), glm::vec3(5, 7, 9));
+			boids[i]->addComponent(collider);
+
+			Fighter* fighter = new Fighter();
+			boids[i]->addComponent(fighter);
 
 			ParticleTrail* trail = new ParticleTrail();
 			trail->material = trailMaterial;
@@ -209,7 +213,7 @@ TestSceneHawk::TestSceneHawk()
 	Renderer::camera->getCameraMatrix();
 	camera->update(0);
 
-	Sound* camSound = new Sound("cabin", false, true, 1);
+	Sound* camSound = new Sound("music", false, true, 1);
 	camera->addComponent(camSound);
 
 	PlayerController* controller = new PlayerController();

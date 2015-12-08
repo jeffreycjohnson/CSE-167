@@ -7,6 +7,7 @@ class Component
 {
 	public:
         GameObject* gameObject;
+		bool visible;
 
         virtual ~Component() = default;
         virtual void update(float deltaTime);

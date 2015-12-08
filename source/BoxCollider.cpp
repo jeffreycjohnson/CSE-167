@@ -132,6 +132,15 @@ void BoxCollider::drawDebugCube(glm::vec3 list[])
 	
 }
 
+void BoxCollider::remove()
+{
+	for (int i = 0; i < colliders.size(); i++)
+	{
+		if (colliders[i] == this)
+			colliders.erase(colliders.begin() + i);
+	}
+}
+
 void BoxCollider::updateColliders()
 {
 	// Optimize with sweep and prune eventually, for now use brute force
@@ -148,6 +157,9 @@ void BoxCollider::updateColliders()
 			{
 				while (e < colliders.size() && (colliders[e] == nullptr || colliders[e]->gameObject == nullptr))
 				{
+					if (i > e)
+						i--;
+
 					colliders.erase(colliders.begin() + e);
 				}
 				if (e < colliders.size() && i != e && checkCollision(i, e))

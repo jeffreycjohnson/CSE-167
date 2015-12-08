@@ -17,7 +17,7 @@ public:
 	};
 
 	Transform transform;
-	bool dead;
+	bool dead, visible;
 
     static GameObject SceneRoot;
 

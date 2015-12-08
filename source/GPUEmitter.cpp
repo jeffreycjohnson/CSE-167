@@ -65,7 +65,8 @@ GPUEmitter::GPUEmitter(GameObject* go, string tex, bool burstEmitter)
 	maxStartAngle = 360;
 	minAngularVelocity = -10;
 	maxAngularVelocity = 10;
-	emitterVelocityScale = 10;
+	emitterVelocity = { 0, 0, 0 };
+	emitterVelocityScale = 2;
 	burst = burstEmitter;
 	trigger = false;
 	count = 4000;
@@ -78,7 +79,7 @@ GPUEmitter::GPUEmitter(GameObject* go, string tex, bool burstEmitter)
 
 GPUEmitter::~GPUEmitter()
 {
-	delete texture;
+	//delete texture;
 	// Delete for arrays is handled in genParticles
 }
 
@@ -98,34 +99,65 @@ void GPUEmitter::update(float deltaTime)
 
 		if (trigger)
 		{
-			glUniform1f(startTimeUniform, (GLfloat)startTime);
-			glUniform1ui(burstSeedUniform, (GLuint)rand());
-			glUniform3f(emitterPosUniform, gameObject->transform.position.x,
-				gameObject->transform.position.y,
-				gameObject->transform.position.z);
-			glUniform3f(emitterVelocityUniform, (gameObject->transform.position.x - prevPosition.x) * emitterVelocityScale,
-				(gameObject->transform.position.y - prevPosition.y) * emitterVelocityScale,
-				(gameObject->transform.position.z - prevPosition.z) * emitterVelocityScale);
+			burstSeed = rand();
+			burstStartPos = { gameObject->transform.getWorldPosition().x,
+				gameObject->transform.getWorldPosition().y,
+				gameObject->transform.getWorldPosition().z };
 			trigger = false;
 		}
 	}
-	else
-	{
-		glUniform3f(emitterPosUniform, gameObject->transform.position.x,
-			gameObject->transform.position.y,
-			gameObject->transform.position.z);
-		glUniform3f(emitterVelocityUniform, (gameObject->transform.position.x - prevPosition.x) * emitterVelocityScale,
-			(gameObject->transform.position.y - prevPosition.y) * emitterVelocityScale,
-			(gameObject->transform.position.z - prevPosition.z) * emitterVelocityScale);
-	}
 
-	prevPosition = gameObject->transform.position;
+	prevPosition = gameObject->transform.getWorldPosition();
 }
 
 void GPUEmitter::draw()
 {
 	if (enabled)
 	{
+		if (burst)
+			Renderer::switchShader(EMITTER_BURST_SHADER);
+		else
+			Renderer::switchShader(EMITTER_SHADER);
+
+		if (burst)
+		{
+			glUniform1f(startTimeUniform, (GLfloat)startTime);
+			glUniform1ui(burstSeedUniform, (GLuint)burstSeed);
+			glUniform3f(emitterPosUniform, burstStartPos.x, burstStartPos.y, burstStartPos.z);
+			glUniform3f(emitterVelocityUniform, emitterVelocity.x * emitterVelocityScale, 
+												emitterVelocity.y * emitterVelocityScale, 
+												emitterVelocity.z * emitterVelocityScale);
+		}
+		else
+		{
+			glUniform3f(emitterPosUniform, gameObject->transform.getWorldPosition().x,
+				gameObject->transform.getWorldPosition().y,
+				gameObject->transform.getWorldPosition().z);
+			glUniform3f(emitterVelocityUniform, (gameObject->transform.getWorldPosition().x - prevPosition.x) * emitterVelocityScale,
+				(gameObject->transform.getWorldPosition().y - prevPosition.y) * emitterVelocityScale,
+				(gameObject->transform.getWorldPosition().z - prevPosition.z) * emitterVelocityScale);
+		}
+		glUniform3f(minVelocityUniform, minStartVelocity.x, minStartVelocity.y, minStartVelocity.z);
+		glUniform3f(maxVelocityUniform, maxStartVelocity.x, maxStartVelocity.y, maxStartVelocity.z);
+		glUniform3f(minAccelUniform, minAcceleration.x, minAcceleration.y, minAcceleration.z);
+		glUniform3f(maxAccelUniform, maxAcceleration.x, maxAcceleration.y, maxAcceleration.z);
+		glUniform1f(minStartSizeUniform, minStartSize);
+		glUniform1f(maxStartSizeUniform, maxStartSize);
+		glUniform1f(minEndSizeUniform, minEndSize);
+		glUniform1f(maxEndSizeUniform, maxEndSize);
+		glUniform3f(minStartColorUniform, minStartColor.x, minStartColor.y, minStartColor.z);
+		glUniform3f(maxStartColorUniform, maxStartColor.x, maxStartColor.y, maxStartColor.z);
+		glUniform3f(minEndColorUniform, minEndColor.x, minEndColor.y, minEndColor.z);
+		glUniform3f(maxEndColorUniform, maxEndColor.x, maxEndColor.y, maxEndColor.z);
+		glUniform1f(startOpacityUniform, startOpacity);
+		glUniform1f(endOpacityUniform, endOpacity);
+		glUniform1f(minStartAngleUniform, minStartAngle);
+		glUniform1f(maxStartAngleUniform, maxStartAngle);
+		glUniform1f(minAngularVelocityUniform, minAngularVelocity);
+		glUniform1f(maxAngularVelocityUniform, maxAngularVelocity);
+		unsigned int rotateVel = rotateTowardsVelocity ? 1 : 0;
+		glUniform1ui(rotateTowardsVelocityUniform, rotateVel);
+
 		glEnable(GL_BLEND);
 		if (additive)
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -134,12 +166,7 @@ void GPUEmitter::draw()
 		glDepthMask(false);
 		texture->bindTexture(0);
 
-		if (burst)
-			Renderer::switchShader(EMITTER_BURST_SHADER);
-		else
-			Renderer::switchShader(EMITTER_SHADER);
-
-		Renderer::setModelMatrix(gameObject->transform.getTransformMatrix());
+		Renderer::setModelMatrix(glm::mat4(1));
 		if (Renderer::gpuData.vaoHandle != vao) {
 			glBindVertexArray(vao);
 			Renderer::gpuData.vaoHandle = vao;

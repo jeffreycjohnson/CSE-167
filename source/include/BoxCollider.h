@@ -18,6 +18,7 @@ public:
 
 	BoxCollider(glm::vec3 offset, glm::vec3 dimensions);
 	~BoxCollider();
+	void remove();
 	void update(float deltaTime);
 	void draw();
 	void debugDraw();

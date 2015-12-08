@@ -3,8 +3,8 @@
 
 #include "Component.h"
 
-#define MAX_BULLET_DISTANCE 20.0f
-#define BULLET_VELOCITY 10.0f
+#define MAX_BULLET_DISTANCE 200.0f
+#define BULLET_VELOCITY 500.0f
 
 class Bullet : public Component
 {
@@ -13,8 +13,8 @@ private:
 	bool dying;
 
 public:
-	glm::vec3 startPos, forward;
-	Bullet(glm::vec3 startPos, glm::vec3 forward, float emitterDuration);
+	glm::vec3 startPos, startVel, forward;
+	Bullet(glm::vec3 startPos, glm::vec3 forward, glm::vec3 starVel, float emitterDuration);
 	~Bullet();
 
 	void init();

@@ -23,8 +23,9 @@ private:
 	float* durations;
 	int* quadCorners;
 	unsigned int* seeds;
-	float startTime; // For burst
-	bool burst, trigger, rotateTowardsVelocity;
+	float startTime, burstSeed; // For burst
+	glm::vec3 burstStartPos;
+	bool burst, trigger;
 
 	GLuint genParticles();
 
@@ -32,13 +33,13 @@ public:
 	float minStartSize, maxStartSize, minEndSize, maxEndSize;
 	float startOpacity, endOpacity;
 	glm::vec3 minStartColor, maxStartColor, minEndColor, maxEndColor;
-	glm::vec3 minStartVelocity, maxStartVelocity;
+	glm::vec3 minStartVelocity, maxStartVelocity, emitterVelocity;
 	glm::vec3 minAcceleration, maxAcceleration;
 	float minDuration, maxDuration;
 	float minStartAngle, maxStartAngle, minAngularVelocity, maxAngularVelocity;
 	float emitterVelocityScale;
 	int count; // Per second
-	bool enabled, loop, additive;
+	bool enabled, loop, additive, rotateTowardsVelocity;
 
 	GPUEmitter(GameObject*, std::string, bool);
 	~GPUEmitter();

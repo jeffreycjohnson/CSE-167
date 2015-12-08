@@ -8,6 +8,7 @@
 #include "GPUEmitter.h"
 #include "BoxCollider.h"
 #include "ObjectLoader.h"
+#include "Timer.h"
 
 PlayerController::PlayerController()
 {
@@ -32,9 +33,12 @@ void PlayerController::update(float deltaTime)
 	rotationInputs.z = Input::getAxis("pitch") * rotationSensitivity * deltaTime;
 	currentRot += (rotationInputs - currentRot) * PLAYER_ROTATION_DAMPING;
 
-	if (Input::getButtonDown("fire"))
+	if ((Input::getButton("fire") || Input::getAxis("fire") > 0.5f) && Timer::time() - startShoot > SHOOT_INTERVAL)
 	{
-		makeBullet();
+		makeBullet(true);
+		makeBullet(false);
+		Renderer::camera->screenShake(0.025, 0.2);
+		startShoot = Timer::time();
 	}
 
 	bool zoom = Input::getButton("aim");
@@ -73,18 +77,19 @@ void PlayerController::update(float deltaTime)
 	gameObject->transform.rotate(rollDelta * yawDelta * pitchDelta);
 }
 
-void PlayerController::makeBullet()
+void PlayerController::makeBullet(bool side)
 {
 	GameObject* bulletObj = loadScene("assets/sphere.obj");
-	Bullet* bullet = new Bullet(gameObject->transform.getWorldPosition(), forward, 2);
+	glm::vec3 offset(4, 1, 5);
+	if (side)
+	{
+		offset.x = -offset.x;
+	}
+	Bullet* bullet = new Bullet(gameObject->transform.getWorldPosition() + glm::mat3(gameObject->transform.getTransformMatrix()) * offset, forward, currentVel, 2);
 	bulletObj->addComponent(bullet);
 	bullet->init();
-	BoxCollider* collider = new BoxCollider({ 0, 0, 0 }, { 5, 5, 5 });
+	BoxCollider* collider = new BoxCollider({ 0, 0, 0 }, { 1, 1, 5 });
 	collider->passive = false;
 	bulletObj->addComponent(collider);
-	GPUEmitter* emitter = new GPUEmitter(bulletObj, "assets/particles/spark.png", true);
-	emitter->minDuration = 1;
-	emitter->maxDuration = 2;
-	bulletObj->addComponent(emitter);
 	GameObject::SceneRoot.addChild(*bulletObj);
 }

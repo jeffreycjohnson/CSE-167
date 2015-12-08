@@ -7,6 +7,8 @@ class Fighter : public Component
 {
 private:
 	int health;
+	float startTime, hideTime, emitterTime;
+	bool killed;
 
 public:
 	Fighter();

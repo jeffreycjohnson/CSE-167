@@ -64,7 +64,8 @@ void main()
 
 	// Velocity
 	vec3 velocity = range(minVelocity, maxVelocity);
-	pos.xyz += (velocity + emitterVelocity) * t;
+	vec3 emitterVel = range(vec3(0, 0, 0), emitterVelocity);
+	pos.xyz += (velocity - emitterVel) * t;
 
 	// Acceleration
 	tmpVec = range(minAcceleration, maxAcceleration);
@@ -79,7 +80,7 @@ void main()
 	pos.x += (texCoord.x - 0.5f) * tmp; // Multiply by size
 	pos.y += (texCoord.y - 0.5f) * tmp;
 
-	vec2 velocity_screen = ((transformMatrix) * vec4(velocity - emitterVelocity + (tmpVec * t), 1.0)).xy;
+	vec2 velocity_screen = ((transformMatrix) * vec4(velocity - emitterVel + (tmpVec * t), 1.0)).xy;
 
 	// Angle
 	angle = (rotateTowardsVelocity) * atan(velocity_screen.y, velocity_screen.x) 
