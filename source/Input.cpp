@@ -162,13 +162,42 @@ void Input::init(GLFWwindow* win)
 	addInput(data);
 
 	data.name = "thrust";
-	data.positiveButton = "f";
-	data.negativeButton = "r";
-	data.altPositiveButton = "joystick button 1";
-	data.altNegativeButton = "joystick button 0";
+	data.positiveButton = "r";
+	data.negativeButton = "f";
+	data.altPositiveButton = "joystick button 0";
+	data.altNegativeButton = "joystick button 1";
+	data.joystick = Joystick::JOYSTICK_16; // NULL
+	data.axis = AxisType::X;
+	addInput(data);
+
+	data.name = "fire";
+	data.positiveButton = "mouse 0";
+	data.negativeButton = "";
+	data.altPositiveButton = "space";
+	data.altNegativeButton = "";
 	data.joystick = Joystick::JOYSTICK_2;
 	data.axis = AxisType::X;
-	data.invert = true;
+	data.invert = true; // Right trigger
+	addInput(data);
+
+	data.name = "aim";
+	data.positiveButton = "mouse 1";
+	data.negativeButton = "";
+	data.altPositiveButton = "joystick button 3";
+	data.altNegativeButton = "";
+	data.joystick = Joystick::JOYSTICK_16; // NULL
+	data.axis = AxisType::X;
+	data.invert = false;
+	addInput(data);
+
+	data.name = "afterburner";
+	data.positiveButton = "left shift";
+	data.negativeButton = "";
+	data.altPositiveButton = "";
+	data.altNegativeButton = "";
+	data.joystick = Joystick::JOYSTICK_2;
+	data.axis = AxisType::X;
+	data.invert = false; // Left trigger
 	addInput(data);
 }
 

@@ -232,10 +232,6 @@ void TestSceneHawk::loop() {
 
 	if (Input::getMouseDown("mouse 0"))
 		Renderer::camera->screenShake(0.01, 0.25);
-	if (Input::getKeyDown("down"))
-		Renderer::camera->fov += 0.5;
-	if (Input::getKeyDown("up"))
-		Renderer::camera->fov -= 0.5;
 	if (Input::getKeyDown("space"))
 		emitter->getComponent<GPUEmitter>()->play();
 	if (Input::getMouseDown("mouse 0"))

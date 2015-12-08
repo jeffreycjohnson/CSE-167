@@ -180,6 +180,8 @@
     <ClCompile Include="source\Mesh.cpp" />
     <ClCompile Include="source\ObjectLoader.cpp" />
     <ClCompile Include="source\Renderer.cpp" />
+    <ClCompile Include="source\scripts\Bullet.cpp" />
+    <ClCompile Include="source\scripts\Fighter.cpp" />
     <ClCompile Include="source\scripts\PlayerController.cpp" />
     <ClCompile Include="source\Shader.cpp" />
     <ClCompile Include="source\Skybox.cpp" />
@@ -223,6 +225,8 @@
     <ClInclude Include="source\include\Transform.h" />
     <ClInclude Include="source\include\Turret.h" />
     <ClInclude Include="source\include\WebWindow.h" />
+    <ClInclude Include="source\scripts\include\Bullet.h" />
+    <ClInclude Include="source\scripts\include\Fighter.h" />
     <ClInclude Include="source\scripts\include\PlayerController.h" />
   </ItemGroup>
   <ItemGroup>

@@ -81,9 +81,12 @@ void Camera::update(float deltaTime)
 
 void Camera::screenShake(float amount, float duration)
 {
-	shakeAmount = startShakeAmount = amount;
-	shakeDuration = startShakeDuration = duration;
-	isShaking = true;
+	if (amount >= shakeAmount)
+	{
+		shakeAmount = startShakeAmount = amount;
+		shakeDuration = startShakeDuration = duration;
+		isShaking = true;
+	}
 }
 
 glm::vec3 Camera::getForward()

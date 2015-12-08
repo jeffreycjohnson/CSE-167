@@ -11,7 +11,7 @@ class PlayerController : public Component
 {
 private:
 	glm::vec3 currentRot, currentVel, targetVel, forward;
-	float speed, topSpeed, rotationSensitivity, thrustSensitivity;
+	float speed, topSpeed, boostSpeed, maxBoost, rotationSensitivity, thrustSensitivity, startFOV;
 
 public:
 	PlayerController();
