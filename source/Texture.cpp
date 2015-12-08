@@ -67,15 +67,6 @@ Texture::Texture(glm::vec4 color)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA,
         GL_UNSIGNED_BYTE, buffer);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    GLfloat anisoAmt = 0.0f;
-    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &anisoAmt);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisoAmt);
-
     glBindTexture(GL_TEXTURE_2D, 0);
     CHECK_ERROR();
 }

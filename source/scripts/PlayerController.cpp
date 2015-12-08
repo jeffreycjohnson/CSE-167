@@ -68,7 +68,7 @@ void PlayerController::update(float deltaTime)
 
 	forward = glm::normalize(glm::mat3(gameObject->transform.getTransformMatrix()) * glm::vec3(0, 0, -1));
 	currentVel += (1 + afterburner) * (forward * currentSpeed - currentVel) * (1 + thrustSensitivity * topSpeed - currentSpeed) * deltaTime;
-	gameObject->transform.translate(currentVel);
+	gameObject->transform.translate(currentVel * deltaTime * 60.f);
 
 	glm::quat rollDelta = glm::angleAxis(currentRot.x, glm::vec3(0, 0, -1));
 	glm::quat yawDelta = glm::angleAxis(currentRot.y, glm::vec3(0, -1, 0));
