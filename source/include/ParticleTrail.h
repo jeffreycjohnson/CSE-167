@@ -31,7 +31,7 @@ private:
 	const int maxPoints = 64;
 	float* megaArray;
 
-	const float addDelayTime = 0.32f;//in seconds
+	const float addDelayTime = 0.07f;//in seconds
 	float currentDelayTime = 0;
 
 	void addPoint(glm::vec3 point);
