@@ -53,11 +53,9 @@ TestSceneHawk::TestSceneHawk()
 
 	blankNormal = new Texture("assets/blank_normal.png", false);
 	Texture* blueColor = new Texture("assets/blank_normal.png", true);
-
-
+	
 	addComponentMapping("boidAvoid", BoidAvoid::loadBoidAvoid);
 	addComponentMapping("TurretPlaceholder", Turret::loadTurret);
-
 
 	cruiser = loadScene("assets/cruiserPrototype.fbx");
 	cruiser->transform.setPosition(-5, 0, 10);
@@ -104,7 +102,7 @@ TestSceneHawk::TestSceneHawk()
 	for (int i = 0; i < numSquads; i++)
 	{
 		int count = rand() % (maxCount - minCount) + minCount;
-		GameObject** boids = new GameObject*[rand()];
+		GameObject** boids = new GameObject*[count];
 		for (int i = 0; i < count; i++)
 		{
 			boids[i] = new GameObject();
@@ -129,14 +127,7 @@ TestSceneHawk::TestSceneHawk()
 		swarm->addComponent(swarmComponent);
 		GameObject::SceneRoot.addChild(*swarm);
 	}
-	/*ob1 = new BoidSphere();
-	ob1->position = {-5, -6, 0};
-	ob1->radius = 5;
-	ob2 = new BoidSphere();
-	ob2->position = { 6, 5, 0 };
-	ob2->radius = 3;*/
-//	Swarm::addObstacle(ob1);
-//	Swarm::addObstacle(ob2);
+
 
 	bear = loadScene("assets/bear2.dae");
 	bear->transform.rotate(glm::angleAxis(atanf(1)*1.f, glm::vec3(1, 0, 0)));
@@ -218,6 +209,7 @@ TestSceneHawk::TestSceneHawk()
 
 	PlayerController* controller = new PlayerController();
 	camera->addComponent(controller);
+	
 }
 
 void TestSceneHawk::loop() {

@@ -167,6 +167,7 @@
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\Component.cpp" />
     <ClCompile Include="source\DeferrerdPass.cpp" />
+    <ClCompile Include="source\GameScene.cpp" />
     <ClCompile Include="source\ParticleTrail.cpp" />
     <ClCompile Include="source\ForwardPass.cpp" />
     <ClCompile Include="source\Framebuffer.cpp" />
@@ -180,6 +181,7 @@
     <ClCompile Include="source\Mesh.cpp" />
     <ClCompile Include="source\ObjectLoader.cpp" />
     <ClCompile Include="source\Renderer.cpp" />
+    <ClCompile Include="source\SceneLoadFunctions.cpp" />
     <ClCompile Include="source\scripts\Bullet.cpp" />
     <ClCompile Include="source\scripts\Fighter.cpp" />
     <ClCompile Include="source\scripts\PlayerController.cpp" />
@@ -202,6 +204,7 @@
     <ClInclude Include="source\include\BoxCollider.h" />
     <ClInclude Include="source\include\Camera.h" />
     <ClInclude Include="source\include\Component.h" />
+    <ClInclude Include="source\include\GameScene.h" />
     <ClInclude Include="source\include\ParticleTrail.h" />
     <ClInclude Include="source\include\ForwardDecs.h" />
     <ClInclude Include="source\include\Framebuffer.h" />
@@ -215,6 +218,7 @@
     <ClInclude Include="source\include\ObjectLoader.h" />
     <ClInclude Include="source\include\Renderer.h" />
     <ClInclude Include="source\include\RenderPass.h" />
+    <ClInclude Include="source\include\SceneLoadFunctions.h" />
     <ClInclude Include="source\include\Shader.h" />
     <ClInclude Include="source\include\Skybox.h" />
     <ClInclude Include="source\include\Sound.h" />

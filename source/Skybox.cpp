@@ -25,7 +25,7 @@ GLuint indices[INDEX_COUNT] = { 0, 1, 2, 0, 2, 3 };
 #define CUBE_FACES 6
 #define SH_COUNT 9
 
-#define sample_count 4
+#define sample_count 1
 
 
 bool Skybox::loaded = false;

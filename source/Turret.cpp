@@ -14,6 +14,10 @@ Turret::~Turret()
 {
 }
 
+void Turret::update(float dt) {
+
+}
+
 
 Component* Turret::loadTurret(GameObject* parent)
 {

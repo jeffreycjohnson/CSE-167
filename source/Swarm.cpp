@@ -46,9 +46,9 @@ void Swarm::init()
 	srand(time(NULL));
 	for (int i = 0; i < neighbors.size(); i++)
 	{
-		neighbors[i]->transform.position.x = ((float)rand() / RAND_MAX) * 10 - 5;
-		neighbors[i]->transform.position.y = ((float) rand() / RAND_MAX) * 10 - 5;
-		neighbors[i]->transform.position.z = ((float)rand() / RAND_MAX) * 10 - 5;
+		neighbors[i]->transform.position.x += ((float)rand() / RAND_MAX) * 10 - 5;
+		neighbors[i]->transform.position.y += ((float) rand() / RAND_MAX) * 10 - 5;
+		neighbors[i]->transform.position.z += ((float)rand() / RAND_MAX) * 10 - 5;
 	}
 }
 

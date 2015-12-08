@@ -129,6 +129,12 @@
     <ClCompile Include="source\scripts\Fighter.cpp">
       <Filter>Scripts\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\SceneLoadFunctions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\include\Camera.h">
@@ -223,6 +229,12 @@
     </ClInclude>
     <ClInclude Include="source\scripts\include\Bullet.h">
       <Filter>Scripts\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\SceneLoadFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\GameScene.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -8,6 +8,7 @@
 #include "Input.h"
 #include "Timer.h"
 #include "Light.h"
+#include "GameScene.h"
 
 
 #define MODEL_MATRIX "uM_Matrix"
@@ -42,7 +43,7 @@ double lastTime;
 
 Framebuffer* fboTest;
 
-TestSceneHawk* testScene;
+Scene* scene;
 
 Skybox* skybox;
 
@@ -150,7 +151,8 @@ void Renderer::init(int window_width, int window_height) {
 	skybox->applyIrradiance();
 	skybox->applyTexture(5);
 
-	testScene = new TestSceneHawk();
+	//scene = new TestSceneHawk();
+	scene = new GameScene();
 	
 	fboTest = new Framebuffer(width, height, 2, false, true);
 
@@ -182,7 +184,7 @@ void Renderer::loop() {
         pass->render();
     }
 
-	testScene->loop(); /* This is just temporary - all it does it do translation without having to create temporary components */
+	scene->loop(); /* This is just temporary - all it does it do translation without having to create temporary components */
 
     deferredPass->fbo->unbind();
     deferredPass->fbo->bindTexture(0, 3);
@@ -201,7 +203,7 @@ void Renderer::loop() {
 	{
 		glDisable(GL_DEPTH_TEST);
 		Renderer::switchShader(BASIC_SHADER);
-		testScene->debugDraw();
+		GameObject::SceneRoot.debugDraw();
 		glEnable(GL_DEPTH_TEST);
         deferredPass->fbo->blitAll();
 	}

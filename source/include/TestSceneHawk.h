@@ -1,12 +1,13 @@
 #pragma once
 #include "ForwardDecs.h"
-class TestSceneHawk
+#include "GameScene.h"
+class TestSceneHawk : public Scene
 {
 public:
 	TestSceneHawk();
 	~TestSceneHawk();
 
-	void loop();
+	void loop() override;
 	void debugDraw();
 };
 

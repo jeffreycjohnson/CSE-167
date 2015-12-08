@@ -8,5 +8,6 @@ public:
 	static Component* loadTurret(GameObject* parent);
 	Turret();
 	~Turret();
+	void update(float dt) override;
 };
 
