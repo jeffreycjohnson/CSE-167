@@ -98,7 +98,7 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
         else
         {
             aiColor3D color(0.f, 0.f, 0.f);
-            if (aMat->Get(AI_MATKEY_COLOR_DIFFUSE, color))
+            if (AI_SUCCESS == aMat->Get(AI_MATKEY_COLOR_DIFFUSE, color))
                 (*mat)["colorTex"] = new Texture(glm::vec4(color.r, color.g, color.b, 1));
             else
                 (*mat)["colorTex"] = new Texture(glm::vec4(1));
