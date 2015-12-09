@@ -56,14 +56,18 @@ GameScene::GameScene()
 	Renderer::camera->getCameraMatrix();
 	camera->update(0);
 
-	Sound* camSound = new Sound("cabin", false, true, 1);
+	Sound* camSound = new Sound("cabin", true, true, 0.75f);
 	camera->addComponent(camSound);
 
 	PlayerController* controller = new PlayerController();
 	camera->addComponent(controller);
 
+	GameObject* musicObj = new GameObject();
+	Sound* music = new Sound("music", true, true, 0.25f);
+	musicObj->addComponent(music);
+	camera->addChild(*musicObj);
+
 	GameObject::SceneRoot.addChild(*camera);
-	camera->getComponent<Sound>()->toggle();
 }
 
 

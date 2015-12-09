@@ -32,12 +32,16 @@ Component* SceneLoadFunctions::loadPlayer(GameObject* parent) {
 	Renderer::camera->getCameraMatrix();
 	camera->update(0);
 
-	Sound* camSound = new Sound("cabin", false, true, 1);
+	Sound* camSound = new Sound("cabin", true, true, 1);
 	camera->addComponent(camSound);
 
 	PlayerController* controller = new PlayerController();
 	camera->addComponent(controller);
 
+	GameObject* musicObj = new GameObject();
+	Sound* music = new Sound("music", true, true, 0.4f);
+	musicObj->addComponent(music);
+	parent->addChild(*musicObj);
 
 	return new EmptyComponent;
 }
