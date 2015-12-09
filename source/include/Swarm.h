@@ -23,6 +23,9 @@ struct BoidSphere : public GameObject
 class Swarm : public Component
 {
 private:
+    GameObject* sphere;
+    Material* mat;
+    Texture* norm;
 	static unsigned int currentID;
 	static std::vector<BoidSphere*> obstacles;
 

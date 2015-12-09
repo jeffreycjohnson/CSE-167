@@ -79,7 +79,7 @@ void PlayerController::update(float deltaTime)
 
 void PlayerController::makeBullet(bool side)
 {
-	GameObject* bulletObj = loadScene("assets/sphere.obj");
+	GameObject* bulletObj = loadScene("assets/bullet.fbx");
 	glm::vec3 offset(4, 1, 5);
 	if (side)
 	{
@@ -87,6 +87,7 @@ void PlayerController::makeBullet(bool side)
 	}
 	Bullet* bullet = new Bullet(gameObject->transform.getWorldPosition() + glm::mat3(gameObject->transform.getTransformMatrix()) * offset, forward, currentVel, 2);
 	bulletObj->addComponent(bullet);
+    bulletObj->transform.setRotate(gameObject->transform.rotation);
 	bullet->init();
 	BoxCollider* collider = new BoxCollider({ 0, 0, 0 }, { 1, 1, 5 });
 	collider->passive = false;

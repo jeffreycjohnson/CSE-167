@@ -20,7 +20,9 @@ Material::Material(Shader* shader, bool transparent) : shader(shader), transpare
 
 Material::~Material()
 {
-    for (auto uniform : uniforms) delete uniform.second;
+    for (auto uniform : uniforms) {
+        if(uniform.second) delete uniform.second;
+    }
 }
 
 Material::UniformSetter Material::operator[](const std::string& name)

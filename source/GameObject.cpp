@@ -16,10 +16,10 @@ GameObject::GameObject() {
 
 GameObject::~GameObject() {
 	for (auto child : transform.children) {
-		delete (child)->gameObject;
+		if(child && child->gameObject) delete child->gameObject;
 	}
 	for (auto component : componentList) {
-		delete component;
+		if(component) delete component;
 	}
 }
 
