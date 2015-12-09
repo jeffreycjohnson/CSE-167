@@ -25,7 +25,13 @@ BoxCollider::BoxCollider(glm::vec3 offset, glm::vec3 dimensions)
 
 BoxCollider::~BoxCollider()
 {
-
+	for (int i = 0; i < colliders.size(); i++)
+	{
+		if (colliders[i] == this)
+		{
+			colliders.erase(colliders.begin() + i);
+		}
+	}
 }
 
 void BoxCollider::update(float deltaTime)

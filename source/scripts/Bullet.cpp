@@ -85,5 +85,5 @@ void Bullet::onCollisionEnter(GameObject* other)
 
 void Bullet::destroy()
 {
-	//gameObject->destroy();
+	gameObject->destroy();
 }
