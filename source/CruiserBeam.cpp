@@ -8,6 +8,7 @@ void CruiserBeam::loadCruiserBeam(GameObject* parent)
 {
 	Material* beamMaterial = new Material(Renderer::getShader(FORWARD_EMISSIVE));
 	(*beamMaterial).transparent = true;
+    (*beamMaterial)["colorTex"] = new Texture(glm::vec4(1.0, 0.25, 0.25, 0.5));
 	parent->getComponent<Mesh>()->setMaterial(beamMaterial);
 	CruiserBeam* addComponent = new CruiserBeam(parent);
 	parent->addComponent<CruiserBeam>(addComponent);

@@ -8,7 +8,7 @@ layout(location = 0) out vec4 frag_color;
 uniform sampler2D colorTex; //color texture - rgb: color | a: transparency
 
 void main() {
-    vec4 albedo = vec4(20,5,5,0.5);//texture(colorTex, vTexCoord);
+    vec4 albedo = texture(colorTex, vTexCoord);
 
-    frag_color = albedo;
+    frag_color = vec4(albedo.rgb * 20, albedo.a);
 }

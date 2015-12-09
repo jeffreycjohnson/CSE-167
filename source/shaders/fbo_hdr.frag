@@ -10,7 +10,7 @@ layout(location = 0) out vec4 fragColor;
 
 void main() {
 	vec3 color = textureLod(inputTex, vTexCoord, 0).rgb + max(texture(addTex, vTexCoord).rgb - 0.5, vec3(0.0));
-	float exposureTex = textureLod(inputTex, vTexCoord, 10.f).r*10;
+	float exposureTex = length(textureLod(inputTex, vTexCoord, 10.f))*10;
 	color *= mix(exposure, exposureTex, 0.25);
 	color = color / (color + vec3(1));
 	color = pow(color, vec3(1/2.2));
