@@ -80,7 +80,7 @@ void main()
 	pos.x += (texCoord.x - 0.5f) * tmp; // Multiply by size
 	pos.y += (texCoord.y - 0.5f) * tmp;
 
-	vec2 velocity_screen = ((transformMatrix) * vec4(velocity - emitterVel + (tmpVec * t), 1.0)).xy;
+	vec2 velocity_screen = ((transformMatrix) * vec4(velocity + (tmpVec * t), 1.0)).xy;
 
 	// Angle
 	angle = (rotateTowardsVelocity) * atan(velocity_screen.y, velocity_screen.x) 

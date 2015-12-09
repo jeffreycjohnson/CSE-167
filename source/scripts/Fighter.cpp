@@ -6,7 +6,7 @@
 
 Fighter::Fighter()
 {
-	health = 3;
+	health = 10;
 	startTime = 0;
 	hideTime = 
 	emitterTime = 2;
