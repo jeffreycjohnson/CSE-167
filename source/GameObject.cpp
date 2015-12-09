@@ -80,27 +80,29 @@ void GameObject::update(float deltaTime)
 
 void GameObject::extract(PassList & list)
 {
-	Mesh* mesh;
-	if ((mesh = getComponent<Mesh>()) != nullptr) {
-		if (mesh->material && mesh->material->transparent) {
-			list.forward.push_back(mesh);
+	if (visible) {
+		Mesh* mesh;
+		if ((mesh = getComponent<Mesh>()) != nullptr) {
+			if (mesh->material && mesh->material->transparent) {
+				list.forward.push_back(mesh);
+			}
+			else
+			{
+				list.deferred.push_back(mesh);
+			}
 		}
-        else
-        {
-            list.deferred.push_back(mesh);
-        }
-	}
-	GPUEmitter* emitter;
-	if ((emitter = getComponent<GPUEmitter>()) != nullptr) {
-		list.particle.push_back(emitter);
-	}
-	ParticleTrail* trail;
-	if ((trail = getComponent<ParticleTrail>()) != nullptr) {
-		list.particle.push_back(trail);
-	}
-	Light* light;
-	if ((light = getComponent<Light>()) != nullptr) {
-		list.light.push_back(light);
+		GPUEmitter* emitter;
+		if ((emitter = getComponent<GPUEmitter>()) != nullptr) {
+			list.particle.push_back(emitter);
+		}
+		ParticleTrail* trail;
+		if ((trail = getComponent<ParticleTrail>()) != nullptr) {
+			list.particle.push_back(trail);
+		}
+		Light* light;
+		if ((light = getComponent<Light>()) != nullptr) {
+			list.light.push_back(light);
+		}
 	}
 
 	for (auto child : transform.children) {

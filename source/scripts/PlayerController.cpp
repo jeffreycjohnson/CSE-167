@@ -80,6 +80,8 @@ void PlayerController::update(float deltaTime)
 void PlayerController::makeBullet(bool side)
 {
 	GameObject* bulletObj = loadScene("assets/sphere.obj");
+	bulletObj->setMaterial(new Material(Renderer::getShader(FORWARD_EMISSIVE)));
+
 	glm::vec3 offset(4, 1, 5);
 	if (side)
 	{

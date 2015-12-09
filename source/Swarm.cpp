@@ -37,7 +37,7 @@ Swarm::Swarm(GameObject** models, int count)
 Swarm::~Swarm()
 {
 	delete sphere;
-	delete mat;
+	//delete mat;
 	delete norm;
 }
 

@@ -12,18 +12,15 @@
 #include "BoxCollider.h"
 #include "Fighter.h"
 
-Component* loadX(GameObject* parent, std::string filename) {
+void loadX(GameObject* parent, std::string filename) {
 	parent->removeComponent<Mesh>();
 
 	GameObject* childObj = loadScene(filename);
 	childObj->transform.rotate(glm::angleAxis(atanf(1)*2.f, glm::vec3(1, 0, 0))); //convert back to z-up axis
 	parent->addChild(*childObj);
-
-	Component* addComponent = new EmptyComponent();
-	return addComponent;
 }
 
-Component* SceneLoadFunctions::loadPlayer(GameObject* parent) {
+void SceneLoadFunctions::loadPlayer(GameObject* parent) {
 
 	GameObject* camera = loadScene("assets/cockpit.fbx");
 	parent->addChild(*camera);
@@ -46,24 +43,30 @@ Component* SceneLoadFunctions::loadPlayer(GameObject* parent) {
 
 	BoidAvoid* obstacle = new BoidAvoid(5);
 	parent->addComponent(obstacle);
-
-	return new EmptyComponent;
 }
 
-Component* SceneLoadFunctions::loadAsteroidBoid(GameObject* parent) {
+void SceneLoadFunctions::loadAsteroidBoid(GameObject* parent) {
 	loadX(parent, "assets/asteroid3.fbx");
-	return new BoidAvoid(1);
+	parent->addComponent<BoidAvoid>(new BoidAvoid(1));
 }
 
-Component* SceneLoadFunctions::loadAsteroidNoBoid(GameObject* parent) {
+void SceneLoadFunctions::loadAsteroidNoBoid(GameObject* parent) {
 	return loadX(parent, "assets/asteroid3.fbx");
 }
 
-Component* SceneLoadFunctions::loadCapitalShip(GameObject* parent) {
-	return loadX(parent, "assets/cruiserPrototype.fbx");
+void SceneLoadFunctions::loadCapitalShip(GameObject* parent) {
+	parent->removeComponent<Mesh>();
+
+	GameObject* childObj = loadScene("assets/cruiserPrototype.fbx");
+	childObj->transform.rotate(glm::angleAxis(atanf(1)*2.f, glm::vec3(1, 0, 0))); //convert back to z-up axis
+
+	loadX(parent, "assets/cruiser_beam.fbx");
+
+	parent->addChild(*childObj);
 }
 
-Component* loadWing(GameObject* parent, bool allied) {
+void loadWing(GameObject* parent, bool allied) {
+	parent->removeComponent<Mesh>();
 
 	Material* trailMaterial = new Material(Renderer::getShader(PARTICLE_TRAIL_SHADER));
 	(*trailMaterial)["size"] = 0.32f;
@@ -99,15 +102,14 @@ Component* loadWing(GameObject* parent, bool allied) {
 	Swarm* swarmComponent = new Swarm(boids, count);
 	swarm->addComponent(swarmComponent);
 	parent->addChild(*swarm);
-	return new EmptyComponent();
 }
 
 
-Component* SceneLoadFunctions::loadFighterWing(GameObject* parent) {
+void SceneLoadFunctions::loadFighterWing(GameObject* parent) {
 	return loadWing(parent, true);
 }
 
-Component* SceneLoadFunctions::loadEnemyWing(GameObject* parent) {
+void SceneLoadFunctions::loadEnemyWing(GameObject* parent) {
 	return loadWing(parent, false);
 }
 

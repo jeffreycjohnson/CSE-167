@@ -2,11 +2,11 @@
 #include "Swarm.h"
 #include "Mesh.h"
 
-Component* BoidAvoid::loadBoidAvoid(GameObject* parent)
+void BoidAvoid::loadBoidAvoid(GameObject* parent)
 {
 	 parent->removeComponent<Mesh>();
 	 BoidAvoid* addComponent = new BoidAvoid(parent->transform.scaleFactor.x);
-	 return addComponent;
+	 parent->addComponent<BoidAvoid>(addComponent);
 }
 
 BoidAvoid::BoidAvoid(float radius) : radius(radius) {

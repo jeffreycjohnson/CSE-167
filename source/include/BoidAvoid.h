@@ -8,7 +8,7 @@ public:
 	float radius;
 	bool added = false;
 
-	static Component* loadBoidAvoid(GameObject* parent);
+	static void loadBoidAvoid(GameObject* parent);
 	BoidAvoid(float radius);
 	~BoidAvoid();
 	void update(float dt) override;

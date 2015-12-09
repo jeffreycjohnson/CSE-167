@@ -19,7 +19,7 @@ void Turret::update(float dt) {
 }
 
 
-Component* Turret::loadTurret(GameObject* parent)
+void Turret::loadTurret(GameObject* parent)
 {
 	parent->removeComponent<Mesh>();
 	GameObject* turretObj = loadScene("assets/turret.fbx");
@@ -28,5 +28,5 @@ Component* Turret::loadTurret(GameObject* parent)
 
 	parent->addChild(*turretObj);
 	Turret* addComponent = new Turret();
-	return addComponent;
+	parent->addComponent<Turret>(addComponent);
 }
