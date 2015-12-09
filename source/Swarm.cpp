@@ -10,9 +10,6 @@
 
 unsigned int Swarm::currentID = 1; // Start at 1, ignore ID's of 0
 std::vector<BoidSphere*> Swarm::obstacles;
-GameObject* sphere;
-Material* mat;
-Texture* norm;
 
 Swarm::Swarm(GameObject** models, int count)
 {
@@ -36,9 +33,9 @@ Swarm::Swarm(GameObject** models, int count)
 
 Swarm::~Swarm()
 {
-	delete sphere;
-	//delete mat;
-	delete norm;
+	if(sphere) delete sphere;
+	if(mat) delete mat;
+	if(norm) delete norm;
 }
 
 void Swarm::init()
