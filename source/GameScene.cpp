@@ -67,6 +67,9 @@ GameScene::GameScene()
 	musicObj->addComponent(music);
 	camera->addChild(*musicObj);
 
+	BoidAvoid* obstacle = new BoidAvoid(5);
+	camera->addComponent(obstacle);
+
 	GameObject::SceneRoot.addChild(*camera);
 }
 

@@ -10,6 +10,7 @@
 #include "PlayerController.h"
 #include "Sound.h"
 #include "BoxCollider.h"
+#include "Fighter.h"
 
 Component* loadX(GameObject* parent, std::string filename) {
 	parent->removeComponent<Mesh>();
@@ -32,16 +33,19 @@ Component* SceneLoadFunctions::loadPlayer(GameObject* parent) {
 	Renderer::camera->getCameraMatrix();
 	camera->update(0);
 
-	Sound* camSound = new Sound("cabin", true, true, 1);
+	Sound* camSound = new Sound("cabin", true, true, 0.75f);
 	camera->addComponent(camSound);
 
 	PlayerController* controller = new PlayerController();
 	camera->addComponent(controller);
 
 	GameObject* musicObj = new GameObject();
-	Sound* music = new Sound("music", true, true, 0.4f);
+	Sound* music = new Sound("music", true, true, 0.25f);
 	musicObj->addComponent(music);
 	parent->addChild(*musicObj);
+
+	BoidAvoid* obstacle = new BoidAvoid(5);
+	parent->addComponent(obstacle);
 
 	return new EmptyComponent;
 }
@@ -85,6 +89,9 @@ Component* loadWing(GameObject* parent, bool allied) {
 		ParticleTrail* trail = new ParticleTrail();
 		trail->material = trailMaterial;
 		boids[i]->addComponent<ParticleTrail>(trail);
+
+		Fighter* fighter = new Fighter();
+		boids[i]->addComponent(fighter);
 
 		GameObject::SceneRoot.addChild(*boids[i]);
 	}
