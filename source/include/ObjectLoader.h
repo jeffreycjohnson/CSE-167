@@ -6,7 +6,7 @@
 // returns the root game object of the file, with all children correctly added
 GameObject* loadScene(const std::string& filename);
 
-extern std::unordered_multimap<std::string, std::function<Component*(GameObject*)>> componentMap;
+extern std::unordered_multimap<std::string, std::function<void(GameObject*)>> componentMap;
 
 template<typename T, typename U>
 void addComponentMapping(T name, U func)

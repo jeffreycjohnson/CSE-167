@@ -22,9 +22,10 @@ void ForwardPass::render() {
 	for (Component* c : objectList) {
         auto mesh = dynamic_cast<Mesh*>(c);
         if (mesh && mesh->material && !mesh->material->transparent) continue;
-        if(mesh && mesh->material && mesh->material->shader == Renderer::getShader(FORWARD_UNLIT)) glDepthMask(GL_FALSE);
+		if (mesh && mesh->gameObject && !mesh->gameObject->visible) continue;
+        if(mesh && mesh->material && (mesh->material->shader == Renderer::getShader(FORWARD_UNLIT) || mesh->material->shader == Renderer::getShader(FORWARD_EMISSIVE))) glDepthMask(GL_FALSE);
 		c->draw();
-        if (mesh && mesh->material && mesh->material->shader == Renderer::getShader(FORWARD_UNLIT)) glDepthMask(GL_TRUE);
+        if (mesh && mesh->material && (mesh->material->shader == Renderer::getShader(FORWARD_UNLIT) || mesh->material->shader == Renderer::getShader(FORWARD_EMISSIVE))) glDepthMask(GL_TRUE);
 	}
 }
 

@@ -8,9 +8,9 @@
 #include <glfw3.h>
 
 #define NEAR_DEPTH 0.2f
-#define FAR_DEPTH 1000.f
+#define FAR_DEPTH 1500.f
 
-#define SHADER_COUNT 15
+#define SHADER_COUNT 17
 #define FORWARD_PBR_SHADER_ANIM 0
 #define FORWARD_PBR_SHADER 1
 #define SKYBOX_SHADER 2
@@ -26,6 +26,8 @@
 #define BASIC_SHADER 12
 #define FORWARD_UNLIT 13
 #define FORWARD_EMISSIVE 14
+#define FBO_BLUR 15
+#define FBO_PASS 16
 
 #define FORWARD_SHADER_LIGHT_MAX 5
 

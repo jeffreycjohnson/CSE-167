@@ -9,11 +9,11 @@ class EmptyComponent : public Component
 class SceneLoadFunctions {
 
 public:
-	static Component* loadPlayer(GameObject* parent);
-	static Component* loadAsteroidBoid(GameObject* parent);
-	static Component* loadAsteroidNoBoid(GameObject* parent);
-	static Component* loadCapitalShip(GameObject* parent);
-	static Component* loadFighterWing(GameObject* parent);
-	static Component* loadEnemyWing(GameObject* parent);
+	static void loadPlayer(GameObject* parent);
+	static void loadAsteroidBoid(GameObject* parent);
+	static void loadAsteroidNoBoid(GameObject* parent);
+	static void loadCapitalShip(GameObject* parent);
+	static void loadFighterWing(GameObject* parent);
+	static void loadEnemyWing(GameObject* parent);
 };
 

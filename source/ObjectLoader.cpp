@@ -12,7 +12,7 @@
 #include "Animation.h"
 #include "Light.h"
 
-std::unordered_multimap<std::string, std::function<Component*(GameObject*)>> componentMap;
+std::unordered_multimap<std::string, std::function<void(GameObject*)>> componentMap;
 
 
 int counter = 0;
@@ -153,7 +153,7 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
     if (components.first != componentMap.end())
     {
         while (components.first != components.second) {
-            nodeObject->addComponent(components.first->second(nodeObject));
+            components.first->second(nodeObject);
             ++components.first;
         }
     }

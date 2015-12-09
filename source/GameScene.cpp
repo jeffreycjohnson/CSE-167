@@ -21,6 +21,7 @@
 #include "BoidAvoid.h"
 #include "Turret.h"
 #include "SceneLoadFunctions.h"
+#include "CruiserBeam.h"
 
 
 GameScene::GameScene()
@@ -28,6 +29,7 @@ GameScene::GameScene()
 
 	addComponentMapping("boidAvoid", BoidAvoid::loadBoidAvoid);
 	addComponentMapping("TurretPlaceholder", Turret::loadTurret);
+	addComponentMapping("CruiserBeam", CruiserBeam::loadCruiserBeam);
 
 	addComponentMapping("AsteroidPlaceholder", SceneLoadFunctions::loadAsteroidBoid);
 	addComponentMapping("AsteroidCluster", SceneLoadFunctions::loadAsteroidNoBoid);

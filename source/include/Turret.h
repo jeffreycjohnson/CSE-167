@@ -5,7 +5,7 @@ class Turret :
 	public Component
 {
 public:
-	static Component* loadTurret(GameObject* parent);
+	static void loadTurret(GameObject* parent);
 	Turret();
 	~Turret();
 	void update(float dt) override;

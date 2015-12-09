@@ -42,6 +42,7 @@ std::list<RenderPass*> Renderer::passes;
 double lastTime;
 
 Framebuffer* fboTest;
+Framebuffer* fboBlur;
 
 Scene* scene;
 
@@ -129,6 +130,14 @@ void Renderer::init(int window_width, int window_height) {
         "source/shaders/forward_pbr.vert", "source/shaders/emissive.frag"
         );
 
+	shaderList[FBO_BLUR] = new Shader(
+		"source/shaders/fbo.vert", "source/shaders/fbo_blur.frag"
+		);
+
+	shaderList[FBO_PASS] = new Shader(
+		"source/shaders/fbo.vert", "source/shaders/fbo_pass.frag"
+		);
+
 	currentShader = shaderList[FORWARD_PBR_SHADER];
 	currentShader->use();
 
@@ -153,8 +162,9 @@ void Renderer::init(int window_width, int window_height) {
 
 	//scene = new TestSceneHawk();
 	scene = new GameScene();
-	
-	fboTest = new Framebuffer(width, height, 2, false, true);
+
+	fboTest = new Framebuffer(width, height, 1, false, true);
+	fboBlur = new Framebuffer(width / 2, height / 2, 2, false, true);
 
 	resize(width, height);
 
@@ -187,9 +197,53 @@ void Renderer::loop() {
 	scene->loop(); /* This is just temporary - all it does it do translation without having to create temporary components */
 
     deferredPass->fbo->unbind();
+
+	GLuint buffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+
     deferredPass->fbo->bindTexture(0, 3);
+	fboTest->bind(1, &buffers[0]);
+	switchShader(FBO_PASS);
+	deferredPass->fbo->draw();
+
+	fboTest->unbind();
+
+	fboTest->bindTexture(0, 0);
+	fboBlur->bind(1, &buffers[0]);
+	switchShader(FBO_BLUR);
+	(*shaderList[FBO_BLUR])["width"] = (float)width;
+	(*shaderList[FBO_BLUR])["height"] = (float)height;
+	(*shaderList[FBO_BLUR])["direction"] = glm::vec2(1, 0);
+	deferredPass->fbo->draw();
+	fboBlur->bindTexture(0, 0);
+	fboBlur->bind(1, &buffers[1]);
+	(*shaderList[FBO_BLUR])["direction"] = glm::vec2(0, 1);
+	deferredPass->fbo->draw();
+
+	
+	fboBlur->bindTexture(0, 1);
+	fboBlur->bind(1, &buffers[0]);
+	(*shaderList[FBO_BLUR])["direction"] = glm::vec2(1, 0);
+	deferredPass->fbo->draw();
+
+	fboBlur->bindTexture(0, 0);
+	fboBlur->bind(1, &buffers[1]);
+	(*shaderList[FBO_BLUR])["direction"] = glm::vec2(0, 1);
+	deferredPass->fbo->draw();
+	
+
+
+	fboBlur->unbind();
+	fboTest->bindTexture(0, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	fboBlur->bindTexture(1, 1);
     switchShader(FBO_HDR);
+	(*shaderList[FBO_HDR])["addTex"] = 1;
     deferredPass->fbo->draw();
+
+	fboTest->bindTexture(0, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	camera->update(Timer::deltaTime());
 	if (camera->getFOV() != prevFOV)
@@ -206,6 +260,10 @@ void Renderer::loop() {
 		GameObject::SceneRoot.debugDraw();
 		glEnable(GL_DEPTH_TEST);
         deferredPass->fbo->blitAll();
+	}
+	if (Input::getKey("n"))
+	{
+		fboBlur->blitAll();
 	}
 }
 

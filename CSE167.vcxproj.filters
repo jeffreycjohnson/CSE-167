@@ -135,6 +135,9 @@
     <ClCompile Include="source\GameScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\CruiserBeam.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\include\Camera.h">
@@ -236,6 +239,9 @@
     <ClInclude Include="source\include\GameScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\include\CruiserBeam.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="source\shaders\forward_pbr.frag">
@@ -292,6 +298,14 @@
     <None Include="source\shaders\simple.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\emissive.frag" />
+    <None Include="source\shaders\emissive.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="source\shaders\fbo_blur.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="source\shaders\fbo_pass.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
