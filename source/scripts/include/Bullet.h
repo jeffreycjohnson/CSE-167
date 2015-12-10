@@ -3,7 +3,7 @@
 
 #include "Component.h"
 
-#define MAX_BULLET_DISTANCE 200.0f
+#define MAX_BULLET_DISTANCE 500.0f
 #define BULLET_VELOCITY 500.0f
 
 class Bullet : public Component

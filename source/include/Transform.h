@@ -49,6 +49,7 @@ class Transform : public Component
 		/**
 		 * Scale
 		 */
+		void setScale(glm::vec3 scale);
         void scale(float s);
 
 

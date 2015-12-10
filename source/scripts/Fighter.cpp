@@ -4,6 +4,7 @@
 #include "GPUEmitter.h"
 #include "Mesh.h"
 #include "Swarm.h"
+#include "BoxCollider.h"
 
 Fighter::Fighter(Sound* explosion)
 {
@@ -59,6 +60,7 @@ void Fighter::update(float deltaTime)
 	if (killed && Timer::time() - startTime > hideTime)
 	{
 		gameObject->hideAll();
+		gameObject->removeComponent<BoxCollider>();
 	}
 
 	if (killed && Timer::time() - startTime > emitterTime)

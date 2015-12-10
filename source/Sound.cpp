@@ -149,6 +149,9 @@ void Sound::init()
 	SoundClass explosion;
 	system->createSound("assets/sounds/explosion.mp3", FMOD_3D, NULL, &explosion);
 	soundMap.insert({ "explosion", explosion });
+	SoundClass capital;
+	system->createSound("assets/sounds/capital.wav", FMOD_2D, NULL, &capital);
+	soundMap.insert({ "capital", capital });
 	SoundClass music;
 	system->createSound("assets/sounds/music/soundtrack.mp3", FMOD_2D, NULL, &music);
 	soundMap.insert({ "music", music });

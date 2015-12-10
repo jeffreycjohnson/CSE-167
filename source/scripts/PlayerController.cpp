@@ -40,7 +40,6 @@ void PlayerController::update(float deltaTime)
 	{
 		gunSound->play();
 		makeBullet(true);
-		makeBullet(false);
 		Renderer::camera->screenShake(0.025, 0.2);
 		startShoot = Timer::time();
 	}
@@ -88,12 +87,13 @@ void PlayerController::makeBullet(bool side)
 	//GameObject* bulletObj = loadScene("assets/sphere.obj");
 	//bulletObj->setMaterial(new Material(Renderer::getShader(FORWARD_EMISSIVE)));
 	GameObject* bulletObj = loadScene("assets/bullet.fbx");
-	glm::vec3 offset(4, 1, 5);
+	glm::vec3 offset(0, -1, -3);
 	if (side)
 	{
 		offset.x = -offset.x;
 	}
-	Bullet* bullet = new Bullet(gameObject->transform.getWorldPosition() + glm::mat3(gameObject->transform.getTransformMatrix()) * offset, forward, currentVel, 2);
+	Bullet* bullet = new Bullet(gameObject->transform.getWorldPosition() + glm::mat3(gameObject->transform.getTransformMatrix()) * offset, 
+		glm::normalize(glm::mat3(gameObject->transform.getTransformMatrix()) * glm::normalize(glm::vec3(0, 0.05f, -1))), currentVel, 2);
 	bulletObj->addComponent(bullet);
     bulletObj->transform.setRotate(gameObject->transform.rotation);
 	bullet->init();

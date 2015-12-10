@@ -75,7 +75,7 @@ GameScene::GameScene()
 	camera->addComponent(controller);
 
 	GameObject* musicObj = new GameObject();
-	Sound* music = new Sound("music", true, true, 0.25f, false);
+	Sound* music = new Sound("music", true, true, 0.5f, false);
 	musicObj->addComponent(music);
 	camera->addChild(musicObj);
 

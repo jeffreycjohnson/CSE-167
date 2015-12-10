@@ -49,6 +49,11 @@ void Transform::setRotate(glm::quat& diff) {
 /**
 * Scale
 */
+void Transform::setScale(glm::vec3 scale) {
+	transformMatrixDirty = true;
+	scaleFactor = scale;
+}
+
 void Transform::scale(float s) {
     transformMatrixDirty = true;
 
