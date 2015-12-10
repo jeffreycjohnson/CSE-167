@@ -26,11 +26,11 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-	int width = 1600;
-	int height = 900;
-
-	//const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-    GLFWwindow* window = glfwCreateWindow(width, height, "CSE 167 Final Project", nullptr, nullptr);
+	int width = 1280;
+	int height = 1024;
+	
+	//zconst GLFWvidmode* mode = glfwGetVideoMode(monitor);
+    GLFWwindow* window = glfwCreateWindow(width, height, "CSE 167 Final Project", glfwGetPrimaryMonitor(), nullptr);
 
 	//set callbacks
 	//glfwSetWindowFocusCallback(window, window_focus_callback);

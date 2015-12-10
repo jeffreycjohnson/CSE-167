@@ -150,12 +150,12 @@ void Renderer::init(int window_width, int window_height) {
 		"assets/grace/grace_pz.hdr",
 		"assets/grace/grace_nz.hdr" 
 		*/
-		"assets/skybox/lowres/right.hdr",
-		"assets/skybox/lowres/left.hdr",
-		"assets/skybox/lowres/top.hdr",
-		"assets/skybox/lowres/bottom.hdr",
-		"assets/skybox/lowres/front.hdr",
-		"assets/skybox/lowres/back.hdr"};
+		"assets/skybox/right.hdr",
+		"assets/skybox/left.hdr",
+		"assets/skybox/top.hdr",
+		"assets/skybox/bottom.hdr",
+		"assets/skybox/front.hdr",
+		"assets/skybox/back.hdr"};
 	skybox = new Skybox(cubeFilenames);
 	skybox->applyIrradiance();
 	skybox->applyTexture(5);
