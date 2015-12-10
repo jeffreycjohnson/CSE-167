@@ -33,6 +33,22 @@ void GameObject::destroy() {
 	dead = true;
 }
 
+void GameObject::hideAll()
+{
+	Mesh* mesh = getComponent<Mesh>();
+	if (mesh != nullptr)
+		mesh->visible = false;
+
+	ParticleTrail* trail = getComponent<ParticleTrail>();
+	if (trail != nullptr)
+		trail->emitting = false;
+
+	for (int i = 0; i < transform.children.size(); i++)
+	{
+		transform.children[i]->gameObject->hideAll();
+	}
+}
+
 void GameObject::draw() {
 	if (visible) {
 		for (auto component : componentList) {

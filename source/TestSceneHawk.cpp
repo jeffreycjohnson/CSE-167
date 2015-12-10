@@ -113,9 +113,6 @@ TestSceneHawk::TestSceneHawk()
 			BoxCollider* collider = new BoxCollider(glm::vec3(0, 3, 2), glm::vec3(5, 7, 9));
 			boids[i]->addComponent(collider);
 
-			Fighter* fighter = new Fighter();
-			boids[i]->addComponent(fighter);
-
 			ParticleTrail* trail = new ParticleTrail();
 			trail->material = trailMaterial;
 			boids[i]->addComponent<ParticleTrail>(trail);
@@ -141,7 +138,7 @@ TestSceneHawk::TestSceneHawk()
 	bear->setMaterial(bearMat);
 	bear->getComponent<Animation>()->play(0, true);
 
-	Sound* bearSound = new Sound("gun", false, false, 1);
+	Sound* bearSound = new Sound("gun", false, false, 1, false);
 	bear->addComponent(bearSound);
 
 	BoxCollider* collider = new BoxCollider({ 0, 0, 0 }, { 1, 1, 1 });
@@ -204,16 +201,16 @@ TestSceneHawk::TestSceneHawk()
 	Renderer::camera->getCameraMatrix();
 	camera->update(0);
 
-	Sound* camSound = new Sound("music", false, true, 1);
+	Sound* camSound = new Sound("music", false, true, 1, false);
 	camera->addComponent(camSound);
 
 	GameObject* gunObj = new GameObject();
-	Sound* gun = new Sound("gun", false, false, 0.5f);
+	Sound* gun = new Sound("gun", false, false, 0.5f, false);
 	gunObj->addComponent(gun);
 	camera->addChild(gunObj);
 
 	GameObject* boostObj = new GameObject();
-	Sound* boost = new Sound("boost", true, true, 0.0f);
+	Sound* boost = new Sound("boost", true, true, 0.0f, false);
 	boostObj->addComponent(boost);
 	camera->addChild(boostObj);
 

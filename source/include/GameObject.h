@@ -59,6 +59,7 @@ public:
 
     void addChild(GameObject* go);
 	void destroy();
+	void hideAll();
 
 	void draw();
 	void debugDraw();

@@ -58,16 +58,16 @@ GameScene::GameScene()
 	Renderer::camera->getCameraMatrix();
 	camera->update(0);
 
-	Sound* camSound = new Sound("cabin", true, true, 0.5f);
+	Sound* camSound = new Sound("cabin", true, true, 0.5f, false);
 	camera->addComponent(camSound);
 
 	GameObject* gunObj = new GameObject();
-	Sound* gun = new Sound("gun", false, false, 0.5f);
+	Sound* gun = new Sound("gun", false, false, 0.5f, false);
 	gunObj->addComponent(gun);
 	camera->addChild(gunObj);
 
 	GameObject* boostObj = new GameObject();
-	Sound* boost = new Sound("boost", true, true, 0.0f);
+	Sound* boost = new Sound("boost", true, true, 0.0f, false);
 	boostObj->addComponent(boost);
 	camera->addChild(boostObj);
 
@@ -75,7 +75,7 @@ GameScene::GameScene()
 	camera->addComponent(controller);
 
 	GameObject* musicObj = new GameObject();
-	Sound* music = new Sound("music", true, true, 0.25f);
+	Sound* music = new Sound("music", true, true, 0.25f, false);
 	musicObj->addComponent(music);
 	camera->addChild(musicObj);
 
