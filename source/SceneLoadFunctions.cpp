@@ -36,12 +36,12 @@ void SceneLoadFunctions::loadPlayer(GameObject* parent) {
 	GameObject* gunObj = new GameObject();
 	Sound* gun = new Sound("gun", false, false, 0.5f);
 	gunObj->addComponent(gun);
-	camera->addChild(*gunObj);
+	camera->addChild(gunObj);
 
 	GameObject* boostObj = new GameObject();
 	Sound* boost = new Sound("boost", true, true, 0.0f);
 	boostObj->addComponent(boost);
-	camera->addChild(*boostObj);
+	camera->addChild(boostObj);
 
 	PlayerController* controller = new PlayerController(gun, boost);
 	camera->addComponent(controller);
