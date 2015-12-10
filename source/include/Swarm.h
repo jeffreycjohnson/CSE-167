@@ -11,7 +11,7 @@
 #define MAX_SPEED 40.0f
 #define DAMPING 200.0f
 #define SEPARATION_DISTANCE 150.0f
-#define AVOID_DISTANCE 240.0f
+#define AVOID_DISTANCE 100.f
 #define BOUNDS 200.0f
 
 struct BoidSphere : public GameObject

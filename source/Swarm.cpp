@@ -169,12 +169,12 @@ glm::vec3 Swarm::cohere(int current)
 
 	for (int i = 0; i < neighbors.size(); i++)
 	{
-		mean += neighbors[i]->transform.position;
+		mean += neighbors[i]->transform.getWorldPosition();
 	}
 	mean /= neighbors.size();
 
 	// Steer towards average location
-	glm::vec3 desired = mean - neighbors[current]->transform.position;
+	glm::vec3 desired = mean - neighbors[current]->transform.getWorldPosition();
 	float d = glm::length(desired);
 
 	if (d > 0)
@@ -214,9 +214,9 @@ glm::vec3 Swarm::separate(int current)
 
 	for (int i = 0; i < neighbors.size(); i++)
 	{
-		d = glm::length(neighbors[current]->transform.position - neighbors[i]->transform.position);
+		d = glm::length(neighbors[current]->transform.getWorldPosition() - neighbors[i]->transform.getWorldPosition());
 		if (d > 0 && d < SEPARATION_DISTANCE + neighbors.size() / 4.0f)
-			mean += glm::normalize(neighbors[current]->transform.position - neighbors[i]->transform.position) / (d / (SEPARATION_DISTANCE + neighbors.size() / 2.0f));
+			mean += glm::normalize(neighbors[current]->transform.getWorldPosition() - neighbors[i]->transform.getWorldPosition()) / (d / (SEPARATION_DISTANCE + neighbors.size() / 2.0f));
 	}
 	mean /= neighbors.size();
 	mean = limitSpeed(mean, MAX_SPEED);
@@ -248,14 +248,13 @@ glm::vec3 Swarm::avoidObstacles(int current)
 		glm::vec3 currentObstaclePosition = obstacles[i]->transform->getWorldPosition();
 		float currentObstacleRadius = obstacles[i]->transform->getWorldScale();
 
-		d = glm::length(neighbors[current]->transform.position - currentObstaclePosition);
+		d = glm::length(neighbors[current]->transform.getWorldPosition() - currentObstaclePosition);
 		d = (d - currentObstacleRadius);
 		if (d > 0 && d < AVOID_DISTANCE + neighbors.size() / 4.0f)
 		{
-			mean += glm::normalize(neighbors[current]->transform.position - currentObstaclePosition) / (d / ((AVOID_DISTANCE + neighbors.size() / 4.0f)));
+			mean += glm::normalize(neighbors[current]->transform.getWorldPosition() - currentObstaclePosition) / (d / ((AVOID_DISTANCE + neighbors.size() / 4.0f)));
 		}
 	}
-	mean /= obstacles.size() - hasSelf;
 	mean = limitSpeed(mean, MAX_SPEED);
 	return mean;
 }

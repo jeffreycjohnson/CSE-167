@@ -57,7 +57,7 @@ void SceneLoadFunctions::loadPlayer(GameObject* parent) {
 
 void SceneLoadFunctions::loadAsteroidBoid(GameObject* parent) {
 	loadX(parent, "assets/asteroid3.fbx");
-	parent->addComponent<BoidAvoid>(new BoidAvoid(1));
+	parent->addComponent<BoidAvoid>(new BoidAvoid(25));
 }
 
 void SceneLoadFunctions::loadAsteroidNoBoid(GameObject* parent) {
