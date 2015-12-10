@@ -5,12 +5,13 @@
 #include "Mesh.h"
 #include "Swarm.h"
 
-Fighter::Fighter()
+Fighter::Fighter(Sound* explosion)
 {
+	this->explosion = explosion;
 	health = 10;
 	startTime = 0;
-	hideTime = 
-	emitterTime = 2;
+	hideTime = 0.05;
+	emitterTime = 4;
 	killed = false;
 }
 
@@ -29,6 +30,8 @@ void Fighter::update(float deltaTime)
 	{
 		health = -1;
 		killed = true;
+
+		explosion->play();
 
 		GPUEmitter* emitter = new GPUEmitter(gameObject, "assets/particles/fire1.png", true);
 		emitter->minDuration = 1;
@@ -55,21 +58,12 @@ void Fighter::update(float deltaTime)
 
 	if (killed && Timer::time() - startTime > hideTime)
 	{
-        gameObject->destroy();
-		Mesh* mesh = gameObject->getComponent<Mesh>();
-		if (mesh != nullptr)
-		{
-			mesh->visible = false;
-		}
-		else
-		{
-			// Get child and try to hide that mesh
-		}
+		gameObject->hideAll();
 	}
 
 	if (killed && Timer::time() - startTime > emitterTime)
 	{
-		// Kill game object
+		gameObject->destroy();
 	}
 }
 

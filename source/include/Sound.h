@@ -16,12 +16,12 @@ private:
 	FMOD::Channel* channel;
 	float volume;
 	glm::vec3 position, prevPosition, velocity;
-	bool looping, playing, active;
+	bool looping, playing, active, is3D;
 
 	static FMOD_RESULT result; // For debugging
 
 public:
-	Sound(std::string soundName, bool playOnAwake, bool looping, float volume);
+	Sound(std::string soundName, bool playOnAwake, bool looping, float volume, bool is3D);
 	~Sound();
 
 	void update(float deltaTime);

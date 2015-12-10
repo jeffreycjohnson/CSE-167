@@ -14,6 +14,7 @@ public:
 	void draw() override;
 
 	bool additive = true;
+	bool emitting = true;
 	Material * material;
 private:
 	struct TrailPoint {
@@ -33,6 +34,7 @@ private:
 
 	const float addDelayTime = 0.07f;//in seconds
 	float currentDelayTime = 0;
+	bool removingPoints = false;
 
 	void addPoint(glm::vec3 point);
 	void uploadData();

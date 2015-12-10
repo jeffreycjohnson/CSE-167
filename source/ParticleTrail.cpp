@@ -102,25 +102,32 @@ void ParticleTrail::draw()
 
 void ParticleTrail::addPoint(glm::vec3 point)
 {
-	glm::vec3 normal (1,0,0);
+	if (emitting)
+	{
+		glm::vec3 normal (1,0,0);
 
-	if (pointList.size() > 0) {
-		normal = point - pointList.front().position;
-		if (glm::length(normal) < 0.001) {
-			normal = pointList.front().normal;
+		if (pointList.size() > 0) {
+			normal = point - pointList.front().position;
+			if (glm::length(normal) < 0.001) {
+				normal = pointList.front().normal;
+			}
+			else {
+				normal = glm::normalize(normal);
+			}
+			if (isnan(normal.z)) throw;
 		}
-		else {
-			normal = glm::normalize(normal);
-		}
-		if (isnan(normal.z)) throw;
+
+	
+		TrailPoint newTrailPoint;
+		newTrailPoint.position = point;
+		newTrailPoint.normal = normal;
+		pointList.push_front(newTrailPoint);
 	}
 
-	TrailPoint newTrailPoint;
-	newTrailPoint.position = point;
-	newTrailPoint.normal = normal;
-	pointList.push_front(newTrailPoint);
+	if (pointList.size() > maxPoints)
+		removingPoints = true;
 
-	while (pointList.size() > maxPoints) {
+	if (removingPoints && pointList.size() > 0) {
 		pointList.pop_back();
 	}
 }

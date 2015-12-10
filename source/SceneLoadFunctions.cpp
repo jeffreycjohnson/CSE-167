@@ -30,16 +30,16 @@ void SceneLoadFunctions::loadPlayer(GameObject* parent) {
 	Renderer::camera->getCameraMatrix();
 	camera->update(0);
 
-	Sound* camSound = new Sound("cabin", true, true, 0.5f);
+	Sound* camSound = new Sound("cabin", true, true, 0.5f, false);
 	camera->addComponent(camSound);
 
 	GameObject* gunObj = new GameObject();
-	Sound* gun = new Sound("gun", false, false, 0.5f);
+	Sound* gun = new Sound("gun", false, false, 0.5f, false);
 	gunObj->addComponent(gun);
 	camera->addChild(gunObj);
 
 	GameObject* boostObj = new GameObject();
-	Sound* boost = new Sound("boost", true, true, 0.0f);
+	Sound* boost = new Sound("boost", true, true, 0.0f, false);
 	boostObj->addComponent(boost);
 	camera->addChild(boostObj);
 
@@ -47,7 +47,7 @@ void SceneLoadFunctions::loadPlayer(GameObject* parent) {
 	camera->addComponent(controller);
 
 	GameObject* musicObj = new GameObject();
-	Sound* music = new Sound("music", true, true, 0.25f);
+	Sound* music = new Sound("music", true, true, 0.25f, false);
 	musicObj->addComponent(music);
 	parent->addChild(musicObj);
 
@@ -103,8 +103,16 @@ void loadWing(GameObject* parent, bool allied) {
 		trail->material = trailMaterial;
 		boids[i]->addComponent<ParticleTrail>(trail);
 
-		Fighter* fighter = new Fighter();
+		Sound* explosion = new Sound("explosion", false, false, 20, true);
+		boids[i]->addComponent<Sound>(explosion);
+
+		Fighter* fighter = new Fighter(explosion);
 		boids[i]->addComponent(fighter);
+
+		GameObject* engineObj = new GameObject();
+		Sound* engine = new Sound("fighterEngine", true, true, 10, true);
+		engineObj->addComponent<Sound>(engine);
+		boids[i]->addChild(engineObj);
 
 		GameObject::SceneRoot.addChild(boids[i]);
 	}

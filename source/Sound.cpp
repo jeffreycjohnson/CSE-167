@@ -10,15 +10,18 @@ FMOD::System* Sound::system;
 std::unordered_map<std::string, FMOD::Sound*> Sound::soundMap;
 FMOD_RESULT Sound::result;
 
-Sound::Sound(std::string soundName, bool playOnAwake, bool looping, float volume)
+Sound::Sound(std::string soundName, bool playOnAwake, bool looping, float volume, bool is3D)
 {
 	name = soundName;
 	this->volume = volume;
 	this->looping = looping;
+	this->is3D = is3D;
 	playing = active = playOnAwake;
 
 	result = system->playSound(soundMap[name], 0, true, &channel);
 	channel->setVolume(volume);
+	if (!is3D)
+		channel->setPriority(0);
 	if (looping)
 	{
 		channel->setMode(FMOD_LOOP_NORMAL);
@@ -43,7 +46,7 @@ void Sound::update(float deltaTime)
 	FMOD_VECTOR vel = { velocity.x, velocity.y, velocity.z };
 	channel->set3DAttributes(&pos, &vel, 0);
 	
-	prevPosition = gameObject->transform.position;
+	prevPosition = gameObject->transform.getWorldPosition();
 
 	channel->setPaused(!playing); // Used at the end of update to prevent inconsistent initial volume
 }
@@ -53,7 +56,7 @@ void Sound::play()
 	if (playing)
 	{
 		// Possible leak, does FMOD handle deleting sound instances for playSound?
-		result = system->playSound(soundMap[name], 0, true, &channel);
+		result = system->playSound(soundMap[name], 0, false, &channel);
 		channel->setVolume(volume);
 		if (looping)
 		{
@@ -64,6 +67,9 @@ void Sound::play()
 		{
 			channel->setMode(FMOD_LOOP_OFF);
 		}
+
+		if (!is3D)
+			channel->setPriority(0);
 	}
 	else // Paused
 	{
@@ -124,19 +130,25 @@ void Sound::init()
 		throw;
 	}
 
-	// Initialize our Instance with 36 Channels
-	system->init(36, FMOD_INIT_NORMAL, NULL);
+	// Initialize our Instance with 128 channels
+	system->init(256, FMOD_INIT_NORMAL, NULL);
 
 	// Generate sound map
 	SoundClass cabin;
 	system->createSound("assets/sounds/ambience/cabin.wav", FMOD_2D, NULL, &cabin);
 	soundMap.insert({ "cabin", cabin });
 	SoundClass gun;
-	system->createSound("assets/sounds/gun2.wav", FMOD_2D, NULL, &gun);
+	system->createSound("assets/sounds/gun.wav", FMOD_2D, NULL, &gun);
 	soundMap.insert({ "gun", gun });
 	SoundClass boost;
 	system->createSound("assets/sounds/boost.wav", FMOD_2D, NULL, &boost);
 	soundMap.insert({ "boost", boost });
+	SoundClass fighterEngine;
+	system->createSound("assets/sounds/engine.wav", FMOD_3D, NULL, &fighterEngine);
+	soundMap.insert({ "fighterEngine", fighterEngine });
+	SoundClass explosion;
+	system->createSound("assets/sounds/explosion.mp3", FMOD_3D, NULL, &explosion);
+	soundMap.insert({ "explosion", explosion });
 	SoundClass music;
 	system->createSound("assets/sounds/music/soundtrack.mp3", FMOD_2D, NULL, &music);
 	soundMap.insert({ "music", music });
