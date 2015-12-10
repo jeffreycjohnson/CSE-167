@@ -73,7 +73,8 @@ Texture::Texture(glm::vec4 color)
 
 Texture::~Texture()
 {
-    glDeleteTextures(1, &textureHandle);
+    // We cache texture handles now
+    //glDeleteTextures(1, &textureHandle);
 }
 
 void Texture::bindTexture(int slot) const {

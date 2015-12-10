@@ -150,6 +150,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)Dependencies\;$(ProjectDir)Dependencies\fmod;$(ProjectDir)Dependencies\SOIL;$(ProjectDir)Dependencies\glfw\include\GLFW;$(ProjectDir)Dependencies\glew\include\GL;$(ProjectDir)Dependencies\glm\glm;$(ProjectDir)source\scripts\include;$(ProjectDir)source\scripts;$(ProjectDir)source\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

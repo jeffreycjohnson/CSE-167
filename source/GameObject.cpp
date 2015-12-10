@@ -23,10 +23,10 @@ GameObject::~GameObject() {
 	}
 }
 
-void GameObject::addChild(GameObject& go) {
-    transform.children.push_back(&go.transform);
-    go.transform.parent = &transform;
-    go.transform.transformMatrixDirty = true;
+void GameObject::addChild(GameObject* go) {
+    transform.children.push_back(&go->transform);
+    go->transform.parent = &transform;
+    go->transform.transformMatrixDirty = true;
 }
 
 void GameObject::destroy() {
@@ -122,15 +122,8 @@ void GameObject::setMaterial(Material *mat) {
 
 void GameObject::onCollisionEnter(GameObject* other)
 {
-	if (this != nullptr)
+	for (int i = 0; i < componentList.size(); i++)
 	{
-		for (int i = 0; i < componentList.size(); i++)
-		{
-			componentList[i]->onCollisionEnter(other);
-		}
-	}
-	else
-	{
-		// Weird shit happened and code will sometimes run here
+		componentList[i]->onCollisionEnter(other);
 	}
 }

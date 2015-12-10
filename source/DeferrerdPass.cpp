@@ -42,8 +42,9 @@ void DeferredPass::render()
     std::function<void(GameObject*)> gbufferPass;
     gbufferPass = [&](GameObject* obj)
     {
+        if (!obj) return;
         auto mesh = obj->getComponent<Mesh>();
-        if (mesh && mesh->material && !mesh->material->transparent) {
+        if (mesh && mesh->material && !mesh->material->transparent && mesh->visible) {
             mesh->material->bind();
             mesh->draw();
         }

@@ -39,6 +39,7 @@ public:
             if (test)
             {
                 test->setGameObject(nullptr);
+                delete test;
                 componentList.erase(component);
                 return true;
             }
@@ -56,7 +57,7 @@ public:
         return nullptr;
     }
 
-    void addChild(GameObject& go);
+    void addChild(GameObject* go);
 	void destroy();
 
 	void draw();

@@ -46,6 +46,11 @@ void Swarm::init()
 		neighbors[i]->transform.position.x += ((float)rand() / RAND_MAX) * 10 - 5;
 		neighbors[i]->transform.position.y += ((float) rand() / RAND_MAX) * 10 - 5;
 		neighbors[i]->transform.position.z += ((float)rand() / RAND_MAX) * 10 - 5;
+        auto f = neighbors[i]->getComponent<Fighter>();
+        if(f)
+        {
+            f->swarm = this;
+        }
 	}
 }
 
@@ -138,18 +143,35 @@ void Swarm::debugDraw()
 	}
 }
 
+void Swarm::remove(GameObject* fighter)
+{
+    int i = 0;
+    for (auto iter = neighbors.begin(); iter < neighbors.end(); iter++)
+    {
+        if (*iter == fighter)
+        {
+            neighbors.erase(iter);
+            break;
+        }
+        i++;
+    }
+    auto iter = neighborVelocities.begin();
+    while(i-- > 0)
+    {
+        iter++;
+    }
+    neighborVelocities.erase(iter);
+}
+
 glm::vec3 Swarm::cohere(int current)
 {
 	glm::vec3 mean;
 
 	for (int i = 0; i < neighbors.size(); i++)
 	{
-		if (i == current) // Skip myself
-			continue;
-
 		mean += neighbors[i]->transform.position;
 	}
-	mean /= neighbors.size() - 1;
+	mean /= neighbors.size();
 
 	// Steer towards average location
 	glm::vec3 desired = mean - neighbors[current]->transform.position;
@@ -179,12 +201,9 @@ glm::vec3 Swarm::align(int current)
 
 	for (int i = 0; i < neighborVelocities.size(); i++)
 	{
-		if (i == current) // Skip myself
-			continue;
-
-		mean += neighborVelocities[i];
+        mean += neighborVelocities[i];
 	}
-	mean /= neighborVelocities.size() - 1;
+	mean /= neighborVelocities.size();
 	return mean / 30.0f;
 }
 
@@ -195,14 +214,11 @@ glm::vec3 Swarm::separate(int current)
 
 	for (int i = 0; i < neighbors.size(); i++)
 	{
-		if (i == current) // Skip myself
-			continue;
-
 		d = glm::length(neighbors[current]->transform.position - neighbors[i]->transform.position);
 		if (d > 0 && d < SEPARATION_DISTANCE + neighbors.size() / 4.0f)
 			mean += glm::normalize(neighbors[current]->transform.position - neighbors[i]->transform.position) / (d / (SEPARATION_DISTANCE + neighbors.size() / 2.0f));
 	}
-	mean /= neighbors.size() - 1;
+	mean /= neighbors.size();
 	mean = limitSpeed(mean, MAX_SPEED);
 	return mean;
 }

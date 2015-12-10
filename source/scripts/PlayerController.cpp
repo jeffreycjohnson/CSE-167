@@ -94,5 +94,5 @@ void PlayerController::makeBullet(bool side)
 	BoxCollider* collider = new BoxCollider({ 0, 0, 0 }, { 1, 1, 5 });
 	collider->passive = false;
 	bulletObj->addComponent(collider);
-	GameObject::SceneRoot.addChild(*bulletObj);
+	GameObject::SceneRoot.addChild(bulletObj);
 }

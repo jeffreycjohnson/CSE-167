@@ -44,9 +44,9 @@ GameScene::GameScene()
 	sun->addComponent(sunLight);
 	sun->transform.translate(5, 8.5, -1.5);
 	sun->transform.setRotate(glm::quat_cast(glm::orientation(glm::vec3(0.5, 0.85, -0.15), glm::vec3(0, 1, 0))));
-	GameObject::SceneRoot.addChild(*sun);
+	GameObject::SceneRoot.addChild(sun);
 
-	GameObject::SceneRoot.addChild(*loadScene("assets/gameScene.fbx"));
+	GameObject::SceneRoot.addChild(loadScene("assets/gameScene.fbx"));
 
 
 
@@ -67,12 +67,12 @@ GameScene::GameScene()
 	GameObject* musicObj = new GameObject();
 	Sound* music = new Sound("music", true, true, 0.25f);
 	musicObj->addComponent(music);
-	camera->addChild(*musicObj);
+	camera->addChild(musicObj);
 
 	BoidAvoid* obstacle = new BoidAvoid(5);
 	camera->addComponent(obstacle);
 
-	GameObject::SceneRoot.addChild(*camera);
+	GameObject::SceneRoot.addChild(camera);
 }
 
 

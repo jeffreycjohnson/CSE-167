@@ -3,6 +3,7 @@
 #include "Timer.h"
 #include "GPUEmitter.h"
 #include "Mesh.h"
+#include "Swarm.h"
 
 Fighter::Fighter()
 {
@@ -15,7 +16,11 @@ Fighter::Fighter()
 
 Fighter::~Fighter()
 {
-
+    auto s = dynamic_cast<Swarm*>(swarm);
+    if(s)
+    {
+        s->remove(gameObject);
+    }
 }
 
 void Fighter::update(float deltaTime)
@@ -50,6 +55,7 @@ void Fighter::update(float deltaTime)
 
 	if (killed && Timer::time() - startTime > hideTime)
 	{
+        gameObject->destroy();
 		Mesh* mesh = gameObject->getComponent<Mesh>();
 		if (mesh != nullptr)
 		{

@@ -135,7 +135,7 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
 
     //load child objects
     for (unsigned int c = 0; c < currentNode->mNumChildren; ++c) {
-        nodeObject->addChild(*parseNode(scene, currentNode->mChildren[c], filename, loadingAcceleration, lights));
+        nodeObject->addChild(parseNode(scene, currentNode->mChildren[c], filename, loadingAcceleration, lights));
     }
 
 	//To auto load components, use name before period

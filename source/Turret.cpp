@@ -26,7 +26,7 @@ void Turret::loadTurret(GameObject* parent)
 	turretObj->transform.rotate(glm::angleAxis(atanf(1)*2.f, glm::vec3(1,0,0))); //convert back to z-up axis
 	
 
-	parent->addChild(*turretObj);
+	parent->addChild(turretObj);
 	Turret* addComponent = new Turret();
 	parent->addComponent<Turret>(addComponent);
 }

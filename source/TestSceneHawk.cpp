@@ -61,13 +61,13 @@ TestSceneHawk::TestSceneHawk()
 	cruiser->transform.setPosition(-5, 0, 10);
 	cruiser->transform.scale(0.5);
 	cruiser->addComponent<BoidAvoid>(new BoidAvoid(1));
-	GameObject::SceneRoot.addChild(*cruiser);
+	GameObject::SceneRoot.addChild(cruiser);
 
 	for (int a = 0; a < 10; ++a) {
 		GameObject* asteroid = loadScene("assets/asteroid3.fbx");
 		//bad not psudo random location generation, just something quick to position asteroids
 		asteroid->transform.translate(10 * sin(a * 21498), 10 * sin(a * 581209), 10 * sin(a * 12934));
-		GameObject::SceneRoot.addChild(*asteroid);
+		GameObject::SceneRoot.addChild(asteroid);
 	}
 
 	Material* trailMaterial = new Material(Renderer::getShader(PARTICLE_TRAIL_SHADER));
@@ -87,14 +87,14 @@ TestSceneHawk::TestSceneHawk()
 	(*m)["testRough"] = (0) / 7.f;
 	(*m)["normalTex"] = blankNormal;
 	sun->setMaterial(m);
-	GameObject::SceneRoot.addChild(*sun);
+	GameObject::SceneRoot.addChild(sun);
 
 	emitter = new GameObject();
 	emitterComponent = new GPUEmitter(emitter, "assets/particles/particle.png", true);
 	emitterComponent->init();
 	emitter->addComponent(emitterComponent);
 	emitter->transform.translate(0, 0, 2);
-	GameObject::SceneRoot.addChild(*emitter);
+	GameObject::SceneRoot.addChild(emitter);
 
 	int numSquads = 1;
 	int minCount = 3;
@@ -107,7 +107,7 @@ TestSceneHawk::TestSceneHawk()
 		{
 			boids[i] = new GameObject();
 			GameObject* boid = loadScene("assets/intercepter.dae");
-			boids[i]->addChild(*boid);
+			boids[i]->addChild(boid);
 			boids[i]->transform.scale(1);
 
 			BoxCollider* collider = new BoxCollider(glm::vec3(0, 3, 2), glm::vec3(5, 7, 9));
@@ -120,12 +120,12 @@ TestSceneHawk::TestSceneHawk()
 			trail->material = trailMaterial;
 			boids[i]->addComponent<ParticleTrail>(trail);
 
-			GameObject::SceneRoot.addChild(*boids[i]);
+			GameObject::SceneRoot.addChild(boids[i]);
 		}
 		GameObject* swarm = new GameObject();
 		Swarm* swarmComponent = new Swarm(boids, count);
 		swarm->addComponent(swarmComponent);
-		GameObject::SceneRoot.addChild(*swarm);
+		GameObject::SceneRoot.addChild(swarm);
 	}
 
 
@@ -147,7 +147,7 @@ TestSceneHawk::TestSceneHawk()
 	BoxCollider* collider = new BoxCollider({ 0, 0, 0 }, { 1, 1, 1 });
 	bear->addComponent(collider);
 
-	GameObject::SceneRoot.addChild(*bear);
+	GameObject::SceneRoot.addChild(bear);
 
 	for (int x = 0; x < 8; ++x) {
 		for (int y = 0; y < 8; ++y) {
@@ -165,7 +165,7 @@ TestSceneHawk::TestSceneHawk()
 			(*sphereMat)["normalTex"] = testNormal;
 			sphere[x][y]->setMaterial(sphereMat);
 
-			GameObject::SceneRoot.addChild(*sphere[x][y]);
+			GameObject::SceneRoot.addChild(sphere[x][y]);
 		}
 	}
 
@@ -180,7 +180,7 @@ TestSceneHawk::TestSceneHawk()
 	light->addComponent<Light>(lightComponent);
 	light->setMaterial(sphereMat);
 
-	GameObject::SceneRoot.addChild(*light);
+	GameObject::SceneRoot.addChild(light);
 
 	light2 = loadScene("assets/test_sphere.obj");
 	sphereMat = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
@@ -193,11 +193,11 @@ TestSceneHawk::TestSceneHawk()
 	light2->addComponent<Light>(light2Component);
 	light2->setMaterial(sphereMat);
 
-	GameObject::SceneRoot.addChild(*light2);
+	GameObject::SceneRoot.addChild(light2);
 
-    GameObject::SceneRoot.addChild(*scene);
+    GameObject::SceneRoot.addChild(scene);
     camera = loadScene("assets/cockpit.fbx");
-    scene->addChild(*camera);
+    scene->addChild(camera);
     camera->addComponent(Renderer::camera);
 	camera->transform.setPosition(0, 0, 20);
 	camera->transform.getWorldPosition(); // Force matrix updates to prevent loud initial sounds

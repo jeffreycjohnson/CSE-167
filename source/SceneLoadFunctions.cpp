@@ -17,13 +17,13 @@ void loadX(GameObject* parent, std::string filename) {
 
 	GameObject* childObj = loadScene(filename);
 	childObj->transform.rotate(glm::angleAxis(atanf(1)*2.f, glm::vec3(1, 0, 0))); //convert back to z-up axis
-	parent->addChild(*childObj);
+	parent->addChild(childObj);
 }
 
 void SceneLoadFunctions::loadPlayer(GameObject* parent) {
 
 	GameObject* camera = loadScene("assets/cockpit.fbx");
-	parent->addChild(*camera);
+	parent->addChild(camera);
 	camera->addComponent(Renderer::camera);
 	camera->transform.setPosition(0, 0, 20);
 	camera->transform.getWorldPosition(); // Force matrix updates to prevent loud initial sounds
@@ -39,7 +39,7 @@ void SceneLoadFunctions::loadPlayer(GameObject* parent) {
 	GameObject* musicObj = new GameObject();
 	Sound* music = new Sound("music", true, true, 0.25f);
 	musicObj->addComponent(music);
-	parent->addChild(*musicObj);
+	parent->addChild(musicObj);
 
 	BoidAvoid* obstacle = new BoidAvoid(5);
 	parent->addComponent(obstacle);
@@ -62,7 +62,7 @@ void SceneLoadFunctions::loadCapitalShip(GameObject* parent) {
 
 	loadX(parent, "assets/cruiser_beam.fbx");
 
-	parent->addChild(*childObj);
+	parent->addChild(childObj);
 }
 
 void loadWing(GameObject* parent, bool allied) {
@@ -82,7 +82,7 @@ void loadWing(GameObject* parent, bool allied) {
 	{
 		boids[i] = new GameObject();
 		GameObject* boid = loadScene("assets/intercepter.dae");
-		boids[i]->addChild(*boid);
+		boids[i]->addChild(boid);
 		boids[i]->transform.scale(1);
 		boids[i]->transform.translate(parent->transform.getWorldPosition());
 
@@ -96,12 +96,12 @@ void loadWing(GameObject* parent, bool allied) {
 		Fighter* fighter = new Fighter();
 		boids[i]->addComponent(fighter);
 
-		GameObject::SceneRoot.addChild(*boids[i]);
+		GameObject::SceneRoot.addChild(boids[i]);
 	}
 	GameObject* swarm = new GameObject();
 	Swarm* swarmComponent = new Swarm(boids, count);
 	swarm->addComponent(swarmComponent);
-	parent->addChild(*swarm);
+	parent->addChild(swarm);
 }
 
 

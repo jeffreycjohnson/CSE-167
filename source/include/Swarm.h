@@ -5,6 +5,7 @@
 #include "GameObject.h"
 #include "Transform.h"
 #include <vector>
+#include <Fighter.h>
 
 #define MAX_COHERE_SPEED 100.0f
 #define MAX_SPEED 40.0f
@@ -54,8 +55,8 @@ public:
 	void update(float deltaTime);
 	void draw();
 	void debugDraw();
-
-	static void addObstacle(BoidSphere* newObstacle);
+    void remove(GameObject* fighter);
+    static void addObstacle(BoidSphere* newObstacle);
 };
 
 #endif
