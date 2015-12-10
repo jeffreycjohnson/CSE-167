@@ -131,12 +131,12 @@ void Sound::init()
 	SoundClass cabin;
 	system->createSound("assets/sounds/ambience/cabin.wav", FMOD_2D, NULL, &cabin);
 	soundMap.insert({ "cabin", cabin });
-	SoundClass laser;
-	system->createSound("assets/sounds/laser.mp3", FMOD_3D, NULL, &laser);
-	soundMap.insert({ "laser", laser });
 	SoundClass gun;
-	system->createSound("assets/sounds/gun.wav", FMOD_2D, NULL, &gun);
+	system->createSound("assets/sounds/gun2.wav", FMOD_2D, NULL, &gun);
 	soundMap.insert({ "gun", gun });
+	SoundClass boost;
+	system->createSound("assets/sounds/boost.wav", FMOD_2D, NULL, &boost);
+	soundMap.insert({ "boost", boost });
 	SoundClass music;
 	system->createSound("assets/sounds/music/soundtrack.mp3", FMOD_2D, NULL, &music);
 	soundMap.insert({ "music", music });

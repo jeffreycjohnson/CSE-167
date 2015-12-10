@@ -9,9 +9,12 @@
 #include "BoxCollider.h"
 #include "ObjectLoader.h"
 #include "Timer.h"
+#include "Sound.h"
 
-PlayerController::PlayerController()
+PlayerController::PlayerController(Sound* gun, Sound* boost)
 {
+	gunSound = gun;
+	boostSound = boost;
 	speed = boostSpeed = 0;
 	topSpeed = 1;
 	maxBoost = 0.15f;
@@ -35,6 +38,7 @@ void PlayerController::update(float deltaTime)
 
 	if ((Input::getButton("fire") || Input::getAxis("fire") > 0.5f) && Timer::time() - startShoot > SHOOT_INTERVAL)
 	{
+		gunSound->play();
 		makeBullet(true);
 		makeBullet(false);
 		Renderer::camera->screenShake(0.025, 0.2);
@@ -65,6 +69,8 @@ void PlayerController::update(float deltaTime)
 		speed = topSpeed;
 	else if (speed < 0)
 		speed = 0;
+
+	boostSound->setVolume(speed / topSpeed * 0.2f + boostSpeed / maxBoost  * 0.4f);
 
 	forward = glm::normalize(glm::mat3(gameObject->transform.getTransformMatrix()) * glm::vec3(0, 0, -1));
 	currentVel += (1 + afterburner) * (forward * currentSpeed - currentVel) * (1 + thrustSensitivity * topSpeed - currentSpeed) * deltaTime;

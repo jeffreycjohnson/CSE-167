@@ -30,10 +30,20 @@ void SceneLoadFunctions::loadPlayer(GameObject* parent) {
 	Renderer::camera->getCameraMatrix();
 	camera->update(0);
 
-	Sound* camSound = new Sound("cabin", true, true, 0.75f);
+	Sound* camSound = new Sound("cabin", true, true, 0.5f);
 	camera->addComponent(camSound);
 
-	PlayerController* controller = new PlayerController();
+	GameObject* gunObj = new GameObject();
+	Sound* gun = new Sound("gun", false, false, 0.5f);
+	gunObj->addComponent(gun);
+	camera->addChild(*gunObj);
+
+	GameObject* boostObj = new GameObject();
+	Sound* boost = new Sound("boost", true, true, 0.0f);
+	boostObj->addComponent(boost);
+	camera->addChild(*boostObj);
+
+	PlayerController* controller = new PlayerController(gun, boost);
 	camera->addComponent(controller);
 
 	GameObject* musicObj = new GameObject();
@@ -86,7 +96,7 @@ void loadWing(GameObject* parent, bool allied) {
 		boids[i]->transform.scale(1);
 		boids[i]->transform.translate(parent->transform.getWorldPosition());
 
-		BoxCollider* collider = new BoxCollider(glm::vec3(0, 3, 2), glm::vec3(5, 7, 9));
+		BoxCollider* collider = new BoxCollider(glm::vec3(0, 0, 2), glm::vec3(6, 3, 10));
 		boids[i]->addComponent(collider);
 
 		ParticleTrail* trail = new ParticleTrail();
