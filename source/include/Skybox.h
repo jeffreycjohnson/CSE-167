@@ -1,6 +1,7 @@
 #pragma once
 #include "ForwardDecs.h"
 #include "Mesh.h"
+
 class Skybox
 {
 public:

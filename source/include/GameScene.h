@@ -1,6 +1,8 @@
-#pragma once
+#ifndef INCLUDE_GAMESCENE_H
+#define INCLUDE_GAMESCENE_H
 
 #include "GameObject.h"
+
 class Scene {
 public:
 	virtual void loop() = 0;
@@ -16,3 +18,4 @@ public:
 	void loop() override;
 };
 
+#endif

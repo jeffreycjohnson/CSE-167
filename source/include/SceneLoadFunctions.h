@@ -1,13 +1,14 @@
+#ifndef INCLUDE_SCENELOADFUNCTIONS_H
+#define INCLUDE_SCENELOADFUNCTIONS_H
+
 #include "Component.h"
 #include "GameObject.h"
 
-#pragma once
 class EmptyComponent : public Component
 {
 };
 
 class SceneLoadFunctions {
-
 public:
 	static void loadPlayer(GameObject* parent);
 	static void loadAsteroidBoid(GameObject* parent);
@@ -17,3 +18,4 @@ public:
 	static void loadEnemyWing(GameObject* parent);
 };
 
+#endif
