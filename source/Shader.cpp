@@ -76,7 +76,7 @@ static bool compile(const std::string& file, GLuint shader)
     data.close();
 	buffer[length] = '\0';
 
-    glShaderSource(shader, 1, &buffer, nullptr);
+    glShaderSource(shader, 1, const_cast<const char**>(&buffer), nullptr);
     delete[] buffer;
     glCompileShader(shader);
     GLint status;
@@ -85,14 +85,15 @@ static bool compile(const std::string& file, GLuint shader)
     {
         char errbuf[512];
         glGetShaderInfoLog(shader, 512, nullptr, errbuf);
+        LOG(file);
         LOG((static_cast<const char *>(errbuf)));
-        return true;;
+        return true;
     }
     return false;
 }
 
 Shader::Shader(const std::string& vertex, const std::string& fragment, bool autoReload)
-    : vertexFile(vertex), fragFile(fragment), autoReload(autoReload)
+    : autoReload(autoReload), vertexFile(vertex), fragFile(fragment)
 {
     reload();
 }
@@ -170,7 +171,7 @@ void Shader::reload()
         char errbuf[512];
         glGetProgramInfoLog(id, 512, nullptr, errbuf);
         LOG(static_cast<const char *>(errbuf));
-        throw;
+        //throw;
     }
     CHECK_ERROR();
 }

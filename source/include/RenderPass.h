@@ -4,6 +4,7 @@
 #include "ForwardDecs.h"
 #include "Shader.h"
 #include "Skybox.h"
+#include <list>
 
 class RenderPass
 {
@@ -26,7 +27,7 @@ protected:
 class DeferredPass : public RenderPass
 {
 public:
-    DeferredPass(int resx, int resy);
+    DeferredPass();
     ~DeferredPass() override;
     void render() override;
     Framebuffer * fbo;

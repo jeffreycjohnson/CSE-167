@@ -14,7 +14,7 @@ const static glm::mat4 bias(
     0.0, 0.0, 0.5, 0.0,
     0.5, 0.5, 0.5, 1.0);
 
-DeferredPass::DeferredPass(int resx, int resy)
+DeferredPass::DeferredPass()
 {
     fbo = new Framebuffer(Renderer::getWindowWidth(), Renderer::getWindowHeight(), 4, true, true);
 

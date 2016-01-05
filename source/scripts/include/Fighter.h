@@ -17,7 +17,7 @@ public:
 	Fighter(Sound* explosion);
 	~Fighter();
 
-	void update(float deltaTime);
+	void update(float);
 	void damage(int damage);
 };
 

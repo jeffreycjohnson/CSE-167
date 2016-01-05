@@ -13,7 +13,7 @@ using namespace std;
 
 Camera::Camera()
 {
-	currentFOV = fov = atan(1) * 4.0f / 3.0f;
+	currentFOV = fov = atan(1.f) * 4.0f / 3.0f;
 	fovDuration = 1;
 	offset.setPosition(0, 0, 0);
 	up = {0, 1, 0};

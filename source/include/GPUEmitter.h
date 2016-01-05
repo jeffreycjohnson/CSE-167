@@ -47,7 +47,6 @@ public:
 	void draw() override;
 	void init();
 	void play();
-	void setGameObject(GameObject* go);
 };
 
 #endif

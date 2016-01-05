@@ -24,7 +24,7 @@ public:
 	Sound(std::string soundName, bool playOnAwake, bool looping, float volume, bool is3D);
 	~Sound();
 
-	void update(float deltaTime);
+	void update(float);
 	void play();
 	void pause();
 	void stop();

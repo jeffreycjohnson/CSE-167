@@ -4,7 +4,6 @@
 #include "Framebuffer.h"
 #include <gtc/matrix_transform.hpp>
 #include "Skybox.h"
-#include "TestSceneHawk.h"
 #include "Input.h"
 #include "Timer.h"
 #include "Light.h"
@@ -142,14 +141,6 @@ void Renderer::init(int window_width, int window_height) {
 	currentShader->use();
 
 	std::string cubeFilenames[6] = {
-		/*
-		"assets/grace/grace_px.hdr",
-		"assets/grace/grace_nx.hdr",
-		"assets/grace/grace_py.hdr",
-		"assets/grace/grace_ny.hdr",
-		"assets/grace/grace_pz.hdr",
-		"assets/grace/grace_nz.hdr" 
-		*/
 		"assets/skybox/right.hdr",
 		"assets/skybox/left.hdr",
 		"assets/skybox/top.hdr",
@@ -160,7 +151,6 @@ void Renderer::init(int window_width, int window_height) {
 	skybox->applyIrradiance();
 	skybox->applyTexture(5);
 
-	//scene = new TestSceneHawk();
 	scene = new GameScene();
 
 	fboTest = new Framebuffer(width, height, 1, false, true);
@@ -171,7 +161,7 @@ void Renderer::init(int window_width, int window_height) {
 	regularPass = new ForwardPass();
 	particlePass = new ForwardPass();
     shadowPass = new ShadowPass();
-    deferredPass = new DeferredPass(width, height);
+    deferredPass = new DeferredPass();
 
     passes.push_back(shadowPass);
     passes.push_back(deferredPass);

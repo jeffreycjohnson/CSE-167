@@ -29,7 +29,7 @@ private:
 	GLuint vaoHandle;
 	GLuint meshBuffer;
 	
-	const int maxPoints = 64;
+	const unsigned int maxPoints = 64;
 	float* megaArray;
 
 	const float addDelayTime = 0.07f;//in seconds

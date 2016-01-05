@@ -176,9 +176,8 @@ GameObject* loadScene(const std::string& filename) {
 	const aiScene* scene = importer.ReadFile(filename,
 		aiProcess_Triangulate | aiProcess_GenNormals |
 		aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality |
-		aiProcess_RemoveRedundantMaterials | aiProcess_FindInvalidData |
-		aiProcess_GenUVCoords | aiProcess_TransformUVCoords |
-		aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace | aiProcess_CalcTangentSpace);
+		aiProcess_FindInvalidData | aiProcess_GenUVCoords | aiProcess_TransformUVCoords |
+		aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace);
 
 	if (!scene) {
 		LOG(importer.GetErrorString());
@@ -204,8 +203,10 @@ GameObject* loadScene(const std::string& filename) {
         {
             light = new SpotLight();
         }
-
         light->color = glm::vec3(l->mColorDiffuse.r, l->mColorDiffuse.g, l->mColorDiffuse.b);
+        light->constantFalloff = l->mAttenuationConstant;
+        light->linearFalloff = l->mAttenuationLinear;
+        light->exponentialFalloff = l->mAttenuationQuadratic;
         lights[l->mName.C_Str()] = light;
     }
 

@@ -114,8 +114,7 @@ float range(float min, float max)
 
 vec3 range(vec3 min, vec3 max)
 {
-	return min + (max - min) 
-		* vec3(float(rand()) / 4294967295f, float(rand()) / 4294967295f, float(rand()) / 4294967295f);
+	return min + (max - min) * vec3(float(rand()) / 4294967295f, float(rand()) / 4294967295f, float(rand()) / 4294967295f);
 }
 
 void srand(uint newSeed)

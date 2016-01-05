@@ -5,6 +5,7 @@
 #include "Transform.h"
 #include "Component.h"
 #include "Material.h"
+#include <list>
 
 class GameObject
 {

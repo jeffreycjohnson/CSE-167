@@ -43,9 +43,9 @@ void GameObject::hideAll()
 	if (trail != nullptr)
 		trail->emitting = false;
 
-	for (int i = 0; i < transform.children.size(); i++)
+	for (auto child : transform.children)
 	{
-		transform.children[i]->gameObject->hideAll();
+		child->gameObject->hideAll();
 	}
 }
 
@@ -72,10 +72,9 @@ void GameObject::debugDraw() {
 
 void GameObject::update(float deltaTime)
 {
-	Transform* object;
-	for (int i = 0; i < transform.children.size(); i++)
+	for (unsigned int i = 0; i < transform.children.size(); i++)
     {
-		object = transform.children[i];
+        auto object = transform.children[i];
 		if (object->gameObject->dead)
 		{
 			BoxCollider* collider;
@@ -94,7 +93,7 @@ void GameObject::update(float deltaTime)
     }
 }
 
-void GameObject::extract(PassList & list)
+void GameObject::extract(PassList& list)
 {
 	if (visible) {
 		Mesh* mesh;
@@ -126,7 +125,7 @@ void GameObject::extract(PassList & list)
 	}
 }
 
-void GameObject::setMaterial(Material *mat) {
+void GameObject::setMaterial(Material* mat) {
 	Mesh* mesh;
 	if ((mesh = getComponent<Mesh>()) != nullptr) {
 		mesh->setMaterial(mat);
@@ -138,8 +137,8 @@ void GameObject::setMaterial(Material *mat) {
 
 void GameObject::onCollisionEnter(GameObject* other)
 {
-	for (int i = 0; i < componentList.size(); i++)
+	for (auto component : componentList)
 	{
-		componentList[i]->onCollisionEnter(other);
+		component->onCollisionEnter(other);
 	}
 }

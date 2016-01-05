@@ -1,4 +1,4 @@
-#version 440
+#version 430
 precision mediump float;
 in vec4 vPosition;
 
@@ -21,14 +21,14 @@ uniform vec3 cameraPos;
 uniform vec3 uLightColor;
 uniform vec3 uLightPosition;
 uniform vec3 uLightDirection;
+uniform vec3 uLightFalloff;
 uniform float uLightSize = 1.0f;
 uniform vec2 uScreenSize;
 uniform int uLightType;
 uniform mat4 uShadow_Matrix;
 
-
 //main algorithm from http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html
-vec2 Hammersley(uint i, uint N) {
+vec2 Hammersley(int i, int N) {
 	 uint bits = bitfieldReverse(i);
      return vec2(float(i)/float(N),float(bits) * 2.3283064365386963e-10);
  }
@@ -169,7 +169,7 @@ void main () {
 	  }
 
 
-	  float power = 1.0 / (lightDist * lightDist + 1.0);
+	  float power = 1.0 / (lightDist * lightDist * uLightFalloff.z + lightDist * uLightFalloff.y + uLightFalloff.x);
 	  vec3 diffuseLight = uLightColor * dot(lightDir, normal.xyz) * power;
 	
 	  vec3 halfVec = normalize(view + lightDir);

@@ -51,7 +51,7 @@ GameScene::GameScene()
 
 
 
-	GameObject* camera = loadScene("assets/cockpit.fbx");
+	GameObject* camera = loadScene("assets/cockpit.dae");
 	camera->addComponent(Renderer::camera);
 	camera->transform.setPosition(0, 0, 20);
 	camera->transform.getWorldPosition(); // Force matrix updates to prevent loud initial sounds

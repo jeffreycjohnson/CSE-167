@@ -33,9 +33,9 @@ class Transform : public Component
 		 * -Transform Dirty
 		 */
         void translate(float x, float y, float z);
-        void translate(glm::vec3& diff);
+        void translate(const glm::vec3& diff);
 		void setPosition(float x, float y, float z);
-		void setPosition(glm::vec3& pos);
+		void setPosition(const glm::vec3& pos);
 
 
 		/**
@@ -43,13 +43,13 @@ class Transform : public Component
 		 * -Transform Dirty
 		 * -Normals Dirty
 		 */
-		void setRotate(glm::quat& rotation);
-        void rotate(glm::quat& diff);
+		void setRotate(const glm::quat& rotation);
+        void rotate(const glm::quat& diff);
 
 		/**
 		 * Scale
 		 */
-		void setScale(glm::vec3 scale);
+		void setScale(const glm::vec3& scale);
         void scale(float s);
 
 

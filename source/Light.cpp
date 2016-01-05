@@ -19,6 +19,7 @@ void Light::deferredHelper(const std::string& meshName)
         Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
     }
 
+    (*Renderer::currentShader)["uLightFalloff"] = glm::vec3(constantFalloff, linearFalloff, exponentialFalloff);
     (*Renderer::currentShader)["uLightPosition"] = gameObject->transform.getWorldPosition();
     (*Renderer::currentShader)["uLightColor"] = color;
     (*Renderer::currentShader)["uLightSize"] = radius;
@@ -30,8 +31,9 @@ void Light::deferredHelper(const std::string& meshName)
 void PointLight::forwardPass(int index)
 {
 	for (int shaderId : Renderer::shaderForwardLightList) {
-		(*Renderer::getShader(shaderId))["uLightData[" + std::to_string(2*index) + "]"] = glm::vec4(gameObject->transform.getWorldPosition(), 1.0);
-		(*Renderer::getShader(shaderId))["uLightData[" + std::to_string(2*index+1) + "]"] = glm::vec4(color, 1);
+		(*Renderer::getShader(shaderId))["uLightData[" + std::to_string(3*index) + "]"] = glm::vec4(gameObject->transform.getWorldPosition(), 1.0);
+		(*Renderer::getShader(shaderId))["uLightData[" + std::to_string(3*index+1) + "]"] = glm::vec4(color, 1);
+        (*Renderer::getShader(shaderId))["uLightData[" + std::to_string(3*index+2) + "]"] = glm::vec4(constantFalloff, linearFalloff, exponentialFalloff, 1);
 	}
 }
 

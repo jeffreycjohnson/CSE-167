@@ -3,7 +3,6 @@
 
 #include "ForwardDecs.h"
 #include <experimental/filesystem>
-#include <map>
 
 class Shader
 {

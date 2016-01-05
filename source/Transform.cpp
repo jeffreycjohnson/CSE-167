@@ -11,7 +11,7 @@ void Transform::translate(float x, float y, float z) {
     position += glm::vec3(x, y, z);
 }
 
-void Transform::Transform::translate(glm::vec3& diff) {
+void Transform::Transform::translate(const glm::vec3& diff) {
     transformMatrixDirty = true;
 
     position += diff;
@@ -23,7 +23,7 @@ void Transform::setPosition(float x, float y, float z) {
 	position = glm::vec3(x, y, z);
 }
 
-void Transform::Transform::setPosition(glm::vec3& pos) {
+void Transform::Transform::setPosition(const glm::vec3& pos) {
 	transformMatrixDirty = true;
 
 	position = pos;
@@ -35,13 +35,13 @@ void Transform::Transform::setPosition(glm::vec3& pos) {
 * -Transform Dirty
 * -Normals Dirty
 */
-void Transform::rotate(glm::quat& diff) {
+void Transform::rotate(const glm::quat& diff) {
     transformMatrixDirty = true;
 
     rotation *= diff;
 }
 
-void Transform::setRotate(glm::quat& diff) {
+void Transform::setRotate(const glm::quat& diff) {
 	rotation = glm::quat();
 	rotate(diff);
 }
@@ -49,7 +49,7 @@ void Transform::setRotate(glm::quat& diff) {
 /**
 * Scale
 */
-void Transform::setScale(glm::vec3 scale) {
+void Transform::setScale(const glm::vec3& scale) {
 	transformMatrixDirty = true;
 	scaleFactor = scale;
 }

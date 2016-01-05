@@ -4,7 +4,8 @@
 #include <gtc/matrix_transform.hpp>
 
 
-Framebuffer::Framebuffer(int w, int h, int numColorTextures, bool accessibleDepth, bool hdrEnabled) : width(w), height(h), numColorTex(numColorTextures), accessibleDepth(accessibleDepth), hdrEnabled(hdrEnabled) {
+Framebuffer::Framebuffer(int w, int h, int numColorTextures, bool accessibleDepth, bool hdrEnabled)
+        : accessibleDepth(accessibleDepth), numColorTex(numColorTextures), hdrEnabled(hdrEnabled), width(w), height(h) {
 	glGenFramebuffers(1, &id);
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 

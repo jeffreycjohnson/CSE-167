@@ -30,7 +30,7 @@ class Transform;
 
 #ifdef _MSC_VER
 #ifndef __func__
-#define __func__ __FUNCTION__
+#define __func__ __FUNCSIG__
 #endif
 #endif
 

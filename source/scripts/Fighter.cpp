@@ -25,7 +25,7 @@ Fighter::~Fighter()
     }
 }
 
-void Fighter::update(float deltaTime)
+void Fighter::update(float)
 {
 	if (health <= 0 && !killed)
 	{

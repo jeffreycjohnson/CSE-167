@@ -213,7 +213,7 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
 	if (enabledTexCoord[0]) stride += FLOAT_SIZE * TEX_COORD_COUNT;
 	if (mesh->HasBones()) stride += FLOAT_SIZE * BONE_WEIGHT_COUNT;
 
-	GLuint currentOffset = 0;
+	uintptr_t currentOffset = 0;
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (FLOAT_SIZE * 3);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (FLOAT_SIZE * 3);

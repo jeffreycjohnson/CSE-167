@@ -1,4 +1,4 @@
-#include "include\ParticleTrail.h"
+#include "ParticleTrail.h"
 #include "GameObject.h"
 #include "Transform.h"
 #include "Renderer.h"
@@ -13,7 +13,7 @@ void ParticleTrail::uploadData() {
 	if (pointList.size() < 1) {
 		return;
 	}
-	int arrayIndex=0;
+	unsigned int arrayIndex = 0;
 	float distance = 0;
 	glm::vec3 lastPosition;
 	for (TrailPoint& currentPoint : pointList) {
@@ -39,7 +39,7 @@ void ParticleTrail::uploadData() {
 		glBindBuffer(GL_ARRAY_BUFFER, meshBuffer);
 		glBufferData(GL_ARRAY_BUFFER, arrayIndex * sizeof(float), megaArray, GL_STREAM_DRAW);
 		int stride = FLOAT_SIZE * (elementStride);
-		int currentOffset = 0;
+		uintptr_t currentOffset = 0;
 		glVertexAttribPointer(VERTEX_ATTRIB_LOCATION, 3, GL_FLOAT, false, stride, (GLvoid*)0); currentOffset += (FLOAT_SIZE * 3);
 		glVertexAttribPointer(NORMAL_ATTRIB_LOCATION, 3, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (FLOAT_SIZE * 3);
 		glVertexAttribPointer(DIST_ATTRIB_LOCATION, 1, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (FLOAT_SIZE * 1);

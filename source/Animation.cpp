@@ -1,4 +1,4 @@
-#include "include\Animation.h"
+#include "Animation.h"
 
 #include "Transform.h"
 
@@ -95,32 +95,34 @@ glm::vec3 convertVec(aiVector3D input) {
 
 Animation::Animation(const aiScene* scene, std::unordered_map<std::string, Transform*> loadingAcceleration)
 {
-	for (int a = 0; a < scene->mNumAnimations; ++a) { //separate animations (e.g. run, jump)
+	for (unsigned int a = 0; a < scene->mNumAnimations; ++a) { //separate animations (e.g. run, jump)
+        auto animation = scene->mAnimations[a];
 		AnimationData currentAnimData;
 
 		float longestTime = 0;
 		//channels correspond to nodes, i.e. bones
-		for (int channel = 0; channel < scene->mAnimations[a]->mNumChannels; ++channel) {
+		for (unsigned int c = 0; c < animation->mNumChannels; ++c) {
+            auto channel = animation->mChannels[c];
 
-			std::string name = scene->mAnimations[a]->mChannels[channel]->mNodeName.C_Str();
+			std::string name = channel->mNodeName.C_Str();
 
 			AnimNodeData newData;
 			newData.name = name;
 			newData.object = loadingAcceleration[name];
 
-			for (int keyframe = 0; keyframe < scene->mAnimations[a]->mChannels[channel]->mNumPositionKeys; ++keyframe) {
-				newData.keyframes.position.push_back(std::make_pair(scene->mAnimations[a]->mChannels[channel]->mPositionKeys[keyframe].mTime,
-					convertVec(scene->mAnimations[a]->mChannels[channel]->mPositionKeys[keyframe].mValue)));
+			for (unsigned int keyframe = 0; keyframe < channel->mNumPositionKeys; ++keyframe) {
+				newData.keyframes.position.push_back(std::make_pair(channel->mPositionKeys[keyframe].mTime,
+					convertVec(channel->mPositionKeys[keyframe].mValue)));
 			}
 
-			for (int keyframe = 0; keyframe < scene->mAnimations[a]->mChannels[channel]->mNumRotationKeys; ++keyframe) {
-				newData.keyframes.rotation.push_back(std::make_pair(scene->mAnimations[a]->mChannels[channel]->mRotationKeys[keyframe].mTime,
-					convertQuat(scene->mAnimations[a]->mChannels[channel]->mRotationKeys[keyframe].mValue)));
+			for (unsigned int keyframe = 0; keyframe < channel->mNumRotationKeys; ++keyframe) {
+				newData.keyframes.rotation.push_back(std::make_pair(channel->mRotationKeys[keyframe].mTime,
+					convertQuat(channel->mRotationKeys[keyframe].mValue)));
 			}
 
-			for (int keyframe = 0; keyframe < scene->mAnimations[a]->mChannels[channel]->mNumScalingKeys; ++keyframe) {
-				newData.keyframes.scale.push_back(std::make_pair(scene->mAnimations[a]->mChannels[channel]->mScalingKeys[keyframe].mTime,
-					convertVec(scene->mAnimations[a]->mChannels[channel]->mScalingKeys[keyframe].mValue)));
+			for (unsigned int keyframe = 0; keyframe < channel->mNumScalingKeys; ++keyframe) {
+				newData.keyframes.scale.push_back(std::make_pair(channel->mScalingKeys[keyframe].mTime,
+					convertVec(channel->mScalingKeys[keyframe].mValue)));
 			}
 
 			if (newData.keyframes.position.back().first > longestTime) longestTime = newData.keyframes.position.back().first;

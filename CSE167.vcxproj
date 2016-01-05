@@ -192,7 +192,6 @@
     <ClCompile Include="source\Sound.cpp" />
     <ClCompile Include="source\SkyboxPass.cpp" />
     <ClCompile Include="source\Swarm.cpp" />
-    <ClCompile Include="source\TestSceneHawk.cpp" />
     <ClCompile Include="source\Texture.cpp" />
     <ClCompile Include="source\Timer.cpp" />
     <ClCompile Include="source\Transform.cpp" />
@@ -226,7 +225,6 @@
     <ClInclude Include="source\include\Skybox.h" />
     <ClInclude Include="source\include\Sound.h" />
     <ClInclude Include="source\include\Swarm.h" />
-    <ClInclude Include="source\include\TestSceneHawk.h" />
     <ClInclude Include="source\include\Texture.h" />
     <ClInclude Include="source\include\Timer.h" />
     <ClInclude Include="source\include\Transform.h" />

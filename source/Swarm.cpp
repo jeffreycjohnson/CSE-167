@@ -41,12 +41,12 @@ Swarm::~Swarm()
 void Swarm::init()
 {
 	srand(time(NULL));
-	for (int i = 0; i < neighbors.size(); i++)
+	for (auto neighbor : neighbors)
 	{
-		neighbors[i]->transform.position.x += ((float)rand() / RAND_MAX) * 10 - 5;
-		neighbors[i]->transform.position.y += ((float) rand() / RAND_MAX) * 10 - 5;
-		neighbors[i]->transform.position.z += ((float)rand() / RAND_MAX) * 10 - 5;
-        auto f = neighbors[i]->getComponent<Fighter>();
+		neighbor->transform.position.x += ((float)rand() / RAND_MAX) * 10 - 5;
+		neighbor->transform.position.y += ((float) rand() / RAND_MAX) * 10 - 5;
+		neighbor->transform.position.z += ((float)rand() / RAND_MAX) * 10 - 5;
+        auto f = neighbor->getComponent<Fighter>();
         if(f)
         {
             f->swarm = this;
@@ -57,13 +57,13 @@ void Swarm::init()
 void Swarm::update(float deltaTime)
 {
 	averagePosition = {0, 0, 0};
-	for (int i = 0; i < neighbors.size(); i++)
+	for (auto neighbor : neighbors)
 	{
-		averagePosition += neighbors[i]->transform.position;
+		averagePosition += neighbor->transform.position;
 	}
 	averagePosition /= neighbors.size();
 
-	for (int i = 0; i < neighborVelocities.size(); i++)
+	for (unsigned int i = 0; i < neighborVelocities.size(); i++)
 	{
 		neighborVelocities[i] += cohere(i) + align(i) + separate(i)
 			+ travel(i) + avoidObstacles(i);
@@ -71,7 +71,7 @@ void Swarm::update(float deltaTime)
 		neighborVelocities[i] = limitSpeed(neighborVelocities[i], MAX_SPEED);
 	}
 
-	for (int i = 0; i < neighbors.size(); i++)
+	for (unsigned int i = 0; i < neighbors.size(); i++)
 	{
 		neighbors[i]->transform.translate((float) Timer::deltaTime() * neighborVelocities[i]);
 
@@ -89,7 +89,7 @@ void Swarm::update(float deltaTime)
 	}
 
 	float distance = glm::length(target - currentTarget);
-	if (abs(distance) < 0.001)
+	if (fabs(distance) < 0.001)
 	{
 		prevTarget = target;
 		glm::vec3 direction(((float)rand() / RAND_MAX - 0.5), ((float)rand() / RAND_MAX - 0.5), ((float)rand() / RAND_MAX - 0.5));
@@ -135,10 +135,10 @@ void Swarm::debugDraw()
 	sphere->transform.scaleFactor = glm::vec3(1, 1, 1);
 	sphere->draw();
 
-	for (int i = 0; i < obstacles.size(); i++)
+	for (auto obstacle : obstacles)
 	{
-		sphere->transform.setPosition(obstacles[i]->transform->getWorldPosition());
-		sphere->transform.scaleFactor = obstacles[i]->transform->getWorldScale() * glm::vec3(1, 1, 1);
+		sphere->transform.setPosition(obstacle->transform->getWorldPosition());
+		sphere->transform.scaleFactor = obstacle->transform->getWorldScale() * glm::vec3(1, 1, 1);
 		sphere->draw();
 	}
 }
@@ -167,9 +167,9 @@ glm::vec3 Swarm::cohere(int current)
 {
 	glm::vec3 mean;
 
-	for (int i = 0; i < neighbors.size(); i++)
+	for (auto neighbor : neighbors)
 	{
-		mean += neighbors[i]->transform.getWorldPosition();
+		mean += neighbor->transform.getWorldPosition();
 	}
 	mean /= neighbors.size();
 
@@ -199,9 +199,9 @@ glm::vec3 Swarm::align(int current)
 {
 	glm::vec3 mean;
 
-	for (int i = 0; i < neighborVelocities.size(); i++)
+	for (auto velocity : neighborVelocities)
 	{
-        mean += neighborVelocities[i];
+        mean += velocity;
 	}
 	mean /= neighborVelocities.size();
 	return mean / 30.0f;
@@ -212,11 +212,11 @@ glm::vec3 Swarm::separate(int current)
 	glm::vec3 mean;
 	float d;
 
-	for (int i = 0; i < neighbors.size(); i++)
+	for (auto neighbor : neighbors)
 	{
-		d = glm::length(neighbors[current]->transform.getWorldPosition() - neighbors[i]->transform.getWorldPosition());
+		d = glm::length(neighbors[current]->transform.getWorldPosition() - neighbor->transform.getWorldPosition());
 		if (d > 0 && d < SEPARATION_DISTANCE + neighbors.size() / 4.0f)
-			mean += glm::normalize(neighbors[current]->transform.getWorldPosition() - neighbors[i]->transform.getWorldPosition()) / (d / (SEPARATION_DISTANCE + neighbors.size() / 2.0f));
+			mean += glm::normalize(neighbors[current]->transform.getWorldPosition() - neighbor->transform.getWorldPosition()) / (d / (SEPARATION_DISTANCE + neighbors.size() / 2.0f));
 	}
 	mean /= neighbors.size();
 	mean = limitSpeed(mean, MAX_SPEED);
@@ -237,9 +237,9 @@ glm::vec3 Swarm::avoidObstacles(int current)
 	float d;
 	int hasSelf = 0;
 
-	for (int i = 0; i < obstacles.size(); i++)
+	for (unsigned int i = 0; i < obstacles.size(); i++)
 	{
-		if (i == id) // Skip myself
+		if ((signed)i == id) // Skip myself
 		{
 			hasSelf = 1;
 			continue;
@@ -264,9 +264,9 @@ glm::vec3 Swarm::limitSpeed(glm::vec3 current, float maxSpeed)
 	float max = glm::max(current.x, current.y);
 	max = glm::max(max, current.z);
 
-	if (abs(max) > maxSpeed)
+	if (fabs(max) > maxSpeed)
 	{
-		current /= abs(max) / maxSpeed;
+		current /= fabs(max) / maxSpeed;
 	}
 
 	return current;

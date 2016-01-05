@@ -1,4 +1,4 @@
-#version 440
+#version 430
 precision mediump float;
 
 uniform sampler2D colorTex; //color texture - rgb: color | a: team mask

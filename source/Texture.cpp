@@ -61,7 +61,7 @@ Texture::Texture(glm::vec4 color)
 {
     glGenTextures(1, &textureHandle);
 
-    char buffer[4] = { color.r * 255, color.g * 255, color.b * 255, color.a * 255 };
+    char buffer[4] = { static_cast<char>(color.r * 255), static_cast<char>(color.g * 255), static_cast<char>(color.b * 255), static_cast<char>(color.a * 255) };
 
     glBindTexture(GL_TEXTURE_2D, textureHandle);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA,

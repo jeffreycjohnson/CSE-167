@@ -1,4 +1,4 @@
-#version 440
+#version 430
 precision mediump float;
 in vec4 vPosition;
 in vec3 vNormal;
@@ -28,17 +28,15 @@ uniform vec3 cameraPos;
 
 //light data - (position.xyz, unused) followed by (lightColor.xyz, lightType)
 const int lightCount = 5;
-uniform vec4 uLightData[2*lightCount];
+uniform vec4 uLightData[3*lightCount];
 
 //tmp variables to set the metalness and roughness instead of a texture
 uniform float testMetal;
 uniform float testRough;
 uniform bool useTextures = false;
 
-
-
 //main algorithm from http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html
-vec2 Hammersley(uint i, uint N) {
+vec2 Hammersley(int i, int N) {
 	 uint bits = bitfieldReverse(i);
      return vec2(float(i)/float(N),float(bits) * 2.3283064365386963e-10);
  }
@@ -151,30 +149,29 @@ void main () {
   vec3 specColor = SpecularEnvMap(normal, view, a, F0);
   
   for (int i=0; i < lightCount; ++i) {
-	float lightType = uLightData[2*i+1].w;
+	float lightType = uLightData[3*i+1].w;
 	float power = 1;
-	vec3 lightDir = normalize(uLightData[2*i].xyz);
+	vec3 lightDir = normalize(uLightData[3*i].xyz);
 	if (lightType == 1) {
-		lightDir =  (uLightData[2*i] - vPosition).xyz;
+		lightDir =  (uLightData[3*i] - vPosition).xyz;
 		float lightDist = length(lightDir);
 
 		//Spherical light algorithm from http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf
-		float sphereRadius = uLightData[2*i].w;
+		float sphereRadius = uLightData[3*i].w;
 		vec3 reflectedRay = reflect(-view, normal);
 		vec3 centerToRay = dot(lightDir, reflectedRay) * reflectedRay - lightDir;
 		lightDir = normalize(lightDir + centerToRay * clamp(sphereRadius / length(centerToRay), 0.0, 1.0));
 		//todo normalize based on sphere size
-
-		power = 1.0 / (lightDist * lightDist + 1);
+	    power = 1.0 / (lightDist * lightDist * uLightData[3*i+2].z + lightDist * uLightData[3*i+2].y + uLightData[3*i+2].x);
 	}
 
-    diffuseLight = diffuseLight + (uLightData[2*i+1].xyz * (clamp(dot(lightDir, normal) * power, 0.0, 1.0)));
+    diffuseLight = diffuseLight + (uLightData[3*i+1].xyz * (clamp(dot(lightDir, normal) * power, 0.0, 1.0)));
 	
 	vec3 halfVec = normalize(view + lightDir);
 	float dotNH = clamp(dot(normal, halfVec), 0.0, 1.0);
 
 	float a2 = a*a;
-	specColor += GGX_D(dotNH, a2*a2) * SpecularBRDF(uLightData[2*i+1].xyz, normal, view, lightDir, a, F0, 1) * power;
+	specColor += GGX_D(dotNH, a2*a2) * SpecularBRDF(uLightData[3*i+1].xyz, normal, view, lightDir, a, F0, 1) * power;
   }
 
   vec3 diffuseColor = ((1.0-mat.r) * albedo.rgb) * diffuseLight;

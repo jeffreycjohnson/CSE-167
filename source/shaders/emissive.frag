@@ -1,4 +1,4 @@
-#version 440
+#version 330
 precision mediump float;
 in vec4 vPosition;
 in vec2 vTexCoord;

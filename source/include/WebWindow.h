@@ -1,4 +1,5 @@
-#pragma 
+#ifndef INCLUDE_WEBWINDOW_H
+#define INCLUDE_WEBWINDOW_H 
 
 #include <string>
 
@@ -40,4 +41,4 @@ public:
 	*/
 };
 
-
+#endif

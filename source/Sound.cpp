@@ -38,7 +38,7 @@ Sound::~Sound()
 	
 }
 
-void Sound::update(float deltaTime)
+void Sound::update(float)
 {
 	position = gameObject->transform.getWorldPosition(); // Needs to be in world position for audio
 	velocity = position - prevPosition;

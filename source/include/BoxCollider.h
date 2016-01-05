@@ -19,7 +19,7 @@ public:
 	BoxCollider(glm::vec3 offset, glm::vec3 dimensions);
 	~BoxCollider();
 	void remove();
-	void update(float deltaTime);
+	void update(float);
 	void draw();
 	void debugDraw();
 	void setGameObject(GameObject* go);

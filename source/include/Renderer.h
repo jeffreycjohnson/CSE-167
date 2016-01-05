@@ -32,7 +32,7 @@
 #define FORWARD_SHADER_LIGHT_MAX 5
 
 struct GPUData {
-	int vaoHandle;
+	GLuint vaoHandle;
 	int textureSlot[20];
 };
 

@@ -25,7 +25,7 @@ BoxCollider::BoxCollider(glm::vec3 offset, glm::vec3 dimensions)
 
 BoxCollider::~BoxCollider()
 {
-	for (int i = 0; i < colliders.size(); i++)
+	for (unsigned int i = 0; i < colliders.size(); i++)
 	{
 		if (colliders[i] == this)
 		{
@@ -34,7 +34,7 @@ BoxCollider::~BoxCollider()
 	}
 }
 
-void BoxCollider::update(float deltaTime)
+void BoxCollider::update(float)
 {
 	glm::mat4 matrix = gameObject->transform.getTransformMatrix();
 	for (int i = 0; i < 8; i++)
@@ -140,7 +140,7 @@ void BoxCollider::drawDebugCube(glm::vec3 list[])
 
 void BoxCollider::remove()
 {
-	for (int i = 0; i < colliders.size(); i++)
+	for (unsigned int i = 0; i < colliders.size(); i++)
 	{
 		if (colliders[i] == this)
 			colliders.erase(colliders.begin() + i);
@@ -150,7 +150,7 @@ void BoxCollider::remove()
 void BoxCollider::updateColliders()
 {
 	// Optimize with sweep and prune eventually, for now use brute force
-	for (int i = 0; i < colliders.size(); i++)
+	for (unsigned int i = 0; i < colliders.size(); i++)
 	{
 		// Optimize erasing colliders? How often will this really happen?
 		while (i < colliders.size() && (colliders[i] == nullptr || colliders[i]->gameObject == nullptr))
@@ -159,7 +159,7 @@ void BoxCollider::updateColliders()
 		}
 		if (i < colliders.size() && !colliders[i]->passive)
 		{
-			for (int e = 0; e < colliders.size(); e++)
+			for (unsigned int e = 0; e < colliders.size(); e++)
 			{
 				while (e < colliders.size() && (colliders[e] == nullptr || colliders[e]->gameObject == nullptr))
 				{

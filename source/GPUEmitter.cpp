@@ -302,8 +302,3 @@ GLuint GPUEmitter::genParticles()
 
 	return vao;
 }
-
-void GPUEmitter::setGameObject(GameObject* go)
-{
-	this->gameObject = go;
-}

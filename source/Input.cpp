@@ -117,15 +117,15 @@ void Input::init(GLFWwindow* win)
 	{
 		if (it->second.type == InputType::KEYBOARD)
 		{
-			keyboardMap.insert({ it->second.id, {InputState::IDLE, false} });
+			keyboardMap.insert({ it->second.id, {InputState::IDLE, false, 0, 0, 0} });
 		}
 		else if (it->second.type == InputType::MOUSE)
 		{
-			mouseMap.insert({ it->second.id,{ InputState::IDLE, false } });
+			mouseMap.insert({ it->second.id,{ InputState::IDLE, false, 0, 0, 0 } });
 		}
 		else if (it->second.type == InputType::JOYSTICK)
 		{
-			joystickMap.insert({ it->second.id,{ InputState::IDLE, false } });
+			joystickMap.insert({ it->second.id,{ InputState::IDLE, false, 0, 0, 0 } });
 		}
 	}
 
@@ -545,7 +545,7 @@ void Input::showCursor()
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
-void Input::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+void Input::scroll_callback(GLFWwindow*, double xoffset, double yoffset)
 {
 	scrollBuff.x += (float) xoffset;
 	scrollBuff.y += (float) yoffset;
