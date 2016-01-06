@@ -47,8 +47,6 @@ void Mesh::draw() {
 		Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
 	}
 
-	if (material) material->bind();
-
 	//TODO move
 	Renderer::setModelMatrix(gameObject->transform.getTransformMatrix());
 
