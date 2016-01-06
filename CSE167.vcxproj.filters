@@ -84,9 +84,6 @@
     <ClCompile Include="source\Timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\MathFunc.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\GPUEmitter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -117,23 +114,26 @@
     <ClCompile Include="source\BoidAvoid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Turret.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\scripts\Bullet.cpp">
       <Filter>Scripts\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\scripts\Fighter.cpp">
       <Filter>Scripts\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\SceneLoadFunctions.cpp">
+    <ClCompile Include="source\FileWatcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\GameScene.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="source\scripts\Turret.cpp">
+      <Filter>Scripts\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\CruiserBeam.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="source\scripts\SceneLoadFunctions.cpp">
+      <Filter>Scripts\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\scripts\CruiserBeam.cpp">
+      <Filter>Scripts\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\scripts\GameScene.cpp">
+      <Filter>Scripts\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -191,9 +191,6 @@
     <ClInclude Include="source\include\Timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\include\MathFunc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\include\GPUEmitter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -218,23 +215,26 @@
     <ClInclude Include="source\include\BoidAvoid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\include\Turret.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\scripts\include\Fighter.h">
       <Filter>Scripts\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\scripts\include\Bullet.h">
       <Filter>Scripts\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\include\SceneLoadFunctions.h">
+    <ClInclude Include="source\include\FileWatcher.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\include\GameScene.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="source\scripts\include\CruiserBeam.h">
+      <Filter>Scripts\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\include\CruiserBeam.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="source\scripts\include\GameScene.h">
+      <Filter>Scripts\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\scripts\include\SceneLoadFunctions.h">
+      <Filter>Scripts\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\scripts\include\Turret.h">
+      <Filter>Scripts\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

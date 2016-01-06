@@ -1,7 +1,7 @@
 #include "Shader.h"
 #include <fstream>
-#include "gtc/type_ptr.hpp"
-
+#include <gtc/type_ptr.hpp>
+#include "FileWatcher.h"
 #include "Renderer.h"
 
 Shader::Uniform::Uniform(GLint program, GLint location)
@@ -93,8 +93,10 @@ static bool compile(const std::string& file, GLuint shader)
 }
 
 Shader::Shader(const std::string& vertex, const std::string& fragment, bool autoReload)
-    : autoReload(autoReload), vertexFile(vertex), fragFile(fragment)
+    : autoReload(autoReload)
 {
+    vertWatcher = new FileWatcher(vertex, 30);
+    fragWatcher = new FileWatcher(fragment, 30);
     reload();
 }
 
@@ -111,33 +113,13 @@ Shader::Uniform Shader::operator[](const std::string& name)
 
 void Shader::use()
 {
-    reloadTimer++;
-    if(reloadTimer % 30) reload();
+    if(vertWatcher->changed() || fragWatcher->changed()) reload();
     glUseProgram(id);
 	Renderer::setCurrentShader(this);
 }
 
 void Shader::reload()
 {
-    if (id != -1 && !autoReload) return;
-    else if(id == -1 || autoReload)
-    {
-        bool reload = false;
-        auto t = last_write_time(path(vertexFile));
-        if (vertFileTime != t)
-        {
-            reload = true;
-            vertFileTime = t;
-        }
-        t = last_write_time(path(fragFile));
-        if (fragFileTime != t)
-        {
-            reload = true;
-            fragFileTime = t;
-        }
-        if (!reload) return;
-    }
-
     if(id != -1) glDeleteProgram(id);
 
     id = glCreateProgram();
@@ -145,9 +127,9 @@ void Shader::reload()
     auto fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     CHECK_ERROR();
 
-    if (compile(vertexFile, vertexShader)) throw vertexFile;
+    if (compile(vertWatcher->file, vertexShader)) throw vertWatcher->file;
     glAttachShader(id, vertexShader);
-    if (compile(fragFile, fragmentShader)) throw fragFile;
+    if (compile(fragWatcher->file, fragmentShader)) throw fragWatcher->file;
     glAttachShader(id, fragmentShader);
 
     glLinkProgram(id);
@@ -163,15 +145,6 @@ void Shader::reload()
         glGetProgramInfoLog(id, 512, nullptr, errbuf);
         LOG(static_cast<const char *>(errbuf));
         throw;
-    }
-    glValidateProgram(id);
-    glGetProgramiv(id, GL_VALIDATE_STATUS, &status);
-    if (status == GL_FALSE)
-    {
-        char errbuf[512];
-        glGetProgramInfoLog(id, 512, nullptr, errbuf);
-        LOG(static_cast<const char *>(errbuf));
-        //throw;
     }
     CHECK_ERROR();
 }

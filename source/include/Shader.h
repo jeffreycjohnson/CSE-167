@@ -2,7 +2,6 @@
 #define INCLUDE_SHADER_H
 
 #include "ForwardDecs.h"
-#include <experimental/filesystem>
 
 class Shader
 {
@@ -40,11 +39,7 @@ public:
     bool autoReload;
 
 private:
-    int reloadTimer = 0;
-    std::string vertexFile, fragFile;
-    typedef std::experimental::filesystem::file_time_type file_time_type;
-    typedef std::experimental::filesystem::path path;
-    file_time_type vertFileTime, fragFileTime;
+    FileWatcher * vertWatcher, * fragWatcher;
 };
 
 #endif

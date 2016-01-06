@@ -167,9 +167,10 @@
     <ClCompile Include="source\BoxCollider.cpp" />
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\Component.cpp" />
-    <ClCompile Include="source\CruiserBeam.cpp" />
+    <ClCompile Include="source\scripts\CruiserBeam.cpp" />
     <ClCompile Include="source\DeferrerdPass.cpp" />
-    <ClCompile Include="source\GameScene.cpp" />
+    <ClCompile Include="source\FileWatcher.cpp" />
+    <ClCompile Include="source\scripts\GameScene.cpp" />
     <ClCompile Include="source\ParticleTrail.cpp" />
     <ClCompile Include="source\ForwardPass.cpp" />
     <ClCompile Include="source\Framebuffer.cpp" />
@@ -179,11 +180,10 @@
     <ClCompile Include="source\Light.cpp" />
     <ClCompile Include="source\Main.cpp" />
     <ClCompile Include="source\Material.cpp" />
-    <ClCompile Include="source\MathFunc.cpp" />
     <ClCompile Include="source\Mesh.cpp" />
     <ClCompile Include="source\ObjectLoader.cpp" />
     <ClCompile Include="source\Renderer.cpp" />
-    <ClCompile Include="source\SceneLoadFunctions.cpp" />
+    <ClCompile Include="source\scripts\SceneLoadFunctions.cpp" />
     <ClCompile Include="source\scripts\Bullet.cpp" />
     <ClCompile Include="source\scripts\Fighter.cpp" />
     <ClCompile Include="source\scripts\PlayerController.cpp" />
@@ -195,7 +195,7 @@
     <ClCompile Include="source\Texture.cpp" />
     <ClCompile Include="source\Timer.cpp" />
     <ClCompile Include="source\Transform.cpp" />
-    <ClCompile Include="source\Turret.cpp" />
+    <ClCompile Include="source\scripts\Turret.cpp" />
     <ClCompile Include="source\Util.cpp" />
     <ClCompile Include="source\WebWindow.cpp" />
   </ItemGroup>
@@ -205,8 +205,9 @@
     <ClInclude Include="source\include\BoxCollider.h" />
     <ClInclude Include="source\include\Camera.h" />
     <ClInclude Include="source\include\Component.h" />
-    <ClInclude Include="source\include\CruiserBeam.h" />
-    <ClInclude Include="source\include\GameScene.h" />
+    <ClInclude Include="source\scripts\include\CruiserBeam.h" />
+    <ClInclude Include="source\include\FileWatcher.h" />
+    <ClInclude Include="source\scripts\include\GameScene.h" />
     <ClInclude Include="source\include\ParticleTrail.h" />
     <ClInclude Include="source\include\ForwardDecs.h" />
     <ClInclude Include="source\include\Framebuffer.h" />
@@ -215,12 +216,11 @@
     <ClInclude Include="source\include\Input.h" />
     <ClInclude Include="source\include\Light.h" />
     <ClInclude Include="source\include\Material.h" />
-    <ClInclude Include="source\include\MathFunc.h" />
     <ClInclude Include="source\include\Mesh.h" />
     <ClInclude Include="source\include\ObjectLoader.h" />
     <ClInclude Include="source\include\Renderer.h" />
     <ClInclude Include="source\include\RenderPass.h" />
-    <ClInclude Include="source\include\SceneLoadFunctions.h" />
+    <ClInclude Include="source\scripts\include\SceneLoadFunctions.h" />
     <ClInclude Include="source\include\Shader.h" />
     <ClInclude Include="source\include\Skybox.h" />
     <ClInclude Include="source\include\Sound.h" />
@@ -228,7 +228,7 @@
     <ClInclude Include="source\include\Texture.h" />
     <ClInclude Include="source\include\Timer.h" />
     <ClInclude Include="source\include\Transform.h" />
-    <ClInclude Include="source\include\Turret.h" />
+    <ClInclude Include="source\scripts\include\Turret.h" />
     <ClInclude Include="source\include\WebWindow.h" />
     <ClInclude Include="source\scripts\include\Bullet.h" />
     <ClInclude Include="source\scripts\include\Fighter.h" />

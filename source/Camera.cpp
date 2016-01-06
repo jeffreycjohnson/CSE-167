@@ -1,12 +1,10 @@
 #include "Camera.h"
 #include "Timer.h"
-#include "Input.h"
-#include "MathFunc.h"
 #include "Renderer.h"
 #include <gtc/matrix_inverse.hpp>
 #include <gtc/matrix_transform.hpp>
+#include <gtx/compatibility.hpp>
 #include <glm.hpp>
-#include <random>
 #include <time.h>
 
 using namespace std;
@@ -45,7 +43,7 @@ void Camera::update(float deltaTime)
 		prevFOV = fov;
 	}
 
-	currentFOV = MathFunc::Lerp(currentFOV, fov, (float) (Timer::time() - fovStartTime) / fovDuration);
+	currentFOV = glm::lerp(currentFOV, fov, (float) (Timer::time() - fovStartTime) / fovDuration);
 
 	if (isShaking)
 	{

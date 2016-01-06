@@ -1,11 +1,9 @@
 #include "PlayerController.h"
 #include "GameObject.h"
 #include "Input.h"
-#include "MathFunc.h"
 #include "Renderer.h"
 #include "Camera.h"
 #include "Bullet.h"
-#include "GPUEmitter.h"
 #include "BoxCollider.h"
 #include "ObjectLoader.h"
 #include "Timer.h"
@@ -84,8 +82,6 @@ void PlayerController::update(float deltaTime)
 
 void PlayerController::makeBullet(bool side)
 {
-	//GameObject* bulletObj = loadScene("assets/sphere.obj");
-	//bulletObj->setMaterial(new Material(Renderer::getShader(FORWARD_EMISSIVE)));
 	GameObject* bulletObj = loadScene("assets/bullet.fbx");
 	glm::vec3 offset(0, -1, -3);
 	if (side)

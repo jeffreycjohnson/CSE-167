@@ -1,7 +1,6 @@
 #include "Input.h"
 #include "Timer.h"
-#include "MathFunc.h"
-#include <iostream>
+#include <gtx/compatibility.hpp>
 #include <SOIL/SOIL.h>
 
 using namespace std;
@@ -346,12 +345,12 @@ float Input::getAxisHelper(GLFWinput in, InputData data)
 		Button button = keyboardMap[in.id];
 		if (button.state == InputState::BUTTON_DOWN || button.state == InputState::PRESSED)
 		{
-			keyboardMap[in.id].value = MathFunc::Lerp(button.startValue, 1, (float)(Timer::time() - button.startTime) / data.sensitivity);
+			keyboardMap[in.id].value = glm::lerp(button.startValue, 1.f, glm::clamp((float)(Timer::time() - button.startTime) / data.sensitivity, 0.f, 1.f));
 			return keyboardMap[in.id].value;
 		}
 		else if (button.state == InputState::BUTTON_UP || button.state == InputState::IDLE)
 		{
-			keyboardMap[in.id].value = MathFunc::Lerp(button.startValue, 0, (float)(Timer::time() - button.startTime) / data.sensitivity);
+			keyboardMap[in.id].value = glm::lerp(button.startValue, 0.f, glm::clamp((float)(Timer::time() - button.startTime) / data.sensitivity, 0.f, 1.f));
 			return keyboardMap[in.id].value;
 		}
 	}
@@ -360,12 +359,12 @@ float Input::getAxisHelper(GLFWinput in, InputData data)
 		Button button = mouseMap[in.id];
 		if (button.state == InputState::BUTTON_DOWN || button.state == InputState::PRESSED)
 		{
-			mouseMap[in.id].value = MathFunc::Lerp(button.startValue, 1, (float)(Timer::time() - button.startTime) / data.sensitivity);
+			mouseMap[in.id].value = glm::lerp(button.startValue, 1.f, glm::clamp((float)(Timer::time() - button.startTime) / data.sensitivity, 0.f, 1.f));
 			return mouseMap[in.id].value;
 		}
 		else if (button.state == InputState::BUTTON_UP || button.state == InputState::IDLE)
 		{
-			mouseMap[in.id].value = MathFunc::Lerp(button.startValue, 0, (float)(Timer::time() - button.startTime) / data.sensitivity);
+			mouseMap[in.id].value = glm::lerp(button.startValue, 0.f, glm::clamp((float)(Timer::time() - button.startTime) / data.sensitivity, 0.f, 1.f));
 			return mouseMap[in.id].value;
 		}
 	}
@@ -374,12 +373,12 @@ float Input::getAxisHelper(GLFWinput in, InputData data)
 		Button button = joystickMap[in.id];
 		if (button.state == InputState::BUTTON_DOWN || button.state == InputState::PRESSED)
 		{
-			joystickMap[in.id].value = MathFunc::Lerp(button.startValue, 1, (float)(Timer::time() - button.startTime) / data.sensitivity);
+			joystickMap[in.id].value = glm::lerp(button.startValue, 1.f, glm::clamp((float)(Timer::time() - button.startTime) / data.sensitivity, 0.f, 1.f));
 			return joystickMap[in.id].value;
 		}
 		else if (button.state == InputState::BUTTON_UP || button.state == InputState::IDLE)
 		{
-			joystickMap[in.id].value = MathFunc::Lerp(button.startValue, 0, (float)(Timer::time() - button.startTime) / data.sensitivity);
+			joystickMap[in.id].value = glm::lerp(button.startValue, 0.f, glm::clamp((float)(Timer::time() - button.startTime) / data.sensitivity, 0.f, 1.f));
 			return joystickMap[in.id].value;
 		}
 	}

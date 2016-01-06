@@ -5,13 +5,14 @@
 #include <string>
 #include <memory>
 #define GLM_FORCE_RADIANS
-#include "glm.hpp"
-#include "glew.h"
+#include <glm.hpp>
+#include <glew.h>
 
 class Animation;
 class BoxCollider;
 class Camera;
 class Component;
+class FileWatcher;
 class Framebuffer;
 class GameObject;
 class GPUEmitter;

@@ -2,11 +2,10 @@
 #include "Renderer.h"
 #include "Timer.h"
 #include "ObjectLoader.h"
-#include "MathFunc.h"
 #include <random>
 #include <time.h>
 #include <gtc/quaternion.hpp>
-#include <gtx/rotate_vector.hpp>
+#include <gtx/compatibility.hpp>
 
 unsigned int Swarm::currentID = 1; // Start at 1, ignore ID's of 0
 std::vector<BoidSphere*> Swarm::obstacles;
@@ -120,7 +119,7 @@ void Swarm::update(float deltaTime)
 	else
 	{
 		float targetDistance = glm::length(target - prevTarget);
-		currentTarget = MathFunc::Lerp(prevTarget, target, (Timer::time() - startTime) / (targetDistance / MAX_SPEED / 2));
+		currentTarget = glm::lerp(prevTarget, target, glm::clamp((float)(Timer::time() - startTime) / (targetDistance / MAX_SPEED / 2), 0.f, 1.f));
 	}
 }
 
