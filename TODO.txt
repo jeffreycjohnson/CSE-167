@@ -12,6 +12,7 @@ High Priority
 - Use camera space for light calculations (E)
 - Nothing visible bug (?)
 - General cleanup (M)
+-- Load Mesh/Material/etc. separeately from node tree
 -- Make GPUEmitter use regular uniform system (E)
 -- Proper member accessibility for Transform (E)
 -- Timer inconsistencies (E)

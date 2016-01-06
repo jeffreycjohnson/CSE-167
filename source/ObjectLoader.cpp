@@ -57,6 +57,7 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
 
     std::string name = currentNode->mName.C_Str();
     if (name == "defaultobject") name = filename + std::to_string(counter);
+    nodeObject->setName(name);
 
     if (lights.count(name))
     {

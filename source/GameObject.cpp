@@ -1,12 +1,29 @@
 #include "GameObject.h"
 #include "Mesh.h"
 #include "GPUEmitter.h"
-#include "Renderer.h"
 #include "Light.h"
 #include "ParticleTrail.h"
 #include "BoxCollider.h"
 
 GameObject GameObject::SceneRoot;
+std::multimap<std::string, GameObject*> GameObject::nameMap;
+
+GameObject * GameObject::FindByName(const std::string& name)
+{
+    auto iter = nameMap.find(name);
+    return iter == nameMap.end() ? nullptr : iter->second;
+}
+
+std::vector<GameObject*> GameObject::FindAllByName(const std::string& name)
+{
+    std::vector<GameObject*> ret;
+    auto range = nameMap.equal_range(name);
+    while (range.first != range.second) {
+        ret.push_back(range.first->second);
+        ++range.first;
+    }
+    return ret;
+}
 
 GameObject::GameObject() {
 	transform.setGameObject(this);
@@ -21,6 +38,7 @@ GameObject::~GameObject() {
 	for (auto component : componentList) {
 		if(component) delete component;
 	}
+    removeName();
 }
 
 void GameObject::addChild(GameObject* go) {
@@ -47,6 +65,17 @@ void GameObject::hideAll()
 	{
 		child->gameObject->hideAll();
 	}
+}
+
+bool GameObject::isChildOf(GameObject* go) const
+{
+    auto parent = transform.parent;
+    while(parent)
+    {
+        if (parent->gameObject == go) return true;
+        parent = parent->parent;
+    }
+    return false;
 }
 
 void GameObject::draw() {
@@ -141,4 +170,28 @@ void GameObject::onCollisionEnter(GameObject* other)
 	{
 		component->onCollisionEnter(other);
 	}
+}
+
+void GameObject::setName(const std::string& name)
+{
+    removeName();
+    nameMap.insert(std::make_pair(name, this));
+}
+
+std::string GameObject::getName() const
+{
+    return name;
+}
+
+void GameObject::removeName()
+{
+    auto range = nameMap.equal_range(name);
+    while (range.first != range.second)
+    {
+        if (range.first->second == this) {
+            nameMap.erase(range.first);
+            return;
+        }
+        ++range.first;
+    }
 }

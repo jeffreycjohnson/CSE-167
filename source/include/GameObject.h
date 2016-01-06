@@ -6,6 +6,7 @@
 #include "Component.h"
 #include "Material.h"
 #include <list>
+#include <map>
 
 class GameObject
 {
@@ -21,6 +22,8 @@ public:
 	bool dead, visible;
 
     static GameObject SceneRoot;
+    static GameObject* FindByName(const std::string& name);
+    static std::vector<GameObject*> FindAllByName(const std::string& name);
 
 	GameObject();
 	~GameObject();
@@ -61,6 +64,7 @@ public:
     void addChild(GameObject* go);
 	void destroy();
 	void hideAll();
+    bool isChildOf(GameObject* go) const;
 
 	void draw();
 	void debugDraw();
@@ -72,8 +76,14 @@ public:
 
 	void onCollisionEnter(GameObject* other);
 
+    void setName(const std::string& name);
+    std::string getName() const;
+
 protected:
     std::vector<Component*> componentList;
+    std::string name;
+    static std::multimap<std::string, GameObject*> nameMap;
+    void removeName();
 };
 
 #endif
