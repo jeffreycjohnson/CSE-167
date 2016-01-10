@@ -113,7 +113,7 @@ Shader::Uniform Shader::operator[](const std::string& name)
 
 void Shader::use()
 {
-    if(vertWatcher->changed() || fragWatcher->changed()) reload();
+    if(autoReload && (vertWatcher->changed() || fragWatcher->changed())) reload();
     glUseProgram(id);
 	Renderer::setCurrentShader(this);
 }

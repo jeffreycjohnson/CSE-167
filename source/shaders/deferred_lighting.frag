@@ -26,6 +26,7 @@ uniform float uLightSize = 1.0f;
 uniform vec2 uScreenSize;
 uniform int uLightType;
 uniform mat4 uShadow_Matrix;
+uniform mat4 uIV_Matrix;
 
 //main algorithm from http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html
 vec2 Hammersley(int i, int N) {
@@ -112,8 +113,10 @@ void main () {
   vec4 pos = texture(posTex, gl_FragCoord.xy / uScreenSize);
   vec4 normal = texture(normalTex, gl_FragCoord.xy / uScreenSize);
   vec3 mat = vec3(albedo.a, pos.w, normal.w);
+  pos = uIV_Matrix * vec4(pos.xyz, 1);
+  pos /= pos.w;
 
-  vec3 view = normalize(cameraPos - vPosition.xyz);
+  vec3 view = normalize(cameraPos - pos.xyz);
 
 
   mat.y += 0.0001; //there seem to be issues with roughness = 0 due to visibility
@@ -154,10 +157,10 @@ void main () {
 		  //todo normalize based on sphere size
 	  }
 	  else {
+		  vec3 shadowPos = (uShadow_Matrix * vec4(pos.xyz, 1.0)).xyz / (uShadow_Matrix * vec4(pos.xyz, 1.0)).w;
 		  lightDir = uLightDirection;
 		  lightDist = 0;
   
-		  vec3 shadowPos = (uShadow_Matrix * vec4(pos.xyz, 1.0)).xyz / (uShadow_Matrix * vec4(pos.xyz, 1.0)).w;
 		  shadowPos.z -= max(0.05 * (1.0 - dot(normal.xyz, lightDir)), 0.005);
 		  shadowPos.z = min(shadowPos.z, 0.9999);
 		  vec2 texelSize = 1.0 / textureSize(shadowTex, 0);
@@ -170,7 +173,7 @@ void main () {
 
 
 	  float power = 1.0 / (lightDist * lightDist * uLightFalloff.z + lightDist * uLightFalloff.y + uLightFalloff.x);
-	  vec3 diffuseLight = uLightColor * dot(lightDir, normal.xyz) * power;
+	  vec3 diffuseLight = uLightColor * clamp(dot(lightDir, normal.xyz), 0.0, 1.0) * power;
 	
 	  vec3 halfVec = normalize(view + lightDir);
 	  float dotNH = clamp(dot(normal.xyz, halfVec), 0.0, 1.0);

@@ -174,6 +174,8 @@ void Renderer::init(int window_width, int window_height) {
 
 
 void Renderer::loop() {
+    (*shaderList[SHADOW_SHADER])["uP_Matrix"] = DirectionalLight::shadowMatrix;
+    (*shaderList[SHADOW_SHADER_ANIM])["uP_Matrix"] = DirectionalLight::shadowMatrix;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     applyPerFrameData();
 
@@ -280,8 +282,9 @@ void Renderer::applyPerFrameData() {
 }
 
 void Renderer::updatePerspective(const glm::mat4& perspectiveMatrix) {
+    perspective = perspectiveMatrix;
 	for (int shaderId : shaderPerspectiveList) {
-		(*Renderer::getShader(shaderId))["uP_Matrix"] = perspectiveMatrix;
+		(*Renderer::getShader(shaderId))["uP_Matrix"] = perspective;
 	}
 }
 

@@ -6,12 +6,14 @@
 
 Framebuffer::Framebuffer(int w, int h, int numColorTextures, bool accessibleDepth, bool hdrEnabled)
         : accessibleDepth(accessibleDepth), numColorTex(numColorTextures), hdrEnabled(hdrEnabled), width(w), height(h) {
+    colorFormats.resize(numColorTextures);
 	glGenFramebuffers(1, &id);
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 
 	colorTex = new GLuint[numColorTex];
 
 	for (int x = 0; x < numColorTex; ++x) {
+        colorFormats[x] = (hdrEnabled) ? GL_RGBA16F : GL_RGBA;
 		addColorTexture(x);
 	}
 
@@ -22,15 +24,34 @@ Framebuffer::Framebuffer(int w, int h, int numColorTextures, bool accessibleDept
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
 
+Framebuffer::Framebuffer(int w, int h, const std::vector<GLint>& colorFormats, bool accessibleDepth)
+        : accessibleDepth(accessibleDepth), numColorTex(colorFormats.size()), colorFormats(colorFormats), width(w), height(h) {
+    glGenFramebuffers(1, &id);
+    glBindFramebuffer(GL_FRAMEBUFFER, id);
+
+    colorTex = new GLuint[numColorTex];
+
+    for (int x = 0; x < numColorTex; ++x) {
+        addColorTexture(x);
+    }
+
+    if (accessibleDepth) {
+        addDepthTexture();
+    }
+    else {
+        addDepthBuffer();
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Framebuffer::addColorTexture(int index) {
 	glGenTextures(1, &(colorTex[index]) );
 	glBindTexture(GL_TEXTURE_2D, colorTex[index]);
 
-	GLint format = (hdrEnabled) ? GL_RGBA32F : GL_RGBA;
-	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, colorFormats[index], width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -146,10 +167,7 @@ void Framebuffer::resize(int w, int h) {
 		addDepthBuffer();
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 }
-
-
 
 
 #define VERTEX_COUNT ((3+2) * 4)

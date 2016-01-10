@@ -46,15 +46,13 @@ void ShadowPass::render()
         glDrawBuffer(GL_NONE);
         for (Component* c : objectList) {
             auto mesh = dynamic_cast<Mesh*>(c);
-            if (!mesh || (mesh->material && mesh->material->transparent)) continue;
-            Material *mat = mesh->material;
-            Shader *s = nullptr;
-            if (mat) s = mat->shader;
-            if (s == Renderer::getShader(DEFERRED_PBR_SHADER_ANIM)) mat->shader = Renderer::getShader(SHADOW_SHADER_ANIM);
-            else if(mat) mat->shader = Renderer::getShader(SHADOW_SHADER);
-            else Renderer::getShader(SHADOW_SHADER)->use();
+            if (!mesh || (mesh->material && mesh->material->transparent) || !mesh->visible) continue;
+            Material* mat = mesh->material;
+            Shader* s = nullptr;
+            if (mat->shader == Renderer::getShader(DEFERRED_PBR_SHADER_ANIM)) s = Renderer::getShader(SHADOW_SHADER_ANIM);
+            else s = Renderer::getShader(SHADOW_SHADER);
+            if (s != Renderer::currentShader) s->use();
             mesh->draw();
-            if (mat) mat->shader = s;
         }
     }
 }

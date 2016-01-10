@@ -8,7 +8,6 @@ High Priority
 - Collision/boids optimizations (M)
 - Fix Assimp texture mode loading (may be Assimp bug) (E)
 - Use newer Assimp (for .blends) (E)
-- Pack GBuffer better (M)
 - Use camera space for light calculations (E)
 - Nothing visible bug (?)
 - General cleanup (M)
@@ -42,6 +41,8 @@ Medium Priority
 - Thread scene independent drawing and scene updating (M)
 - OpenGEX/glTF for models? (I have had SO MANY issues w/ fbx/dae) (E)
 - Retained mode line drawing (E)
+- Better bloom (sum of small/med/large blurs w/ downsizing) (M)
+- Pack GBuffer better (M)
 
 Low Priority
 - Networking (H)

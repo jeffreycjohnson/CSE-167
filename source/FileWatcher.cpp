@@ -2,6 +2,7 @@
 
 FileWatcher::FileWatcher(const std::string& file, unsigned int delay) : file(file), delay(delay)
 {
+    time = last_write_time(path(file));
 }
 
 bool FileWatcher::changed()

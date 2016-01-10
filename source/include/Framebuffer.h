@@ -3,6 +3,7 @@
 
 #include "ForwardDecs.h"
 #include "Mesh.h"
+#include <vector>
 
 class Framebuffer
 {
@@ -14,6 +15,7 @@ public:
 	GLuint depthTex;
 
 	bool hdrEnabled=false;
+    std::vector<GLint> colorFormats;
 
 	int width, height;
 
@@ -22,6 +24,7 @@ public:
 
 
 	Framebuffer(int w, int h, int numColorTexture, bool accessibleDepth, bool hdrEnabled);
+    Framebuffer(int w, int h, const std::vector<GLint>& colorFormats, bool accessibleDepth);
 	~Framebuffer();
 
 	void deleteTextures();
@@ -39,7 +42,7 @@ public:
 	void draw();
 
 private:
-	void addColorTexture(int index);
+    void addColorTexture(int index);
 	void addDepthBuffer();
 	void addDepthTexture();
 

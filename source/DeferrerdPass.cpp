@@ -7,6 +7,7 @@
 #include "Renderer.h"
 #include <functional>
 #include <gtc/matrix_inverse.hpp>
+#include "Camera.h"
 
 const static glm::mat4 bias(
     0.5, 0.0, 0.0, 0.0,
@@ -16,7 +17,7 @@ const static glm::mat4 bias(
 
 DeferredPass::DeferredPass()
 {
-    fbo = new Framebuffer(Renderer::getWindowWidth(), Renderer::getWindowHeight(), 4, true, true);
+    fbo = new Framebuffer(Renderer::getWindowWidth(), Renderer::getWindowHeight(), {GL_RGBA8, GL_RGB16_SNORM, GL_RGBA16F, GL_RGBA16F}, true);
 
     (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["colorTex"] = 0;
     (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["normalTex"] = 1;
@@ -72,6 +73,7 @@ void DeferredPass::render()
     (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["normalTex"] = 1;
     (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["posTex"] = 2;
     (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["shadowTex"] = 3;
+    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["uIV_Matrix"] = Renderer::camera->gameObject->transform.getTransformMatrix();
     CHECK_ERROR();
 
     std::function<void(GameObject*)> lightPass = [&](GameObject* obj)

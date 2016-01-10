@@ -11,7 +11,6 @@ glm::mat4 DirectionalLight::shadowMatrix = glm::ortho<float>(-25, 25, -25, 25, -
 
 void Light::deferredHelper(const std::string& meshName)
 {
-    // TODO : Bind falloff
     auto& currentEntry = Mesh::meshMap[meshName];
 
     if (Renderer::gpuData.vaoHandle != currentEntry.vaoHandle) {
