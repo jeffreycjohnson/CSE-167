@@ -7,12 +7,6 @@
 Shader::Uniform::Uniform(GLint program, GLint location)
     : program(program), location(location)
 {
-    if(program == -1 || location == -1)
-    {
-		CHECK_ERROR();
-        //LOG("Invalid Uniform Location");
-    //    throw;
-    }
 }
 
 void Shader::Uniform::operator=(bool val)
@@ -108,7 +102,13 @@ Shader::~Shader()
 //TODO should we pre-extract these into a map?
 Shader::Uniform Shader::operator[](const std::string& name)
 {
-    return Uniform(id, glGetUniformLocation(id, name.c_str()));
+    auto loc = glGetUniformLocation(id, name.c_str());
+    if(id == -1 || loc == -1)
+    {
+        CHECK_ERROR();
+        //LOG(name + "not defined correctly.");
+    }
+    return Uniform(id, loc);
 }
 
 void Shader::use()

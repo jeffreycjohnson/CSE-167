@@ -135,6 +135,9 @@
     <ClCompile Include="source\scripts\GameScene.cpp">
       <Filter>Scripts\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\BloomPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\include\Camera.h">

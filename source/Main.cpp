@@ -44,7 +44,7 @@ int main()
 
     glewExperimental = GL_TRUE;
     glewInit();
-	glfwSwapInterval(1);
+	glfwSwapInterval(0);
 	Sound::init();
 	Renderer::init(width, height);
 	Input::init(window);
