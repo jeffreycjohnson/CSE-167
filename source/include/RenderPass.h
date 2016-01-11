@@ -56,7 +56,7 @@ public:
 
 private:
     Framebuffer * brightPass;
-    Framebuffer * blurBuffers[3];
+    Framebuffer * blurBuffers[5];
     DeferredPass * deferredPass;
 };
 
