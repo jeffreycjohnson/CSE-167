@@ -91,7 +91,7 @@ void PlayerController::makeBullet(bool side)
 	Bullet* bullet = new Bullet(gameObject->transform.getWorldPosition() + glm::mat3(gameObject->transform.getTransformMatrix()) * offset, 
 		glm::normalize(glm::mat3(gameObject->transform.getTransformMatrix()) * glm::normalize(glm::vec3(0, 0.05f, -1))), currentVel, 2);
 	bulletObj->addComponent(bullet);
-    bulletObj->transform.setRotate(gameObject->transform.rotation);
+    bulletObj->transform.setRotate(gameObject->transform.getRotation());
 	bullet->init();
 	BoxCollider* collider = new BoxCollider({ 0, 0, 0 }, { 1, 1, 5 });
 	collider->passive = false;

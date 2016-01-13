@@ -74,10 +74,9 @@ void Animation::update(float dt) {
 		}
 	}
 	for (AnimNodeData &node : currentAnim.boneData) {
-		node.object->position = interpolateKeyframes(node.keyframes.position, currentTime);
-		node.object->rotation = interpolateQuaternions(node.keyframes.rotation, currentTime);
+		node.object->setPosition(interpolateKeyframes(node.keyframes.position, currentTime));
+		node.object->setRotate(interpolateQuaternions(node.keyframes.rotation, currentTime));
 		//node.object->scaleFactor = node.keyframes.scale[scaleIndex].second;
-		node.object->transformMatrixDirty = true;
 	}
 }
 

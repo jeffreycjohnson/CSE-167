@@ -24,7 +24,7 @@ CruiserBeam::CruiserBeam(GameObject* laserObj): laser(laserObj)
 	boom = new Sound("capital", false, false, 2, false);
 	laserObj->addComponent(boom);
 
-	startScale = laserObj->transform.scaleFactor;
+	startScale = laserObj->transform.getScale();
 }
 
 

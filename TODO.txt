@@ -13,7 +13,6 @@ High Priority
 - General cleanup (M)
 -- Load Mesh/Material/etc. separeately from node tree
 -- Make GPUEmitter use regular uniform system (E)
--- Proper member accessibility for Transform (E)
 -- Timer inconsistencies (E)
 -- Better way of handling shaders (E)
 --- Generic way to choose shader from ObjectLoader (E)

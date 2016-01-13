@@ -44,7 +44,6 @@ GameObject::~GameObject() {
 void GameObject::addChild(GameObject* go) {
     transform.children.push_back(&go->transform);
     go->transform.parent = &transform;
-    go->transform.transformMatrixDirty = true;
 }
 
 void GameObject::destroy() {

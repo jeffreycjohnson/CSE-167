@@ -62,7 +62,7 @@ class Renderer
 		static Shader* getShader(int shaderId);
 		static void switchShader(int shaderId);
 
-		static void setModelMatrix(glm::mat4 transform);
+		static void setModelMatrix(const glm::mat4& transform);
 
 		static int getWindowWidth() { return width; }
 		static int getWindowHeight() { return height; }

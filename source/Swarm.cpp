@@ -42,9 +42,10 @@ void Swarm::init()
 	srand(time(NULL));
 	for (auto neighbor : neighbors)
 	{
-		neighbor->transform.position.x += ((float)rand() / RAND_MAX) * 10 - 5;
-		neighbor->transform.position.y += ((float) rand() / RAND_MAX) * 10 - 5;
-		neighbor->transform.position.z += ((float)rand() / RAND_MAX) * 10 - 5;
+        auto pos = neighbor->transform.getPosition();
+		pos.x += ((float)rand() / RAND_MAX) * 10 - 5;
+		pos.y += ((float) rand() / RAND_MAX) * 10 - 5;
+		pos.z += ((float)rand() / RAND_MAX) * 10 - 5;
         auto f = neighbor->getComponent<Fighter>();
         if(f)
         {
@@ -58,7 +59,7 @@ void Swarm::update(float deltaTime)
 	averagePosition = {0, 0, 0};
 	for (auto neighbor : neighbors)
 	{
-		averagePosition += neighbor->transform.position;
+		averagePosition += neighbor->transform.getPosition();
 	}
 	averagePosition /= neighbors.size();
 
@@ -131,13 +132,13 @@ void Swarm::draw()
 void Swarm::debugDraw()
 {
 	sphere->transform.setPosition(currentTarget);
-	sphere->transform.scaleFactor = glm::vec3(1, 1, 1);
+	sphere->transform.getScale() = glm::vec3(1, 1, 1);
 	sphere->draw();
 
 	for (auto obstacle : obstacles)
 	{
 		sphere->transform.setPosition(obstacle->transform->getWorldPosition());
-		sphere->transform.scaleFactor = obstacle->transform->getWorldScale() * glm::vec3(1, 1, 1);
+		sphere->transform.getScale() = obstacle->transform->getWorldScale() * glm::vec3(1, 1, 1);
 		sphere->draw();
 	}
 }
@@ -224,7 +225,7 @@ glm::vec3 Swarm::separate(int current)
 
 glm::vec3 Swarm::travel(int current)
 {
-	glm::vec3 tmp = (currentTarget - neighbors[current]->transform.position);
+	glm::vec3 tmp = (currentTarget - neighbors[current]->transform.getPosition());
 	tmp /= 5;
 	tmp = limitSpeed(tmp, MAX_SPEED);
 	return  tmp;

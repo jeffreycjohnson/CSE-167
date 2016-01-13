@@ -323,7 +323,7 @@ void Renderer::switchShader(int shaderId) {
 
 
 
-void Renderer::setModelMatrix(glm::mat4 transform) {
+void Renderer::setModelMatrix(const glm::mat4& transform) {
 	(*currentShader)[MODEL_MATRIX] = transform;
 }
 

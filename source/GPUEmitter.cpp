@@ -43,7 +43,7 @@ GPUEmitter::GPUEmitter(GameObject* go, string tex, bool burstEmitter)
 	maxAngularVelocityUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "maxAngularVelocity");
 	rotateTowardsVelocityUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "rotateTowardsVelocity");
 
-	prevPosition = gameObject->transform.position;
+	prevPosition = gameObject->transform.getWorldPosition();
 	velocity = { 0, 0, 0 };
 	minStartSize = 0.4;
 	maxStartSize = 0.6;
@@ -268,8 +268,8 @@ GLuint GPUEmitter::genParticles()
 		glUniform1ui(burstSeedUniform, (GLuint) rand());
 	}
 
-	glUniform3f(emitterPosUniform, gameObject->transform.position.x, 
-		gameObject->transform.position.y, gameObject->transform.position.z);
+	glUniform3f(emitterPosUniform, gameObject->transform.getWorldPosition().x,
+		gameObject->transform.getWorldPosition().y, gameObject->transform.getWorldPosition().z);
 	glUniform3f(emitterVelocityUniform, 0, 0, 0);
 	glUniform3f(minVelocityUniform, minStartVelocity.x, minStartVelocity.y, minStartVelocity.z);
 	glUniform3f(maxVelocityUniform, maxStartVelocity.x, maxStartVelocity.y, maxStartVelocity.z);

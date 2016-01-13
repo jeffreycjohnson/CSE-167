@@ -5,7 +5,7 @@
 void BoidAvoid::loadBoidAvoid(GameObject* parent)
 {
 	 parent->removeComponent<Mesh>();
-	 BoidAvoid* addComponent = new BoidAvoid(parent->transform.scaleFactor.x);
+	 BoidAvoid* addComponent = new BoidAvoid(parent->transform.getScale().x);
 	 parent->addComponent<BoidAvoid>(addComponent);
 }
 
