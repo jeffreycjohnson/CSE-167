@@ -135,6 +135,9 @@
     <ClCompile Include="source\scripts\GameScene.cpp">
       <Filter>Scripts\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\ThreadPool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\include\Camera.h">
@@ -235,6 +238,9 @@
     </ClInclude>
     <ClInclude Include="source\scripts\include\Turret.h">
       <Filter>Scripts\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\ThreadPool.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
