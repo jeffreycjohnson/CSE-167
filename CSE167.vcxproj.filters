@@ -307,6 +307,9 @@
     <None Include="source\shaders\fbo_pass.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="source\shaders\deferred_lighting.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="TODO.txt" />

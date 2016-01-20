@@ -42,11 +42,11 @@ public:
 
 private:
     static bool jobComparator(Job* first, Job* second);
-    std::set<Job*, bool(Job*, Job*)> readyQueue;
+    std::set<Job*, bool(*)(Job*, Job*)> readyQueue;
     std::list<std::thread> threads;
     std::mutex jobLock;
 
-    void runThread(int id);
+    static void runThread(ThreadPool* pool, size_t id);
 };
 
 #endif

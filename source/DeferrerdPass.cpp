@@ -91,7 +91,7 @@ void DeferredPass::render()
                 glClear(GL_STENCIL_BUFFER_BIT);
                 glStencilFunc(GL_ALWAYS, 0, 0);
 
-                l->deferredPass();
+                l->deferredPass(true);
 
 
                 glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
@@ -115,7 +115,7 @@ void DeferredPass::render()
             glDisable(GL_DEPTH_TEST);
             glDrawBuffer(GL_COLOR_ATTACHMENT3);
 
-            l->deferredPass();
+            l->deferredPass(false);
         }
 
         for (auto child : obj->transform.children)
@@ -137,7 +137,8 @@ void DeferredPass::render()
     }
 
     (*Renderer::currentShader)["uLightType"] = 3;
-    (*Renderer::currentShader)["uM_Matrix"] = glm::mat4();
+    (*Renderer::currentShader)["uScale"] = 1.f;
+    (*Renderer::currentShader)["uLightPosition"] = glm::vec3(0);
     (*Renderer::currentShader)["uV_Matrix"] = glm::mat4();
     (*Renderer::currentShader)["uP_Matrix"] = glm::mat4();
     glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);

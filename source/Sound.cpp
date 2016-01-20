@@ -40,13 +40,15 @@ Sound::~Sound()
 
 void Sound::update(float)
 {
-	position = gameObject->transform.getWorldPosition(); // Needs to be in world position for audio
-	velocity = position - prevPosition;
-	FMOD_VECTOR pos = { position.x, position.y, position.z };
-	FMOD_VECTOR vel = { velocity.x, velocity.y, velocity.z };
-	channel->set3DAttributes(&pos, &vel, 0);
-	
-	prevPosition = gameObject->transform.getWorldPosition();
+    if (playing) {
+        position = gameObject->transform.getWorldPosition(); // Needs to be in world position for audio
+        velocity = position - prevPosition;
+        FMOD_VECTOR pos = { position.x, position.y, position.z };
+        FMOD_VECTOR vel = { velocity.x, velocity.y, velocity.z };
+        channel->set3DAttributes(&pos, &vel, 0);
+
+        prevPosition = gameObject->transform.getWorldPosition();
+    }
 
 	channel->setPaused(!playing); // Used at the end of update to prevent inconsistent initial volume
 }

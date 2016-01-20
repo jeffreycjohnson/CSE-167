@@ -5,6 +5,7 @@ void Transform::setDirty()
 {
     transformMatrixDirty = true;
     worldPosDirty = true;
+    worldScaleDirty = true;
     for (auto child : children) child->setDirty();
 }
 
@@ -108,5 +109,10 @@ glm::vec3 Transform::getScale() const
 }
 
 float Transform::getWorldScale() {
-	return (glm::length(glm::vec3(getTransformMatrix()[0])));
+    if(worldScaleDirty)
+    {
+        cachedWorldScale = glm::length(glm::vec3(getTransformMatrix()[0]));
+        worldScaleDirty = false;
+    }
+    return cachedWorldScale;
 }

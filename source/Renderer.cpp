@@ -84,7 +84,7 @@ void Renderer::init(int window_width, int window_height) {
         );
 
     shaderList[DEFERRED_SHADER_LIGHTING] = new Shader(
-        "source/shaders/forward_pbr.vert", "source/shaders/deferred_lighting.frag"
+        "source/shaders/deferred_lighting.vert", "source/shaders/deferred_lighting.frag"
         );
 
 	shaderList[SKYBOX_SHADER] = new Shader(

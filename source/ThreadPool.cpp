@@ -22,11 +22,11 @@ ThreadPool::Job::Job(std::function<void()> func, ThreadPool* pool) : pool(pool),
 {
 }
 
-ThreadPool::ThreadPool(size_t threadCount) : threadCount(threadCount > 0 ? threadCount : std::thread::hardware_concurrency()), readyQueue(jobComparator)
+ThreadPool::ThreadPool(size_t threadCount) : threadCount(threadCount > 0 ? threadCount : std::thread::hardware_concurrency()), readyQueue(&jobComparator)
 {
     for (size_t i = 0; i < threadCount; i++)
     {
-        threads.emplace_back(&runThread, this, i);
+        threads.emplace_back(runThread, this, i);
     }
 }
 
@@ -58,21 +58,21 @@ void ThreadPool::wait(Job* job)
     while(!completed(job)) std::this_thread::yield();
 }
 
-void ThreadPool::runThread(int id)
+void ThreadPool::runThread(ThreadPool* pool, size_t id)
 {
-    while(!shutdown)
+    while(!pool->shutdown)
     {
-        jobLock.lock();
-        for(auto job : readyQueue)
+        pool->jobLock.lock();
+        for(auto job : pool->readyQueue)
         {
             if (job->dependencies.size() > 0) continue;
             if (job->affinity >= 0 && job->affinity != id) continue;
-            readyQueue.erase(job);
-            jobLock.unlock();
+            pool->readyQueue.erase(job);
+            pool->jobLock.unlock();
 
             job->func();
 
-            jobLock.lock();
+            pool->jobLock.lock();
             for (auto dependent : job->dependents)
             {
                 dependent->dependencies.erase(job);
@@ -80,6 +80,6 @@ void ThreadPool::runThread(int id)
             delete job;
             break;
         }
-        jobLock.unlock();
+        pool->jobLock.unlock();
     }
 }
