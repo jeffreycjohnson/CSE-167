@@ -7,6 +7,7 @@
 #include <list>
 #include <thread>
 #include <mutex>
+#include <vector>
 
 class ThreadPool
 {
@@ -16,11 +17,10 @@ public:
     public:
         friend ThreadPool;
 
-        int affinity = -1;
-        int priority = 0;
-
         void queue();
-        void addDependency(Job* other);
+        Job* addDependency(Job* other);
+        Job* setAffinity(int thread);
+        Job* setPriority(int amount);
         Job(std::function<void()> func, ThreadPool* pool);
 
     private:
@@ -28,6 +28,8 @@ public:
         std::function<void()> func;
         std::set<Job*> dependencies;
         std::set<Job*> dependents;
+        int affinity = -1;
+        int priority = 0;
     };
 
     explicit ThreadPool(size_t threadCount = 0);
@@ -44,9 +46,12 @@ private:
     static bool jobComparator(Job* first, Job* second);
     std::set<Job*, bool(*)(Job*, Job*)> readyQueue;
     std::list<std::thread> threads;
+    std::vector<Job*> activeJobs;
     std::mutex jobLock;
 
     static void runThread(ThreadPool* pool, size_t id);
 };
+
+extern ThreadPool * workerPool;
 
 #endif

@@ -65,17 +65,18 @@ ParticleTrail::~ParticleTrail()
 }
 
 void ParticleTrail::update(float dt) {
-	currentDelayTime += dt;
-	if (currentDelayTime >= addDelayTime) {
-		addPoint(gameObject->transform.getWorldPosition());
-		uploadData();
-
-		currentDelayTime -= addDelayTime;
-	}
+    deltaTime = dt;
 }
 
 void ParticleTrail::draw()
 {
+    currentDelayTime += deltaTime;
+    if (currentDelayTime >= addDelayTime) {
+        addPoint(gameObject->transform.getWorldPosition());
+        uploadData();
+
+        currentDelayTime -= addDelayTime;
+    }
 
 	if (Renderer::gpuData.vaoHandle != vaoHandle) {
 		glBindVertexArray(vaoHandle);

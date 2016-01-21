@@ -2,6 +2,8 @@
 #include "Renderer.h"
 #include "Framebuffer.h"
 
+extern GLFWwindow * mainWindow;
+
 BloomPass::BloomPass(DeferredPass* deferred) : deferredPass(deferred)
 {
     brightPass = new Framebuffer(Renderer::getWindowWidth(), Renderer::getWindowHeight(), 1, false, true);
@@ -82,4 +84,5 @@ void BloomPass::render()
     (*s3)["addTex5"] = 5;
     deferredPass->fbo->draw();
     CHECK_ERROR();
+    glfwSwapBuffers(mainWindow);
 }

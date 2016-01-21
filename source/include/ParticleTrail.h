@@ -35,6 +35,7 @@ private:
 	const float addDelayTime = 0.07f;//in seconds
 	float currentDelayTime = 0;
 	bool removingPoints = false;
+    float deltaTime = 0.f;
 
 	void addPoint(glm::vec3 point);
 	void uploadData();
