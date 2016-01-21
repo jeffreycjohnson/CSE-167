@@ -47,4 +47,17 @@ public:
     void render() override;
 };
 
+class BloomPass : public RenderPass
+{
+public:
+    BloomPass(DeferredPass * deferred);
+    ~BloomPass() override;
+    void render() override;
+
+private:
+    Framebuffer * brightPass;
+    Framebuffer * blurBuffers[5];
+    DeferredPass * deferredPass;
+};
+
 #endif
