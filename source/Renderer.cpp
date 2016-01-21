@@ -49,6 +49,7 @@ Skybox* skybox;
 
 ForwardPass *regularPass, *particlePass, *shadowPass;
 DeferredPass *deferredPass;
+BloomPass *bloomPass;
 
 void Renderer::init(int window_width, int window_height) {
 	width = window_width;
@@ -162,12 +163,14 @@ void Renderer::init(int window_width, int window_height) {
 	particlePass = new ForwardPass();
     shadowPass = new ShadowPass();
     deferredPass = new DeferredPass();
+    bloomPass = new BloomPass(deferredPass);
 
     passes.push_back(shadowPass);
     passes.push_back(deferredPass);
     passes.push_back(new SkyboxPass(skybox));
 	passes.push_back(regularPass);
 	passes.push_back(particlePass);
+    passes.push_back(bloomPass);
 
 	lastTime = glfwGetTime();
 }
@@ -187,55 +190,6 @@ void Renderer::loop() {
     }
 
 	scene->loop(); /* This is just temporary - all it does it do translation without having to create temporary components */
-
-    deferredPass->fbo->unbind();
-
-	GLuint buffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-
-    deferredPass->fbo->bindTexture(0, 3);
-	fboTest->bind(1, &buffers[0]);
-	switchShader(FBO_PASS);
-	deferredPass->fbo->draw();
-
-	fboTest->unbind();
-
-	fboTest->bindTexture(0, 0);
-	fboBlur->bind(1, &buffers[0]);
-	switchShader(FBO_BLUR);
-	(*shaderList[FBO_BLUR])["width"] = (float)width;
-	(*shaderList[FBO_BLUR])["height"] = (float)height;
-	(*shaderList[FBO_BLUR])["direction"] = glm::vec2(1, 0);
-	deferredPass->fbo->draw();
-	fboBlur->bindTexture(0, 0);
-	fboBlur->bind(1, &buffers[1]);
-	(*shaderList[FBO_BLUR])["direction"] = glm::vec2(0, 1);
-	deferredPass->fbo->draw();
-
-	
-	fboBlur->bindTexture(0, 1);
-	fboBlur->bind(1, &buffers[0]);
-	(*shaderList[FBO_BLUR])["direction"] = glm::vec2(1, 0);
-	deferredPass->fbo->draw();
-
-	fboBlur->bindTexture(0, 0);
-	fboBlur->bind(1, &buffers[1]);
-	(*shaderList[FBO_BLUR])["direction"] = glm::vec2(0, 1);
-	deferredPass->fbo->draw();
-	
-
-
-	fboBlur->unbind();
-	fboTest->bindTexture(0, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-	glGenerateMipmap(GL_TEXTURE_2D);
-
-	fboBlur->bindTexture(1, 1);
-    switchShader(FBO_HDR);
-	(*shaderList[FBO_HDR])["addTex"] = 1;
-    deferredPass->fbo->draw();
-
-	fboTest->bindTexture(0, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	camera->update(Timer::deltaTime());
 	if (camera->getFOV() != prevFOV)

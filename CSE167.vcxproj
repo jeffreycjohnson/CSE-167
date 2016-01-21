@@ -163,6 +163,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="source\Animation.cpp" />
+    <ClCompile Include="source\BloomPass.cpp" />
     <ClCompile Include="source\BoidAvoid.cpp" />
     <ClCompile Include="source\BoxCollider.cpp" />
     <ClCompile Include="source\Camera.cpp" />
