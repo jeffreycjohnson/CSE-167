@@ -59,6 +59,12 @@ Texture::Texture(GLuint handle) : textureHandle(handle) {
 
 Texture::Texture(glm::vec4 color)
 {
+    auto name = std::to_string(color.r) + std::to_string(color.g) + std::to_string(color.b) + std::to_string(color.a);
+    if (textures.count(name))
+    {
+        textureHandle = textures[name];
+        return;
+    }
     glGenTextures(1, &textureHandle);
 
     char buffer[4] = { static_cast<char>(color.r * 255), static_cast<char>(color.g * 255), static_cast<char>(color.b * 255), static_cast<char>(color.a * 255) };
@@ -69,6 +75,8 @@ Texture::Texture(glm::vec4 color)
 
     glBindTexture(GL_TEXTURE_2D, 0);
     CHECK_ERROR();
+
+    textures[name] = textureHandle;
 }
 
 Texture::~Texture()

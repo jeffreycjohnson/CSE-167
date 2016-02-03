@@ -35,6 +35,7 @@ ThreadPool::Job::Job(std::function<void()> func, ThreadPool* pool) : pool(pool),
 bool ThreadPool::jobComparator(Job* first, Job* second)
 {
     if(first->priority != second->priority) return first->priority > second->priority;
+    if(first->affinity != second->affinity) return first->affinity > second->affinity;
     return first > second;
 }
 

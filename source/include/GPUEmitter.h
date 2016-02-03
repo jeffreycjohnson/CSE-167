@@ -10,12 +10,7 @@
 class GPUEmitter : public Component
 {
 private:
-	GLuint vao, emitterPosUniform, emitterVelocityUniform, elapsedTimeUniform, startTimeUniform, 
-		minVelocityUniform, maxVelocityUniform, minAccelUniform, maxAccelUniform, minStartSizeUniform, 
-		maxStartSizeUniform, minEndSizeUniform, maxEndSizeUniform, burstSeedUniform, 
-		minStartColorUniform, maxStartColorUniform, minEndColorUniform, maxEndColorUniform, 
-		minStartAngleUniform, maxStartAngleUniform, minAngularVelocityUniform, maxAngularVelocityUniform,
-		startOpacityUniform, endOpacityUniform, rotateTowardsVelocityUniform;
+	GLuint vao;
 	glm::vec3 prevPosition, velocity;
 	Texture* texture;
 	Shader* shader;
@@ -26,8 +21,10 @@ private:
 	float startTime, burstSeed; // For burst
 	glm::vec3 burstStartPos;
 	bool burst, trigger;
+    bool generateParticles = false;
 
 	GLuint genParticles();
+    void setUniforms();
 
 public:
 	float minStartSize, maxStartSize, minEndSize, maxEndSize;
