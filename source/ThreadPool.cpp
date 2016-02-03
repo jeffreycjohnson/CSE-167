@@ -4,9 +4,9 @@ ThreadPool * workerPool;
 
 void ThreadPool::Job::queue()
 {
-    pool->jobLock.lock();
+    std::unique_lock<std::mutex> lock(pool->jobLock);
     pool->readyQueue.insert(this);
-    pool->jobLock.unlock();
+    pool->condition.notify_one();
 }
 
 ThreadPool::Job* ThreadPool::Job::addDependency(Job* other)
@@ -64,16 +64,12 @@ ThreadPool::Job* ThreadPool::createJob(const std::function<void()>& func)
 
 bool ThreadPool::completed(Job* job)
 {
-    jobLock.lock();
-    if (readyQueue.count(job) != 0) {
-        jobLock.unlock();
-        return false;
-    }
+    std::unique_lock<std::mutex> lock(jobLock);
+    if (readyQueue.count(job) != 0) return false;
     bool ret = true;
     for (auto active : activeJobs) {
         if (active == job) ret = false;
     }
-    jobLock.unlock();
     return ret;
 }
 
@@ -86,26 +82,33 @@ void ThreadPool::runThread(ThreadPool* pool, size_t id)
 {
     while(!pool->shutdown)
     {
-        pool->jobLock.lock();
+        std::unique_lock<std::mutex> lock(pool->jobLock);
+        bool wake = false, blocked = true;
         for(auto job : pool->readyQueue)
         {
             if (job->dependencies.size() > 0) continue;
-            if (job->affinity >= 0 && job->affinity != id) continue;
+            if (job->affinity >= 0 && job->affinity != id) {
+                wake = true;
+                continue;
+            }
+            blocked = false;
             pool->readyQueue.erase(job);
             pool->activeJobs[id] = job;
-            pool->jobLock.unlock();
+            lock.unlock();
 
             job->func();
 
-            pool->jobLock.lock();
+            lock.lock();
             for (auto dependent : job->dependents)
             {
                 dependent->dependencies.erase(job);
+                if (dependent->dependencies.size() == 0) wake = true;
             }
             delete job;
             pool->activeJobs[id] = nullptr;
             break;
         }
-        pool->jobLock.unlock();
+        if (wake) pool->condition.notify_all();
+        if (blocked) pool->condition.wait(lock);
     }
 }

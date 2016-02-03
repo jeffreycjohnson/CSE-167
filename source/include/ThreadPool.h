@@ -7,6 +7,7 @@
 #include <list>
 #include <thread>
 #include <mutex>
+#include <condition_variable>
 #include <vector>
 
 class ThreadPool
@@ -48,6 +49,7 @@ private:
     std::list<std::thread> threads;
     std::vector<Job*> activeJobs;
     std::mutex jobLock;
+    std::condition_variable condition;
 
     static void runThread(ThreadPool* pool, size_t id);
 };
