@@ -11,13 +11,6 @@
 class GameObject
 {
 public:
-	struct PassList {
-		std::list<Component*> forward;
-		std::list<Component*> deferred;
-		std::list<Component*> particle;
-		std::list<Light*> light;
-	};
-
 	Transform transform;
 	bool dead, visible;
 
@@ -71,7 +64,7 @@ public:
 	void debugDraw();
     void update(float deltaTime);
 
-	void extract(PassList& list);
+	void extract();
 
 	void setMaterial(Material *mat);
 

@@ -31,7 +31,7 @@ void main()
     mat3 model = mat3(tangent, binormal, norm);
 
     norm = 2 * texture(normalTex, vTexCoord).xyz - vec3(1.0);
-    NormOut = vec4(normalize(model * norm), mat.y);
+    NormOut = vec4(normalize(model * norm) * 0.5 + 0.5, mat.y);
 
 	vec4 color = texture(colorTex, vTexCoord);
     ColorOut = vec4(teamColor * (1-color.a) + color.rgb, mat.x);

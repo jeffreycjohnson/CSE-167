@@ -4,11 +4,11 @@
 #include "Framebuffer.h"
 #include <gtc/matrix_transform.hpp>
 #include "Skybox.h"
-#include "Input.h"
 #include "Timer.h"
 #include "Light.h"
 #include "GameScene.h"
 #include "ThreadPool.h"
+#include "RenderPass.h"
 
 
 #define MODEL_MATRIX "uM_Matrix"
@@ -37,6 +37,8 @@ float Renderer::prevFOV = 1;
 
 GPUData Renderer::gpuData;
 
+Renderer::RenderBuffer Renderer::renderBuffer;
+
 double lastTime;
 
 Framebuffer* fboTest;
@@ -47,7 +49,8 @@ Scene* scene;
 Skybox* skybox;
 
 ShadowPass *shadowPass;
-ForwardPass *regularPass, *particlePass;
+ForwardPass *regularPass;
+ParticlePass *particlePass;
 DeferredPass *deferredPass;
 BloomPass *bloomPass;
 SkyboxPass *skyboxPass;
@@ -161,7 +164,7 @@ void Renderer::init(int window_width, int window_height) {
 	resize(width, height);
 
 	regularPass = new ForwardPass();
-	particlePass = new ForwardPass();
+	particlePass = new ParticlePass();
     shadowPass = new ShadowPass();
     deferredPass = new DeferredPass();
     bloomPass = new BloomPass(deferredPass);
@@ -186,7 +189,7 @@ void Renderer::loop() {
     auto shadowJob = workerPool->createJob(std::bind(&ShadowPass::render, shadowPass))->setAffinity(0);
     auto deferredJob = workerPool->createJob(std::bind(&DeferredPass::render, deferredPass))->setAffinity(0);
     auto forwardJob = workerPool->createJob(std::bind(&ForwardPass::render, regularPass))->setAffinity(0);
-    auto particleJob = workerPool->createJob(std::bind(&ForwardPass::render, particlePass))->setAffinity(0);
+    auto particleJob = workerPool->createJob(std::bind(&ParticlePass::render, particlePass))->setAffinity(0);
     auto skyboxJob = workerPool->createJob(std::bind(&SkyboxPass::render, skyboxPass))->setAffinity(0);
     auto compositeJob = workerPool->createJob(std::bind(&BloomPass::render, bloomPass))->setAffinity(0);
     auto updatePass = workerPool->createJob(GameObject::UpdateScene);
@@ -202,15 +205,11 @@ void Renderer::loop() {
 }
 
 void Renderer::extractObjects() {
-	GameObject::PassList passList;
-	GameObject::SceneRoot.extract(passList);
-
-    shadowPass->setLights(passList.light);
-    shadowPass->setObjects(passList.deferred);
-	regularPass->setObjects(passList.forward);
-	regularPass->setLights(passList.light);
-	particlePass->setObjects(passList.particle);
-	
+    renderBuffer.deferred.clear();
+    renderBuffer.forward.clear();
+    renderBuffer.particle.clear();
+    renderBuffer.light.clear();
+	GameObject::SceneRoot.extract();
 }
 
 void Renderer::applyPerFrameData() {

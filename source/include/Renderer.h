@@ -2,10 +2,9 @@
 #define INCLUDE_RENDERER_H
 
 #include "ForwardDecs.h"
-#include "RenderPass.h"
 #include "Shader.h"
-
 #include <glfw3.h>
+#include <list>
 
 #define NEAR_DEPTH 0.2f
 #define FAR_DEPTH 1500.f
@@ -39,10 +38,17 @@ struct GPUData {
 class Renderer
 {
 	public:
+        struct RenderBuffer {
+            std::list<Mesh*> forward;
+            std::list<Mesh*> deferred;
+            std::list<Component*> particle;
+            std::list<Light*> light;
+        };
+        static struct RenderBuffer renderBuffer;
+
 		static Shader* currentShader;
 		static Camera* camera;
 		static GPUData gpuData;
-        static std::list<RenderPass*> passes;
 
         static glm::mat4 perspective, view;
 

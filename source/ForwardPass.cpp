@@ -4,30 +4,25 @@
 #include "Mesh.h"
 #include "Renderer.h"
 
-void ForwardPass::setObjects(const std::list<Component*>& list) {
-	objectList = list;
-}
-
-void ForwardPass::setLights(const std::list<Light*>& list) {
-	lightList = list;
-}
-
 void ForwardPass::render() {
 	unsigned int lightIndex = 0;
 	//TODO sort lights by importance?
-	for (Light* l : lightList) {
+	for (auto l : Renderer::renderBuffer.light) {
 		if (lightIndex > FORWARD_SHADER_LIGHT_MAX) break;
 		l->forwardPass(lightIndex++);
 	}
-	for (Component* c : objectList) {
-        auto mesh = dynamic_cast<Mesh*>(c);
-        if (mesh && mesh->material && !mesh->material->transparent) continue;
-		if (mesh && mesh->gameObject && !mesh->gameObject->visible) continue;
-        if(mesh && mesh->material && (mesh->material->shader == Renderer::getShader(FORWARD_UNLIT) || mesh->material->shader == Renderer::getShader(FORWARD_EMISSIVE))) glDepthMask(GL_FALSE);
-        if(mesh && mesh->material) mesh->material->bind();
-		c->draw();
-        if (mesh && mesh->material && (mesh->material->shader == Renderer::getShader(FORWARD_UNLIT) || mesh->material->shader == Renderer::getShader(FORWARD_EMISSIVE))) glDepthMask(GL_TRUE);
+	for (auto mesh : Renderer::renderBuffer.forward) {
+        if(mesh->material->shader == Renderer::getShader(FORWARD_UNLIT) || mesh->material->shader == Renderer::getShader(FORWARD_EMISSIVE)) glDepthMask(GL_FALSE);
+        mesh->material->bind();
+		mesh->draw();
+        if (mesh->material->shader == Renderer::getShader(FORWARD_UNLIT) || mesh->material->shader == Renderer::getShader(FORWARD_EMISSIVE)) glDepthMask(GL_TRUE);
 	}
+}
+
+void ParticlePass::render() {
+    for (auto mesh : Renderer::renderBuffer.particle) {
+        mesh->draw();
+    }
 }
 
 void ShadowPass::render()
@@ -39,14 +34,12 @@ void ShadowPass::render()
     glCullFace(GL_BACK);
     glDisable(GL_STENCIL_TEST);
 
-    for (Light* l : lightList) {
+    for (auto l : Renderer::renderBuffer.light) {
         auto caster = dynamic_cast<DirectionalLight*>(l);
         if (!caster || !caster->shadowCaster) continue;
         caster->bindShadowMap();
         glDrawBuffer(GL_NONE);
-        for (Component* c : objectList) {
-            auto mesh = dynamic_cast<Mesh*>(c);
-            if (!mesh || (mesh->material && mesh->material->transparent) || !mesh->visible) continue;
+        for (auto mesh : Renderer::renderBuffer.deferred) {
             Material* mat = mesh->material;
             Shader* s = nullptr;
             if (mat->shader == Renderer::getShader(DEFERRED_PBR_SHADER_ANIM)) s = Renderer::getShader(SHADOW_SHADER_ANIM);

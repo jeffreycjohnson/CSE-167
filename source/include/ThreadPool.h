@@ -19,6 +19,7 @@ public:
         friend ThreadPool;
 
         void queue();
+        void markComplete();
         Job* addDependency(Job* other);
         Job* setAffinity(int thread);
         Job* setPriority(int amount);
@@ -38,6 +39,9 @@ public:
 
     const size_t threadCount;
     bool shutdown = false;
+
+    static thread_local Job* currentJob;
+    static thread_local int currentThread;
 
     Job* createJob(const std::function<void()>& func);
     bool completed(Job* job);

@@ -9,6 +9,7 @@
 #include "Timer.h"
 #include "Sound.h"
 #include "GameScene.h"
+#include "Renderer.h"
 
 GameObject GameObject::SceneRoot;
 std::multimap<std::string, GameObject*> GameObject::nameMap;
@@ -138,35 +139,35 @@ void GameObject::update(float deltaTime)
     }
 }
 
-void GameObject::extract(PassList& list)
+void GameObject::extract()
 {
 	if (visible) {
 		Mesh* mesh;
 		if ((mesh = getComponent<Mesh>()) != nullptr) {
 			if (mesh->material && mesh->material->transparent) {
-				list.forward.push_back(mesh);
+				Renderer::renderBuffer.forward.push_back(mesh);
 			}
-			else
+			else if(mesh->material)
 			{
-				list.deferred.push_back(mesh);
+                Renderer::renderBuffer.deferred.push_back(mesh);
 			}
 		}
 		GPUEmitter* emitter;
 		if ((emitter = getComponent<GPUEmitter>()) != nullptr) {
-			list.particle.push_back(emitter);
+            Renderer::renderBuffer.particle.push_back(emitter);
 		}
 		ParticleTrail* trail;
 		if ((trail = getComponent<ParticleTrail>()) != nullptr) {
-			list.particle.push_back(trail);
+            Renderer::renderBuffer.particle.push_back(trail);
 		}
 		Light* light;
 		if ((light = getComponent<Light>()) != nullptr) {
-			list.light.push_back(light);
+            Renderer::renderBuffer.light.push_back(light);
 		}
 	}
 
 	for (auto child : transform.children) {
-		(child->gameObject)->extract(list);
+		(child->gameObject)->extract();
 	}
 }
 

@@ -16,12 +16,13 @@ public:
 class ForwardPass : public RenderPass
 {
 public:
-	void setObjects(const std::list<Component*>& list);
-	void setLights(const std::list<Light*>& list);
     virtual void render() override;
-protected:
-	std::list<Component*> objectList;
-	std::list<Light*> lightList;
+};
+
+class ParticlePass : public RenderPass
+{
+public:
+    virtual void render() override;
 };
 
 class DeferredPass : public RenderPass

@@ -1,12 +1,23 @@
 #include "ThreadPool.h"
 
 ThreadPool * workerPool;
+thread_local ThreadPool::Job* ThreadPool::currentJob;
+thread_local int ThreadPool::currentThread;
 
 void ThreadPool::Job::queue()
 {
     std::unique_lock<std::mutex> lock(pool->jobLock);
     pool->readyQueue.insert(this);
     pool->condition.notify_one();
+}
+
+void ThreadPool::Job::markComplete()
+{
+    std::unique_lock<std::mutex> lock(pool->jobLock);
+    for (auto dependent : dependents)
+    {
+        dependent->dependencies.erase(this);
+    }
 }
 
 ThreadPool::Job* ThreadPool::Job::addDependency(Job* other)
@@ -80,6 +91,7 @@ void ThreadPool::wait(Job* job)
 
 void ThreadPool::runThread(ThreadPool* pool, size_t id)
 {
+    currentThread = id;
     while(!pool->shutdown)
     {
         std::unique_lock<std::mutex> lock(pool->jobLock);
@@ -96,6 +108,7 @@ void ThreadPool::runThread(ThreadPool* pool, size_t id)
             pool->activeJobs[id] = job;
             lock.unlock();
 
+            currentJob = job;
             job->func();
 
             lock.lock();
