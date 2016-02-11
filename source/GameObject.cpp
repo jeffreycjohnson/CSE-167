@@ -4,10 +4,7 @@
 #include "Light.h"
 #include "ParticleTrail.h"
 #include "BoxCollider.h"
-#include "ThreadPool.h"
-#include "Input.h"
 #include "Timer.h"
-#include "Sound.h"
 #include "GameScene.h"
 #include "Renderer.h"
 
@@ -35,12 +32,8 @@ std::vector<GameObject*> GameObject::FindAllByName(const std::string& name)
 extern Scene * scene;
 void GameObject::UpdateScene()
 {
-    Timer::update();
     SceneRoot.update(Timer::deltaTime());
     scene->loop(); /* This is just temporary - all it does it do translation without having to create temporary components */
-
-    workerPool->createJob(Input::update)->queue();
-    workerPool->createJob(Sound::updateFMOD)->queue();
 }
 
 GameObject::GameObject() {

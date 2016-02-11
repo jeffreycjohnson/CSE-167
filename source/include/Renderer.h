@@ -5,6 +5,7 @@
 #include "Shader.h"
 #include <glfw3.h>
 #include <list>
+#include <vector>
 
 #define NEAR_DEPTH 0.2f
 #define FAR_DEPTH 1500.f
@@ -49,6 +50,7 @@ class Renderer
 		static Shader* currentShader;
 		static Camera* camera;
 		static GPUData gpuData;
+        static std::vector<RenderPass*> passes;
 
         static glm::mat4 perspective, view;
 

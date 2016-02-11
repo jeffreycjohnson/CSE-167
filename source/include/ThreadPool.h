@@ -18,7 +18,7 @@ public:
     public:
         friend ThreadPool;
 
-        void queue();
+        Job* queue();
         void markComplete();
         Job* addDependency(Job* other);
         Job* setAffinity(int thread);

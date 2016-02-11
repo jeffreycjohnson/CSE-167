@@ -54,6 +54,7 @@ ParticlePass *particlePass;
 DeferredPass *deferredPass;
 BloomPass *bloomPass;
 SkyboxPass *skyboxPass;
+std::vector<RenderPass*> Renderer::passes;
 
 void Renderer::init(int window_width, int window_height) {
 	width = window_width;
@@ -170,6 +171,13 @@ void Renderer::init(int window_width, int window_height) {
     bloomPass = new BloomPass(deferredPass);
     skyboxPass = new SkyboxPass(skybox);
 
+    passes.push_back(shadowPass);
+    passes.push_back(deferredPass);
+    passes.push_back(skyboxPass);
+    passes.push_back(regularPass);
+    passes.push_back(particlePass);
+    passes.push_back(bloomPass);
+
 	lastTime = glfwGetTime();
 }
 
@@ -186,22 +194,17 @@ void Renderer::loop() {
     (*shaderList[SHADOW_SHADER])["uP_Matrix"] = DirectionalLight::shadowMatrix;
     (*shaderList[SHADOW_SHADER_ANIM])["uP_Matrix"] = DirectionalLight::shadowMatrix;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    auto shadowJob = workerPool->createJob(std::bind(&ShadowPass::render, shadowPass))->setAffinity(0);
-    auto deferredJob = workerPool->createJob(std::bind(&DeferredPass::render, deferredPass))->setAffinity(0);
-    auto forwardJob = workerPool->createJob(std::bind(&ForwardPass::render, regularPass))->setAffinity(0);
-    auto particleJob = workerPool->createJob(std::bind(&ParticlePass::render, particlePass))->setAffinity(0);
-    auto skyboxJob = workerPool->createJob(std::bind(&SkyboxPass::render, skyboxPass))->setAffinity(0);
-    auto compositeJob = workerPool->createJob(std::bind(&BloomPass::render, bloomPass))->setAffinity(0);
-    auto updatePass = workerPool->createJob(GameObject::UpdateScene);
-    auto renderJob = workerPool->createJob(loop)->setAffinity(0);
-    renderJob->addDependency(updatePass)->addDependency(compositeJob)->queue();
-    updatePass->addDependency(shadowJob)->addDependency(deferredJob)->addDependency(particleJob)->addDependency(forwardJob)->queue();
-    compositeJob->addDependency(particleJob)->queue();
-    particleJob->addDependency(forwardJob)->queue();
-    forwardJob->addDependency(skyboxJob)->queue();
-    skyboxJob->addDependency(deferredJob)->queue();
-    deferredJob->addDependency(shadowJob)->queue();
-    shadowJob->queue();
+
+
+    for(auto pass : passes)
+    {
+        if (pass == bloomPass) {
+            auto job = workerPool->createJob(GameObject::UpdateScene)->queue();
+            pass->render();
+            workerPool->wait(job);
+        }
+        else pass->render();
+    }
 }
 
 void Renderer::extractObjects() {

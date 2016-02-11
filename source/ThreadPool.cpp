@@ -4,11 +4,12 @@ ThreadPool * workerPool;
 thread_local ThreadPool::Job* ThreadPool::currentJob;
 thread_local int ThreadPool::currentThread;
 
-void ThreadPool::Job::queue()
+ThreadPool::Job* ThreadPool::Job::queue()
 {
     std::unique_lock<std::mutex> lock(pool->jobLock);
     pool->readyQueue.insert(this);
     pool->condition.notify_one();
+    return this;
 }
 
 void ThreadPool::Job::markComplete()
@@ -62,6 +63,7 @@ ThreadPool::ThreadPool(size_t threadCount) : threadCount(threadCount > 0 ? threa
 ThreadPool::~ThreadPool()
 {
     shutdown = true;
+    condition.notify_all();
     for(auto& thread : threads)
     {
         thread.join();
@@ -122,6 +124,6 @@ void ThreadPool::runThread(ThreadPool* pool, size_t id)
             break;
         }
         if (wake) pool->condition.notify_all();
-        if (blocked) pool->condition.wait(lock);
+        if (blocked && !pool->shutdown) pool->condition.wait(lock);
     }
 }

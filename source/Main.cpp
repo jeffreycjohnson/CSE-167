@@ -58,21 +58,21 @@ static void initialize()
     // Loads mesh data for primatives, but we don't need it in a GameObject
     delete loadScene("assets/Primatives.obj");
 
-    auto update = workerPool->createJob(GameObject::UpdateScene);
-    workerPool->createJob(Renderer::loop)->setAffinity(0)->addDependency(update)->queue();
-    update->queue();
+    auto update = workerPool->createJob(GameObject::UpdateScene)->queue();
+    workerPool->wait(update);
 }
 
 int main()
 {
     workerPool = new ThreadPool();
-    auto initJob = workerPool->createJob(initialize);
-    initJob->setAffinity(0)->queue();
-    workerPool->wait(initJob);
+    initialize();
 
 	while (!glfwWindowShouldClose(mainWindow))
 	{
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        Timer::update();
+        Input::update();
+        workerPool->createJob(Sound::updateFMOD)->queue();
+        Renderer::loop();
 	}
 
     delete workerPool;
