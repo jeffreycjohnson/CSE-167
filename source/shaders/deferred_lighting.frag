@@ -115,6 +115,7 @@ void main () {
   vec3 mat = vec3(albedo.a, pos.w, normal.w);
   pos = uIV_Matrix * vec4(pos.xyz, 1);
   pos /= pos.w;
+  normal.xyz = normal.xyz * 2 - 1;
 
   vec3 view = normalize(cameraPos - pos.xyz);
 

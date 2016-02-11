@@ -9,39 +9,6 @@ GPUEmitter::GPUEmitter(GameObject* go, string tex, bool burstEmitter)
 {
 	gameObject = go;
 	texture = new Texture(tex);
-	if (burstEmitter)
-		Renderer::switchShader(EMITTER_BURST_SHADER);
-	else
-		Renderer::switchShader(EMITTER_SHADER);
-
-	if (burstEmitter)
-	{
-		startTimeUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "startTime");
-		burstSeedUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "burstSeed");
-	}
-
-	emitterPosUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "emitterPos");
-	emitterVelocityUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "emitterVelocity");
-	elapsedTimeUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "elapsedTime");
-	minVelocityUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "minVelocity");
-	maxVelocityUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "maxVelocity");
-	minAccelUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "minAcceleration");
-	maxAccelUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "maxAcceleration");
-	minStartSizeUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "minStartSize");
-	maxStartSizeUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "maxStartSize");
-	minEndSizeUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "minEndSize");
-	maxEndSizeUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "maxEndSize");
-	minStartColorUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "minStartColor");
-	maxStartColorUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "maxStartColor");
-	minEndColorUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "minEndColor");
-	maxEndColorUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "maxEndColor");
-	startOpacityUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "startOpacity");
-	endOpacityUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "endOpacity");
-	minStartAngleUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "minStartAngle");
-	maxStartAngleUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "maxStartAngle");
-	minAngularVelocityUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "minAngularVelocity");
-	maxAngularVelocityUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "maxAngularVelocity");
-	rotateTowardsVelocityUniform = glGetUniformLocation(Renderer::getCurrentShader().id, "rotateTowardsVelocity");
 
 	prevPosition = gameObject->transform.getWorldPosition();
 	velocity = { 0, 0, 0 };
@@ -86,13 +53,6 @@ GPUEmitter::~GPUEmitter()
 void GPUEmitter::update(float deltaTime)
 {
 	if (burst)
-		Renderer::switchShader(EMITTER_BURST_SHADER);
-	else
-		Renderer::switchShader(EMITTER_SHADER);
-
-	glUniform1f(elapsedTimeUniform, (GLfloat)Timer::time());
-
-	if (burst)
 	{
 		if (loop && (Timer::time() - startTime) > maxDuration)
 			play();
@@ -112,6 +72,10 @@ void GPUEmitter::update(float deltaTime)
 
 void GPUEmitter::draw()
 {
+    if (generateParticles) {
+        genParticles();
+        generateParticles = false;
+    }
 	if (enabled)
 	{
 		if (burst)
@@ -119,44 +83,10 @@ void GPUEmitter::draw()
 		else
 			Renderer::switchShader(EMITTER_SHADER);
 
-		if (burst)
-		{
-			glUniform1f(startTimeUniform, (GLfloat)startTime);
-			glUniform1ui(burstSeedUniform, (GLuint)burstSeed);
-			glUniform3f(emitterPosUniform, burstStartPos.x, burstStartPos.y, burstStartPos.z);
-			glUniform3f(emitterVelocityUniform, emitterVelocity.x * emitterVelocityScale, 
-												emitterVelocity.y * emitterVelocityScale, 
-												emitterVelocity.z * emitterVelocityScale);
-		}
-		else
-		{
-			glUniform3f(emitterPosUniform, gameObject->transform.getWorldPosition().x,
-				gameObject->transform.getWorldPosition().y,
-				gameObject->transform.getWorldPosition().z);
-			glUniform3f(emitterVelocityUniform, (gameObject->transform.getWorldPosition().x - prevPosition.x) * emitterVelocityScale,
-				(gameObject->transform.getWorldPosition().y - prevPosition.y) * emitterVelocityScale,
-				(gameObject->transform.getWorldPosition().z - prevPosition.z) * emitterVelocityScale);
-		}
-		glUniform3f(minVelocityUniform, minStartVelocity.x, minStartVelocity.y, minStartVelocity.z);
-		glUniform3f(maxVelocityUniform, maxStartVelocity.x, maxStartVelocity.y, maxStartVelocity.z);
-		glUniform3f(minAccelUniform, minAcceleration.x, minAcceleration.y, minAcceleration.z);
-		glUniform3f(maxAccelUniform, maxAcceleration.x, maxAcceleration.y, maxAcceleration.z);
-		glUniform1f(minStartSizeUniform, minStartSize);
-		glUniform1f(maxStartSizeUniform, maxStartSize);
-		glUniform1f(minEndSizeUniform, minEndSize);
-		glUniform1f(maxEndSizeUniform, maxEndSize);
-		glUniform3f(minStartColorUniform, minStartColor.x, minStartColor.y, minStartColor.z);
-		glUniform3f(maxStartColorUniform, maxStartColor.x, maxStartColor.y, maxStartColor.z);
-		glUniform3f(minEndColorUniform, minEndColor.x, minEndColor.y, minEndColor.z);
-		glUniform3f(maxEndColorUniform, maxEndColor.x, maxEndColor.y, maxEndColor.z);
-		glUniform1f(startOpacityUniform, startOpacity);
-		glUniform1f(endOpacityUniform, endOpacity);
-		glUniform1f(minStartAngleUniform, minStartAngle);
-		glUniform1f(maxStartAngleUniform, maxStartAngle);
-		glUniform1f(minAngularVelocityUniform, minAngularVelocity);
-		glUniform1f(maxAngularVelocityUniform, maxAngularVelocity);
-		unsigned int rotateVel = rotateTowardsVelocity ? 1 : 0;
-		glUniform1ui(rotateTowardsVelocityUniform, rotateVel);
+        Shader& shader = Renderer::getCurrentShader();
+
+        shader["elapsedTime"] = (GLfloat)Timer::time();
+        setUniforms();
 
 		glEnable(GL_BLEND);
 		if (additive)
@@ -180,7 +110,7 @@ void GPUEmitter::draw()
 
 void GPUEmitter::init()
 {
-	genParticles();
+    generateParticles = true;
 	if (!burst)
 		enabled = true;
 }
@@ -262,35 +192,7 @@ GLuint GPUEmitter::genParticles()
 	glEnableVertexAttribArray(3);
 	glBindVertexArray(NULL);
 
-	if (burst)
-	{
-		glUniform1f(startTimeUniform, (GLfloat) 0);
-		glUniform1ui(burstSeedUniform, (GLuint) rand());
-	}
-
-	glUniform3f(emitterPosUniform, gameObject->transform.getWorldPosition().x,
-		gameObject->transform.getWorldPosition().y, gameObject->transform.getWorldPosition().z);
-	glUniform3f(emitterVelocityUniform, 0, 0, 0);
-	glUniform3f(minVelocityUniform, minStartVelocity.x, minStartVelocity.y, minStartVelocity.z);
-	glUniform3f(maxVelocityUniform, maxStartVelocity.x, maxStartVelocity.y, maxStartVelocity.z);
-	glUniform3f(minAccelUniform, minAcceleration.x, minAcceleration.y, minAcceleration.z);
-	glUniform3f(maxAccelUniform, maxAcceleration.x, maxAcceleration.y, maxAcceleration.z);
-	glUniform1f(minStartSizeUniform, minStartSize);
-	glUniform1f(maxStartSizeUniform, maxStartSize);
-	glUniform1f(minEndSizeUniform, minEndSize);
-	glUniform1f(maxEndSizeUniform, maxEndSize);
-	glUniform3f(minStartColorUniform, minStartColor.x, minStartColor.y, minStartColor.z);
-	glUniform3f(maxStartColorUniform, maxStartColor.x, maxStartColor.y, maxStartColor.z);
-	glUniform3f(minEndColorUniform, minEndColor.x, minEndColor.y, minEndColor.z);
-	glUniform3f(maxEndColorUniform, maxEndColor.x, maxEndColor.y, maxEndColor.z);
-	glUniform1f(startOpacityUniform, startOpacity);
-	glUniform1f(endOpacityUniform, endOpacity);
-	glUniform1f(minStartAngleUniform, minStartAngle);
-	glUniform1f(maxStartAngleUniform, maxStartAngle);
-	glUniform1f(minAngularVelocityUniform, minAngularVelocity);
-	glUniform1f(maxAngularVelocityUniform, maxAngularVelocity);
-	unsigned int rotateVel = rotateTowardsVelocity ? 1 : 0;
-	glUniform1ui(rotateTowardsVelocityUniform, rotateVel);
+    setUniforms();
 
 	// We don't need the arrays anymore, since we already passed them to the GPU
 	if (!burst)
@@ -301,4 +203,41 @@ GLuint GPUEmitter::genParticles()
 	delete[] seeds;
 
 	return vao;
+}
+
+void GPUEmitter::setUniforms()
+{
+    Shader& shader = Renderer::getCurrentShader();
+
+    if (burst)
+    {
+        shader["startTime"] = (GLfloat)startTime;
+        shader["burstSeed"] = (GLuint)burstSeed;
+        shader["emitterPos"] = burstStartPos;
+        shader["emitterVelocity"] = emitterVelocity * emitterVelocityScale;
+    }
+    else
+    {
+        shader["emitterPos"] = gameObject->transform.getWorldPosition();
+        shader["emitterVelocity"] = (gameObject->transform.getWorldPosition() - prevPosition) * emitterVelocityScale;
+    }
+    shader["minVelocity"] = minStartVelocity;
+    shader["maxVelocity"] = maxStartVelocity;
+    shader["minAcceleration"] = minAcceleration;
+    shader["maxAcceleration"] = maxAcceleration;
+    shader["minStartSize"] = minStartSize;
+    shader["maxStartSize"] = maxStartSize;
+    shader["minEndSize"] = minEndSize;
+    shader["maxEndSize"] = maxEndSize;
+    shader["minStartColor"] = minStartColor;
+    shader["maxStartColor"] = maxStartColor;
+    shader["minEndColor"] = minEndColor;
+    shader["maxEndColor"] = maxEndColor;
+    shader["startOpacity"] = startOpacity;
+    shader["endOpacity"] = endOpacity;
+    shader["minStartAngle"] = minStartAngle;
+    shader["maxStartAngle"] = maxStartAngle;
+    shader["minAngularVelocity"] = minAngularVelocity;
+    shader["maxAngularVelocity"] = maxAngularVelocity;
+    shader["rotateTowardsVelocity"] = (unsigned int)(rotateTowardsVelocity ? 1 : 0);
 }

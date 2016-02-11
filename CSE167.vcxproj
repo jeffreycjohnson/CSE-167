@@ -194,6 +194,7 @@
     <ClCompile Include="source\SkyboxPass.cpp" />
     <ClCompile Include="source\Swarm.cpp" />
     <ClCompile Include="source\Texture.cpp" />
+    <ClCompile Include="source\ThreadPool.cpp" />
     <ClCompile Include="source\Timer.cpp" />
     <ClCompile Include="source\Transform.cpp" />
     <ClCompile Include="source\scripts\Turret.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="source\include\BoxCollider.h" />
     <ClInclude Include="source\include\Camera.h" />
     <ClInclude Include="source\include\Component.h" />
+    <ClInclude Include="source\include\ThreadPool.h" />
     <ClInclude Include="source\scripts\include\CruiserBeam.h" />
     <ClInclude Include="source\include\FileWatcher.h" />
     <ClInclude Include="source\scripts\include\GameScene.h" />
@@ -238,6 +240,7 @@
   <ItemGroup>
     <None Include="source\shaders\deferred_gbuffer.frag" />
     <None Include="source\shaders\deferred_lighting.frag" />
+    <None Include="source\shaders\deferred_lighting.vert" />
     <None Include="source\shaders\emissive.frag" />
     <None Include="source\shaders\fbo.vert" />
     <None Include="source\shaders\fbo_blur.frag" />

@@ -9,20 +9,22 @@
 
 glm::mat4 DirectionalLight::shadowMatrix = glm::ortho<float>(-25, 25, -25, 25, -50, 50);
 
-void Light::deferredHelper(const std::string& meshName)
+void Light::deferredHelper(const std::string& meshName, bool bind)
 {
     auto& currentEntry = Mesh::meshMap[meshName];
 
-    if (Renderer::gpuData.vaoHandle != currentEntry.vaoHandle) {
-        glBindVertexArray(currentEntry.vaoHandle);
-        Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
-    }
+    if (bind) {
+        if (Renderer::gpuData.vaoHandle != currentEntry.vaoHandle) {
+            glBindVertexArray(currentEntry.vaoHandle);
+            Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
+        }
 
-    (*Renderer::currentShader)["uLightFalloff"] = glm::vec3(constantFalloff, linearFalloff, exponentialFalloff);
-    (*Renderer::currentShader)["uLightPosition"] = gameObject->transform.getWorldPosition();
-    (*Renderer::currentShader)["uLightColor"] = color;
-    (*Renderer::currentShader)["uLightSize"] = radius;
-    (*Renderer::currentShader)["uLightDirection"] = glm::vec3(gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, 1, 0));
+        (*Renderer::currentShader)["uLightFalloff"] = glm::vec3(constantFalloff, linearFalloff, exponentialFalloff);
+        (*Renderer::currentShader)["uLightPosition"] = gameObject->transform.getWorldPosition();
+        (*Renderer::currentShader)["uLightColor"] = color;
+        (*Renderer::currentShader)["uLightSize"] = radius;
+        (*Renderer::currentShader)["uLightDirection"] = glm::vec3(gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, 1, 0));
+    }
     glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
     CHECK_ERROR();
 }
@@ -36,17 +38,16 @@ void PointLight::forwardPass(int index)
 	}
 }
 
-void PointLight::deferredPass()
+void PointLight::deferredPass(bool bind)
 {
-    (*Renderer::currentShader)["uLightType"] = 0;
-    auto max = std::max(std::max(color.r, color.g), color.b);
-    float scale = (-linearFalloff + sqrtf(linearFalloff * linearFalloff - 4.0f * (constantFalloff - 256.0f * max) * exponentialFalloff))
-        / (2.0f * exponentialFalloff);
-    auto modelMatrix = glm::mat4(1.0f);
-    modelMatrix = glm::translate(modelMatrix, gameObject->transform.getWorldPosition());
-    modelMatrix = glm::scale(modelMatrix, glm::vec3(scale));
-    (*Renderer::currentShader)["uM_Matrix"] = modelMatrix;
-    deferredHelper("Sphere");
+    if (bind) {
+        (*Renderer::currentShader)["uLightType"] = 0;
+        auto max = std::max(std::max(color.r, color.g), color.b);
+        float scale = (-linearFalloff + sqrtf(linearFalloff * linearFalloff - 4.0f * (constantFalloff - 256.0f * max) * exponentialFalloff))
+            / (2.0f * exponentialFalloff);
+        (*Renderer::currentShader)["uScale"] = scale;
+    }
+    deferredHelper("Sphere", bind);
 }
 
 DirectionalLight::DirectionalLight(bool shadow)
@@ -71,13 +72,14 @@ void DirectionalLight::forwardPass(int index)
 	}
 }
 
-void DirectionalLight::deferredPass()
+void DirectionalLight::deferredPass(bool bind)
 {
     glDisable(GL_STENCIL_TEST);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
     (*Renderer::currentShader)["uLightType"] = 1;
-    (*Renderer::currentShader)["uM_Matrix"] = glm::mat4();
+    (*Renderer::currentShader)["uScale"] = 1.f;
+    (*Renderer::currentShader)["uLightPosition"] = glm::vec3(0);
     (*Renderer::currentShader)["uV_Matrix"] = glm::mat4();
     (*Renderer::currentShader)["uP_Matrix"] = glm::mat4();
     deferredHelper("Plane");
@@ -105,6 +107,6 @@ void SpotLight::forwardPass(int index)
 {
 }
 
-void SpotLight::deferredPass()
+void SpotLight::deferredPass(bool bind)
 {
 }

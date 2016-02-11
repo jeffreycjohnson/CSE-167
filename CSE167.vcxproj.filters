@@ -135,6 +135,9 @@
     <ClCompile Include="source\scripts\GameScene.cpp">
       <Filter>Scripts\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\ThreadPool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="source\BloomPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -239,6 +242,9 @@
     <ClInclude Include="source\scripts\include\Turret.h">
       <Filter>Scripts\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\include\ThreadPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="source\shaders\forward_pbr.frag">
@@ -302,6 +308,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="source\shaders\fbo_pass.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="source\shaders\deferred_lighting.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

@@ -4,6 +4,9 @@
 #include "Light.h"
 #include "ParticleTrail.h"
 #include "BoxCollider.h"
+#include "Timer.h"
+#include "GameScene.h"
+#include "Renderer.h"
 
 GameObject GameObject::SceneRoot;
 std::multimap<std::string, GameObject*> GameObject::nameMap;
@@ -23,6 +26,14 @@ std::vector<GameObject*> GameObject::FindAllByName(const std::string& name)
         ++range.first;
     }
     return ret;
+}
+
+
+extern Scene * scene;
+void GameObject::UpdateScene()
+{
+    SceneRoot.update(Timer::deltaTime());
+    scene->loop(); /* This is just temporary - all it does it do translation without having to create temporary components */
 }
 
 GameObject::GameObject() {
@@ -121,35 +132,35 @@ void GameObject::update(float deltaTime)
     }
 }
 
-void GameObject::extract(PassList& list)
+void GameObject::extract()
 {
 	if (visible) {
 		Mesh* mesh;
 		if ((mesh = getComponent<Mesh>()) != nullptr) {
 			if (mesh->material && mesh->material->transparent) {
-				list.forward.push_back(mesh);
+				Renderer::renderBuffer.forward.push_back(mesh);
 			}
-			else
+			else if(mesh->material)
 			{
-				list.deferred.push_back(mesh);
+                Renderer::renderBuffer.deferred.push_back(mesh);
 			}
 		}
 		GPUEmitter* emitter;
 		if ((emitter = getComponent<GPUEmitter>()) != nullptr) {
-			list.particle.push_back(emitter);
+            Renderer::renderBuffer.particle.push_back(emitter);
 		}
 		ParticleTrail* trail;
 		if ((trail = getComponent<ParticleTrail>()) != nullptr) {
-			list.particle.push_back(trail);
+            Renderer::renderBuffer.particle.push_back(trail);
 		}
 		Light* light;
 		if ((light = getComponent<Light>()) != nullptr) {
-			list.light.push_back(light);
+            Renderer::renderBuffer.light.push_back(light);
 		}
 	}
 
 	for (auto child : transform.children) {
-		(child->gameObject)->extract(list);
+		(child->gameObject)->extract();
 	}
 }
 

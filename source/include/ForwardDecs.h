@@ -26,6 +26,7 @@ class RenderPass;
 class Shader;
 class Skybox;
 class Texture;
+class ThreadPool;
 class Timer;
 class Transform;
 

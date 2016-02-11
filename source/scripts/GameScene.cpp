@@ -80,6 +80,11 @@ GameScene::GameScene()
 	camera->addComponent(obstacle);
 
 	GameObject::SceneRoot.addChild(camera);
+
+    // Don't judge me... I'll do async loading so I don't need these later
+    delete loadScene("assets/bullet.fbx");
+    delete new Texture("assets/particles/fire1.png");
+    delete new Texture("assets/particles/spark.jpg");
 }
 
 

@@ -233,6 +233,8 @@ void Input::update()
 	scrollAmount = scrollBuff;
 	scrollBuff.x = 0;
 	scrollBuff.y = 0;
+
+    glfwPollEvents();
 }
 
 void Input::changeState(unordered_map<int, Button>::iterator it, int newValue)

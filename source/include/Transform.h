@@ -22,6 +22,8 @@ class Transform : public Component
         //Cached other stuff
         glm::vec3 cachedWorldPos;
         bool worldPosDirty = true;
+        float cachedWorldScale;
+        bool worldScaleDirty = true;
 
         Transform* oldParent = nullptr;
 

@@ -4,10 +4,11 @@
 #include "Framebuffer.h"
 #include <gtc/matrix_transform.hpp>
 #include "Skybox.h"
-#include "Input.h"
 #include "Timer.h"
 #include "Light.h"
 #include "GameScene.h"
+#include "ThreadPool.h"
+#include "RenderPass.h"
 
 
 #define MODEL_MATRIX "uM_Matrix"
@@ -36,7 +37,7 @@ float Renderer::prevFOV = 1;
 
 GPUData Renderer::gpuData;
 
-std::list<RenderPass*> Renderer::passes;
+Renderer::RenderBuffer Renderer::renderBuffer;
 
 double lastTime;
 
@@ -47,9 +48,13 @@ Scene* scene;
 
 Skybox* skybox;
 
-ForwardPass *regularPass, *particlePass, *shadowPass;
+ShadowPass *shadowPass;
+ForwardPass *regularPass;
+ParticlePass *particlePass;
 DeferredPass *deferredPass;
 BloomPass *bloomPass;
+SkyboxPass *skyboxPass;
+std::vector<RenderPass*> Renderer::passes;
 
 void Renderer::init(int window_width, int window_height) {
 	width = window_width;
@@ -85,7 +90,7 @@ void Renderer::init(int window_width, int window_height) {
         );
 
     shaderList[DEFERRED_SHADER_LIGHTING] = new Shader(
-        "source/shaders/forward_pbr.vert", "source/shaders/deferred_lighting.frag"
+        "source/shaders/deferred_lighting.vert", "source/shaders/deferred_lighting.frag"
         );
 
 	shaderList[SKYBOX_SHADER] = new Shader(
@@ -160,69 +165,54 @@ void Renderer::init(int window_width, int window_height) {
 	resize(width, height);
 
 	regularPass = new ForwardPass();
-	particlePass = new ForwardPass();
+	particlePass = new ParticlePass();
     shadowPass = new ShadowPass();
     deferredPass = new DeferredPass();
     bloomPass = new BloomPass(deferredPass);
+    skyboxPass = new SkyboxPass(skybox);
 
     passes.push_back(shadowPass);
     passes.push_back(deferredPass);
-    passes.push_back(new SkyboxPass(skybox));
-	passes.push_back(regularPass);
-	passes.push_back(particlePass);
+    passes.push_back(skyboxPass);
+    passes.push_back(regularPass);
+    passes.push_back(particlePass);
     passes.push_back(bloomPass);
 
 	lastTime = glfwGetTime();
 }
 
-
 void Renderer::loop() {
-    (*shaderList[SHADOW_SHADER])["uP_Matrix"] = DirectionalLight::shadowMatrix;
-    (*shaderList[SHADOW_SHADER_ANIM])["uP_Matrix"] = DirectionalLight::shadowMatrix;
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     applyPerFrameData();
-
     extractObjects();
-
-    for (auto pass : passes)
-    {
-        pass->render();
-    }
-
-	scene->loop(); /* This is just temporary - all it does it do translation without having to create temporary components */
 
 	camera->update(Timer::deltaTime());
 	if (camera->getFOV() != prevFOV)
 	{
-		//glm::mat4 perspective = glm::perspective(camera->getFOV(), width / (float)height, .1f, 100.f);
-		//updatePerspective(perspective);
 		prevFOV = camera->getFOV();
 	}
 
-	if (Input::getKey("b"))
-	{
-		glDisable(GL_DEPTH_TEST);
-		Renderer::switchShader(BASIC_SHADER);
-		GameObject::SceneRoot.debugDraw();
-		glEnable(GL_DEPTH_TEST);
-        deferredPass->fbo->blitAll();
-	}
-	if (Input::getKey("n"))
-	{
-		fboBlur->blitAll();
-	}
+    (*shaderList[SHADOW_SHADER])["uP_Matrix"] = DirectionalLight::shadowMatrix;
+    (*shaderList[SHADOW_SHADER_ANIM])["uP_Matrix"] = DirectionalLight::shadowMatrix;
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+    for(auto pass : passes)
+    {
+        if (pass == bloomPass) {
+            auto job = workerPool->createJob(GameObject::UpdateScene)->queue();
+            pass->render();
+            workerPool->wait(job);
+        }
+        else pass->render();
+    }
 }
 
 void Renderer::extractObjects() {
-	GameObject::PassList passList;
-	GameObject::SceneRoot.extract(passList);
-
-    shadowPass->setLights(passList.light);
-    shadowPass->setObjects(passList.deferred);
-	regularPass->setObjects(passList.forward);
-	regularPass->setLights(passList.light);
-	particlePass->setObjects(passList.particle);
-	
+    renderBuffer.deferred.clear();
+    renderBuffer.forward.clear();
+    renderBuffer.particle.clear();
+    renderBuffer.light.clear();
+	GameObject::SceneRoot.extract();
 }
 
 void Renderer::applyPerFrameData() {
