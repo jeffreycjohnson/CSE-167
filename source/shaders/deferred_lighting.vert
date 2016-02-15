@@ -9,10 +9,12 @@ uniform float uScale;
 uniform vec3 uLightPosition;
 uniform mat4 uV_Matrix;
 uniform mat4 uP_Matrix;
+uniform int uLightType;
 		
 out vec4 vPosition;
 
 void main () {
-    vPosition = uV_Matrix * vec4(aPosition.xyz * uScale + uLightPosition, 1);
+	if(uLightType != 1) vPosition = uV_Matrix * vec4(aPosition.xyz * uScale + uLightPosition, 1);
+	else vPosition = uV_Matrix * vec4(aPosition.xyz, 1);
 	gl_Position = uP_Matrix * vPosition;
 }
