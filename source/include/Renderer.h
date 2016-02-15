@@ -3,9 +3,8 @@
 
 #include "ForwardDecs.h"
 #include "Shader.h"
-#include <glfw3.h>
-#include <list>
 #include <vector>
+#include <list>
 
 #define NEAR_DEPTH 0.2f
 #define FAR_DEPTH 1500.f
@@ -40,17 +39,18 @@ class Renderer
 {
 	public:
         struct RenderBuffer {
-            std::list<Mesh*> forward;
-            std::list<Mesh*> deferred;
-            std::list<Component*> particle;
-            std::list<Light*> light;
+            std::vector<Mesh*> forward;
+            std::vector<Mesh*> deferred;
+            std::vector<Component*> particle;
+            std::vector<Light*> light;
         };
         static struct RenderBuffer renderBuffer;
 
 		static Shader* currentShader;
-		static Camera* camera;
+        static Camera* mainCamera;
+		static Camera* currentCamera;
+        static std::list<Camera*> cameras;
 		static GPUData gpuData;
-        static std::vector<RenderPass*> passes;
 
         static glm::mat4 perspective, view;
 
@@ -60,7 +60,7 @@ class Renderer
 		static void loop();
 
 		static void extractObjects();
-		static void applyPerFrameData();
+		static void applyPerFrameData(Camera* camera);
 		static void updatePerspective(const glm::mat4& perspectiveMatrix);
 		static void setIrradiance(glm::mat4(&irradianceMatrix)[3]);
 		static void setEnvironment(int slot, float mipmapLevels);
@@ -72,14 +72,13 @@ class Renderer
 
 		static void setModelMatrix(const glm::mat4& transform);
 
-		static int getWindowWidth() { return width; }
-		static int getWindowHeight() { return height; }
+		static int getWindowWidth() { return windowWidth; }
+		static int getWindowHeight() { return windowHeight; }
 
 		static void resize(int width, int height);
 
 private:
-    static int width, height;
-	static float prevFOV;
+    static int windowWidth, windowHeight;
     Renderer() = delete;
 };
 

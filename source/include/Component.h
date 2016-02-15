@@ -1,4 +1,4 @@
-#ifndef INCLUDE_COMPONENT_H
+ #ifndef INCLUDE_COMPONENT_H
 #define INCLUDE_COMPONENT_H
 
 #include "ForwardDecs.h"
@@ -20,18 +20,17 @@ class Component
         /* TODO - Use these instead of existing
 
         order is:
+            Create();
+            Activate();
             while(fixedTime < time) {
                 FixedUpdate(); (threaded)
                 FixedUpdateApply();
                 CollisionXXX(other);
             }
             Update(dt);
-            Create();
-            Activate();
             Deactivate();
             Destroy();
-            DrawSolid();
-            DrawTransparent();
+            Draw();
             DrawDebug();
             FrameEnd();
 
@@ -40,8 +39,7 @@ class Component
         virtual void FixedUpdate();
         virtual void FixedUpdateApply();
         virtual void FrameEnd();
-		virtual void DrawSolid();
-        virtual void DrawTransparent();
+		virtual void Draw();
 		virtual void DrawDebug();
 		virtual void CollisionEnter(GameObject* other);
         virtual void CollisionExit(GameObject* other);

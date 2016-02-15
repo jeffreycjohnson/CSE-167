@@ -55,13 +55,9 @@ DirectionalLight::DirectionalLight(bool shadow)
     if(shadow)
     {
         shadowCaster = shadow;
-        fbo = new Framebuffer(2048, 2048, 0, true, false);
+        shadowMap = std::make_unique<Camera>(2048, 2048, false, std::vector<GLint>({}));
+        shadowMap->setGameObject(gameObject);
     }
-}
-
-DirectionalLight::~DirectionalLight()
-{
-    if(fbo) delete fbo;
 }
 
 void DirectionalLight::forwardPass(int index)
@@ -89,9 +85,9 @@ void DirectionalLight::deferredPass(bool bind)
 
 void DirectionalLight::bindShadowMap()
 {
-    if(fbo && shadowCaster)
+    if(shadowMap->fbo && shadowCaster)
     {
-        fbo->bind(0, nullptr);
+        shadowMap->fbo->bind(0, nullptr);
         auto mat = glm::affineInverse(gameObject->transform.getTransformMatrix());
         (*Renderer::getShader(SHADOW_SHADER_ANIM))["uV_Matrix"] = mat;
         (*Renderer::getShader(SHADOW_SHADER))["uV_Matrix"] = mat;
@@ -100,7 +96,13 @@ void DirectionalLight::bindShadowMap()
 
 void DirectionalLight::update(float)
 {
-    gameObject->transform.translate(Renderer::camera->gameObject->transform.getWorldPosition() - gameObject->transform.getWorldPosition());
+    gameObject->transform.translate(Renderer::mainCamera->gameObject->transform.getWorldPosition() - gameObject->transform.getWorldPosition());
+}
+
+void DirectionalLight::setGameObject(GameObject* object)
+{
+    Component::setGameObject(object);
+    if (shadowCaster) shadowMap->setGameObject(object);
 }
 
 void SpotLight::forwardPass(int index)

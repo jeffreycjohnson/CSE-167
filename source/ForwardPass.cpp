@@ -4,7 +4,7 @@
 #include "Mesh.h"
 #include "Renderer.h"
 
-void ForwardPass::render() {
+void ForwardPass::render(Camera* camera) {
 	unsigned int lightIndex = 0;
 	//TODO sort lights by importance?
 	for (auto l : Renderer::renderBuffer.light) {
@@ -19,13 +19,13 @@ void ForwardPass::render() {
 	}
 }
 
-void ParticlePass::render() {
+void ParticlePass::render(Camera* camera) {
     for (auto mesh : Renderer::renderBuffer.particle) {
         mesh->draw();
     }
 }
 
-void ShadowPass::render()
+void ShadowPass::render(Camera* camera)
 {
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);

@@ -1,10 +1,12 @@
 #include "RenderPass.h"
 #include "Renderer.h"
 #include "Framebuffer.h"
+#include "Camera.h"
+#include <glfw3.h>
 
 extern GLFWwindow * mainWindow;
 
-BloomPass::BloomPass(DeferredPass* deferred) : deferredPass(deferred)
+BloomPass::BloomPass()
 {
     brightPass = new Framebuffer(Renderer::getWindowWidth(), Renderer::getWindowHeight(), 1, false, true);
     blurBuffers[0] = new Framebuffer(Renderer::getWindowWidth()  / 2, Renderer::getWindowHeight() / 2, 2, false, true);
@@ -26,21 +28,21 @@ BloomPass::~BloomPass()
 
 // TODO : If this needs better performance, blend smaller layers
 // into the next one up to reduce texture reads
-void BloomPass::render()
+void BloomPass::render(Camera* camera)
 {
     auto s1 = Renderer::getShader(FBO_PASS);
     auto s2 = Renderer::getShader(FBO_BLUR);
     auto s3 = Renderer::getShader(FBO_HDR);
-    deferredPass->fbo->unbind();
+    camera->fbo->unbind();
 
     GLuint buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
 
-    deferredPass->fbo->bindTexture(0, 3);
+    camera->fbo->bindTexture(0, 3);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
     glGenerateMipmap(GL_TEXTURE_2D);
     brightPass->bind(1, &buffers[0]);
     s1->use();
-    deferredPass->fbo->draw();
+    camera->fbo->draw();
     CHECK_ERROR();
 
     brightPass->unbind();
@@ -57,20 +59,20 @@ void BloomPass::render()
         brightPass->bindTexture(0, 0);
         blurBuffers[i]->bind(1, &buffers[0]);
         (*s2)["direction"] = glm::vec2(1, 0);
-        deferredPass->fbo->draw();
+        camera->fbo->draw();
 
         (*s2)["level"] = 0.f;
         blurBuffers[i]->bindTexture(0, 0);
         blurBuffers[i]->bind(1, &buffers[1]);
         (*s2)["direction"] = glm::vec2(0, 1);
-        deferredPass->fbo->draw();
+        camera->fbo->draw();
     }
 
     blurBuffers[4]->unbind();
     s3->use();
     CHECK_ERROR();
 
-    deferredPass->fbo->bindTexture(0, 3);
+    camera->fbo->bindTexture(0, 3);
     blurBuffers[0]->bindTexture(1, 1);
     blurBuffers[1]->bindTexture(2, 1);
     blurBuffers[2]->bindTexture(3, 1);
@@ -82,7 +84,7 @@ void BloomPass::render()
     (*s3)["addTex3"] = 3;
     (*s3)["addTex4"] = 4;
     (*s3)["addTex5"] = 5;
-    deferredPass->fbo->draw();
+    camera->fbo->draw();
     CHECK_ERROR();
     glfwSwapBuffers(mainWindow);
 }

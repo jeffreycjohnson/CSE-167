@@ -31,14 +31,14 @@ public:
 class DirectionalLight : public Light
 {
 public:
-    DirectionalLight(bool shadow = false);
-    ~DirectionalLight();
+    explicit DirectionalLight(bool shadow = false);
     void forwardPass(int index) override;
     void deferredPass(bool bind) override;
     void bindShadowMap();
     void update(float) override;
+    void setGameObject(GameObject* object) override;
 
-    Framebuffer * fbo;
+    std::unique_ptr<Camera> shadowMap;
     static glm::mat4 shadowMatrix;
 };
 

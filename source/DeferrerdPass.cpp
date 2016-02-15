@@ -17,19 +17,12 @@ const static glm::mat4 bias(
 
 DeferredPass::DeferredPass()
 {
-    fbo = new Framebuffer(Renderer::getWindowWidth(), Renderer::getWindowHeight(), {GL_RGBA8, GL_RGBA16, GL_RGBA16F, GL_RGBA16F}, true);
-
     (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["colorTex"] = 0;
     (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["normalTex"] = 1;
     (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["posTex"] = 2;
 }
 
-DeferredPass::~DeferredPass()
-{
-    if(fbo) delete fbo;
-}
-
-void DeferredPass::render()
+void DeferredPass::render(Camera* camera)
 {
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
@@ -39,7 +32,7 @@ void DeferredPass::render()
     glDisable(GL_STENCIL_TEST);
 
     GLuint buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-    fbo->bind(3, buffers);
+    camera->fbo->bind(3, buffers);
     for(auto mesh : Renderer::renderBuffer.deferred)
     {
         mesh->material->bind();
@@ -55,14 +48,14 @@ void DeferredPass::render()
     glDrawBuffer(GL_COLOR_ATTACHMENT3);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    fbo->bindTexture(0, 0);
-    fbo->bindTexture(1, 1);
-    fbo->bindTexture(2, 2);
+    camera->fbo->bindTexture(0, 0);
+    camera->fbo->bindTexture(1, 1);
+    camera->fbo->bindTexture(2, 2);
     (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["colorTex"] = 0;
     (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["normalTex"] = 1;
     (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["posTex"] = 2;
     (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["shadowTex"] = 3;
-    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["uIV_Matrix"] = Renderer::camera->gameObject->transform.getTransformMatrix();
+    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["uIV_Matrix"] = Renderer::currentCamera->gameObject->transform.getTransformMatrix();
     CHECK_ERROR();
 
     for(auto light : Renderer::renderBuffer.light) {
@@ -86,9 +79,9 @@ void DeferredPass::render()
         {
             glCullFace(GL_BACK);
             glDisable(GL_STENCIL_TEST);
-            if(d->shadowCaster && d->fbo)
+            if(d->shadowCaster && d->shadowMap->fbo)
             {
-                d->fbo->bindDepthTexture(3);
+                d->shadowMap->fbo->bindDepthTexture(3);
                 (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["uShadow_Matrix"] = bias * DirectionalLight::shadowMatrix * glm::affineInverse(d->gameObject->transform.getTransformMatrix());
             }
         }
