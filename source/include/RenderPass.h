@@ -14,34 +14,40 @@ public:
 class ForwardPass : public RenderPass
 {
 public:
-    void render(Camera* fbo) override;
+    void render(Camera* camera) override;
 };
 
 class ParticlePass : public RenderPass
 {
 public:
-    void render(Camera* fbo) override;
+    void render(Camera* camera) override;
 };
 
-class DeferredPass : public RenderPass
+class GBufferPass : public RenderPass
 {
 public:
-    DeferredPass();
-    void render(Camera* fbo) override;
+    void render(Camera* camera) override;
+};
+
+class LightingPass : public RenderPass
+{
+public:
+    LightingPass();
+    void render(Camera* camera) override;
 };
 
 class SkyboxPass : public RenderPass
 {
 public:
 	explicit SkyboxPass(Skybox* skybox);
-    void render(Camera* fbo) override;
+    void render(Camera* camera) override;
 	Skybox* skybox;
 };
 
 class ShadowPass : public RenderPass
 {
 public:
-    void render(Camera* fbo) override;
+    void render(Camera* camera) override;
 };
 
 class BloomPass : public RenderPass
@@ -49,7 +55,7 @@ class BloomPass : public RenderPass
 public:
     BloomPass();
     ~BloomPass() override;
-    void render(Camera* fbo) override;
+    void render(Camera* camera) override;
 
 private:
     Framebuffer * brightPass;

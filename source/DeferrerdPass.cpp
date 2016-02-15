@@ -14,14 +14,7 @@ const static glm::mat4 bias(
     0.0, 0.0, 0.5, 0.0,
     0.5, 0.5, 0.5, 1.0);
 
-DeferredPass::DeferredPass()
-{
-    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["colorTex"] = 0;
-    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["normalTex"] = 1;
-    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["posTex"] = 2;
-}
-
-void DeferredPass::render(Camera* camera)
+void GBufferPass::render(Camera* camera)
 {
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
@@ -32,13 +25,24 @@ void DeferredPass::render(Camera* camera)
 
     GLuint buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
     camera->fbo->bind(3, buffers);
-    for(auto mesh : Renderer::renderBuffer.deferred)
+    for (auto mesh : Renderer::renderBuffer.deferred)
     {
         mesh->material->bind();
         mesh->draw();
     }
     CHECK_ERROR();
+}
 
+
+LightingPass::LightingPass()
+{
+    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["colorTex"] = 0;
+    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["normalTex"] = 1;
+    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["posTex"] = 2;
+}
+
+void LightingPass::render(Camera* camera)
+{
     Renderer::getShader(DEFERRED_SHADER_LIGHTING)->use();
     (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["uScreenSize"] = glm::vec2(camera->width, camera->height);
     glDepthMask(GL_FALSE);

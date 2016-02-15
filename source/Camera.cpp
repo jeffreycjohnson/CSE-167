@@ -21,7 +21,8 @@ Camera::Camera(int w, int h, bool defaultPasses, const std::vector<GLint>& color
     fbo = std::make_unique<Framebuffer>(w, h, colorFormats, true);
     if (defaultPasses)
     {
-        passes.push_back(std::make_unique<DeferredPass>());
+        passes.push_back(std::make_unique<GBufferPass>());
+        passes.push_back(std::make_unique<LightingPass>());
         // TODO : get actual skybox
         passes.push_back(std::make_unique<SkyboxPass>(nullptr));
         passes.push_back(std::make_unique<ForwardPass>());
