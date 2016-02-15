@@ -146,7 +146,6 @@ void Renderer::init(int window_width, int window_height) {
 	skybox->applyTexture(5);
 
     mainCamera = new Camera(windowWidth, windowHeight, false);
-    mainCamera->passes.push_back(std::make_unique<ShadowPass>());
     mainCamera->passes.push_back(std::make_unique<DeferredPass>());
     mainCamera->passes.push_back(std::make_unique<SkyboxPass>(skybox));
     mainCamera->passes.push_back(std::make_unique<ForwardPass>());

@@ -5,7 +5,6 @@
 #include "Light.h"
 #include "Framebuffer.h"
 #include "Renderer.h"
-#include <functional>
 #include <gtc/matrix_inverse.hpp>
 #include "Camera.h"
 
@@ -41,7 +40,7 @@ void DeferredPass::render(Camera* camera)
     CHECK_ERROR();
 
     Renderer::getShader(DEFERRED_SHADER_LIGHTING)->use();
-    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["uScreenSize"] = glm::vec2(Renderer::getWindowWidth(), Renderer::getWindowHeight());
+    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["uScreenSize"] = glm::vec2(camera->width, camera->height);
     glDepthMask(GL_FALSE);
     glStencilOpSeparate(GL_BACK, GL_KEEP, GL_INCR_WRAP, GL_KEEP);
     glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_DECR_WRAP, GL_KEEP);

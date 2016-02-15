@@ -6,6 +6,7 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtc/matrix_inverse.hpp>
 #include "Camera.h"
+#include "RenderPass.h"
 
 glm::mat4 DirectionalLight::shadowMatrix = glm::ortho<float>(-25, 25, -25, 25, -50, 50);
 
@@ -56,6 +57,7 @@ DirectionalLight::DirectionalLight(bool shadow)
     {
         shadowCaster = shadow;
         shadowMap = std::make_unique<Camera>(2048, 2048, false, std::vector<GLint>({}));
+        shadowMap->passes.push_back(std::make_unique<ShadowPass>());
         shadowMap->setGameObject(gameObject);
     }
 }
