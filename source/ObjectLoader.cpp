@@ -3,6 +3,7 @@
 #include "GameObject.h"
 #include "Shader.h"
 #include "Renderer.h"
+#include "Material.h"
 
 #include <assimp/Importer.hpp>      // C++ importer interface
 #include <assimp/scene.h>           // Output data structure

@@ -1,11 +1,11 @@
 #include "Swarm.h"
-#include "Renderer.h"
 #include "Timer.h"
 #include "ObjectLoader.h"
 #include <random>
 #include <time.h>
 #include <gtc/quaternion.hpp>
 #include <gtx/compatibility.hpp>
+#include "Fighter.h"
 
 unsigned int Swarm::currentID = 1; // Start at 1, ignore ID's of 0
 std::vector<BoidSphere*> Swarm::obstacles;
@@ -20,21 +20,12 @@ Swarm::Swarm(GameObject** models, int count)
 		neighborVelocities.push_back(tmp);
 	}
 	sphere = loadScene("assets/test_sphere.obj");
-	mat = new Material(Renderer::getShader(FORWARD_PBR_SHADER));
-	norm = new Texture("assets/test_sphere_normal.png", false);
-	(*mat)["useTextures"] = false;
-	(*mat)["testMetal"] = 0.5f;
-	(*mat)["testRough"] = 0.5f;
-	(*mat)["normalTex"] = norm;
-	sphere->setMaterial(mat);
 	init();
 }
 
 Swarm::~Swarm()
 {
 	if(sphere) delete sphere;
-	if(mat) delete mat;
-	if(norm) delete norm;
 }
 
 void Swarm::init()

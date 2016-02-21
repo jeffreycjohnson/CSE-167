@@ -5,7 +5,6 @@
 #include "GameObject.h"
 #include "Transform.h"
 #include <vector>
-#include <Fighter.h>
 
 #define MAX_COHERE_SPEED 100.0f
 #define MAX_SPEED 40.0f
@@ -25,8 +24,6 @@ class Swarm : public Component
 {
 private:
     GameObject* sphere;
-    Material* mat;
-    Texture* norm;
 	static unsigned int currentID;
 	static std::vector<BoidSphere*> obstacles;
 
@@ -52,9 +49,9 @@ public:
 
 	void init();
 
-	void update(float deltaTime);
-	void draw();
-	void debugDraw();
+	void update(float deltaTime) override;
+	void draw() override;
+	void debugDraw() override;
     void remove(GameObject* fighter);
     static void addObstacle(BoidSphere* newObstacle);
 };

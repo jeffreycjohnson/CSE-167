@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include "Renderer.h"
 #include "Camera.h"
+#include "Material.h"
 
 void ForwardPass::render(Camera* camera) {
 	unsigned int lightIndex = 0;

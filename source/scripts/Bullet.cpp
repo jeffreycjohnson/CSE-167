@@ -16,11 +16,6 @@ Bullet::Bullet(glm::vec3 startPos, glm::vec3 forward, glm::vec3 starVel, float e
 	dying = false;
 }
 
-Bullet::~Bullet()
-{
-
-}
-
 void Bullet::init()
 {
 	gameObject->transform.setPosition(startPos);
@@ -30,13 +25,13 @@ void Bullet::update(float deltaTime)
 {
 	gameObject->transform.translate((startVel + forward * BULLET_VELOCITY) * deltaTime);
 	if (!dying && glm::length(gameObject->transform.getWorldPosition() - startPos) > MAX_BULLET_DISTANCE)
-		destroy();
+        gameObject->destroy();
 
 	if (dying && Timer::time() - startTime > emitterDuration)
-		destroy();
+        gameObject->destroy();
 }
 
-void Bullet::onCollisionEnter(GameObject* other)
+void Bullet::collisionEnter(GameObject* other)
 {
 	if (other != nullptr && other->getComponent<Bullet>() == nullptr)
 	{
@@ -81,9 +76,4 @@ void Bullet::onCollisionEnter(GameObject* other)
 			// Get child and try to hide that mesh
 		}
 	}
-}
-
-void Bullet::destroy()
-{
-	gameObject->destroy();
 }

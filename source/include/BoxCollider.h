@@ -18,11 +18,9 @@ public:
 
 	BoxCollider(glm::vec3 offset, glm::vec3 dimensions);
 	~BoxCollider();
-	void remove();
-	void update(float);
-	void draw();
-	void debugDraw();
-	void setGameObject(GameObject* go);
+	void destroy() override;
+	void update(float) override;
+	void debugDraw() override;
 	void onCollisionEnter(GameObject* other);
 	void drawDebugCube(glm::vec3 list[]);
 

@@ -6,4 +6,39 @@ void Component::setGameObject(GameObject* go) {
     gameObject = go;
 }
 void Component::debugDraw() {}
-void Component::onCollisionEnter(GameObject* other) {}
+
+void Component::collisionEnter(GameObject* other)
+{
+}
+
+void Component::create()
+{
+}
+
+void Component::destroy()
+{
+}
+
+/*void Component::collisionExit(GameObject* other)
+{
+}
+
+void Component::collisionStay(GameObject* other)
+{
+}
+
+void Component::activate()
+{
+}
+
+void Component::deactivate()
+{
+}*/
+
+void Component::fixedUpdate()
+{
+}
+
+void Component::fixedUpdateApply()
+{
+}

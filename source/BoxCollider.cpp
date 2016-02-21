@@ -65,10 +65,6 @@ void BoxCollider::update(float)
 	}
 }
 
-void BoxCollider::draw()
-{
-}
-
 void BoxCollider::debugDraw()
 {
 	drawDebugCube(transformPoints);
@@ -83,11 +79,6 @@ void BoxCollider::debugDraw()
 	aabb[7] = glm::vec3(xmin, ymin, zmin);
 	drawDebugCube(aabb);
 	colliding = false;
-}
-
-void BoxCollider::setGameObject(GameObject* go)
-{
-	gameObject = go;
 }
 
 void BoxCollider::onCollisionEnter(GameObject* other)
@@ -138,7 +129,7 @@ void BoxCollider::drawDebugCube(glm::vec3 list[])
 	
 }
 
-void BoxCollider::remove()
+void BoxCollider::destroy()
 {
 	for (unsigned int i = 0; i < colliders.size(); i++)
 	{
@@ -171,8 +162,8 @@ void BoxCollider::updateColliders()
 				if (e < colliders.size() && i != e && checkCollision(i, e))
 				{
 					// Check for precise collision?
-					colliders[i]->gameObject->onCollisionEnter(colliders[e]->gameObject);
-					colliders[e]->gameObject->onCollisionEnter(colliders[i]->gameObject);
+					colliders[i]->gameObject->collisionEnter(colliders[e]->gameObject);
+					colliders[e]->gameObject->collisionEnter(colliders[i]->gameObject);
 				}
 			}
 		}

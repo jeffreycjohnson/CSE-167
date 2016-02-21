@@ -3,10 +3,10 @@
 #include "GPUEmitter.h"
 #include "Light.h"
 #include "ParticleTrail.h"
-#include "BoxCollider.h"
 #include "Timer.h"
 #include "GameScene.h"
 #include "Renderer.h"
+#include "Material.h"
 
 GameObject GameObject::SceneRoot;
 std::multimap<std::string, GameObject*> GameObject::nameMap;
@@ -39,7 +39,9 @@ void GameObject::UpdateScene()
 GameObject::GameObject() {
 	transform.setGameObject(this);
 	dead = false;
+    active = true;
 	visible = true;
+    newlyCreated = true;
 }
 
 GameObject::~GameObject() {
@@ -59,6 +61,15 @@ void GameObject::addChild(GameObject* go) {
 
 void GameObject::destroy() {
 	dead = true;
+    active = false;
+    for (auto child : transform.children) {
+        child->destroy();
+    }
+    for (auto component : componentList)
+    {
+        component->destroy();
+        component->active = false;
+    }
 }
 
 void GameObject::hideAll()
@@ -88,10 +99,19 @@ bool GameObject::isChildOf(GameObject* go) const
     return false;
 }
 
+GameObject* GameObject::findChildByName(const std::string& name)
+{
+    for(auto child : transform.children)
+    {
+        if (child->gameObject->name == name) return child->gameObject;
+    }
+    return nullptr;
+}
+
 void GameObject::draw() {
-	if (visible) {
+	if (visible && active && !dead) {
 		for (auto component : componentList) {
-			if (component->visible)
+			if (component->visible && component->active)
 				component->draw();
 		}
 		for (auto child : transform.children) {
@@ -101,42 +121,45 @@ void GameObject::draw() {
 }
 
 void GameObject::debugDraw() {
-	for (auto component : componentList) {
-		component->debugDraw();
-	}
-	for (auto child : transform.children) {
-		(child->gameObject)->debugDraw();
-	}
+    if (visible && active && !dead) {
+        for (auto component : componentList) {
+            if (component->visible && component->active)
+                component->debugDraw();
+        }
+        for (auto child : transform.children) {
+            (child->gameObject)->debugDraw();
+        }
+    }
 }
 
 void GameObject::update(float deltaTime)
 {
+    for (auto component : componentList)
+    {
+        if (newlyCreated || component->newlyCreated) component->create();
+    }
+    if (dead || !active) return;
 	for (unsigned int i = 0; i < transform.children.size(); i++)
     {
         auto object = transform.children[i];
 		if (object->gameObject->dead)
 		{
-			BoxCollider* collider;
-			if ((collider = getComponent<BoxCollider>()) != nullptr) {
-				collider->remove();
-			}
 			delete object->gameObject;
 			transform.children.erase(transform.children.begin() + i);
 		}
-		else
-			object->gameObject->update(deltaTime);
+		else object->gameObject->update(deltaTime);
     }
     for (auto component : componentList)
     {
-        component->update(deltaTime);
+        if(component->active) component->update(deltaTime);
     }
 }
 
 void GameObject::extract()
 {
-	if (visible) {
+	if (visible && active && !dead) {
 		Mesh* mesh;
-		if ((mesh = getComponent<Mesh>()) != nullptr) {
+		if ((mesh = getComponent<Mesh>()) != nullptr && mesh->active) {
 			if (mesh->material && mesh->material->transparent) {
 				Renderer::renderBuffer.forward.push_back(mesh);
 			}
@@ -146,15 +169,15 @@ void GameObject::extract()
 			}
 		}
 		GPUEmitter* emitter;
-		if ((emitter = getComponent<GPUEmitter>()) != nullptr) {
+		if ((emitter = getComponent<GPUEmitter>()) != nullptr && emitter->active) {
             Renderer::renderBuffer.particle.push_back(emitter);
 		}
 		ParticleTrail* trail;
-		if ((trail = getComponent<ParticleTrail>()) != nullptr) {
+		if ((trail = getComponent<ParticleTrail>()) != nullptr && trail->active) {
             Renderer::renderBuffer.particle.push_back(trail);
 		}
 		Light* light;
-		if ((light = getComponent<Light>()) != nullptr) {
+		if ((light = getComponent<Light>()) != nullptr && light->active) {
             Renderer::renderBuffer.light.push_back(light);
 		}
 	}
@@ -164,23 +187,37 @@ void GameObject::extract()
 	}
 }
 
-void GameObject::setMaterial(Material* mat) {
-	Mesh* mesh;
-	if ((mesh = getComponent<Mesh>()) != nullptr) {
-		mesh->setMaterial(mat);
-	}
-	for (auto child : transform.children) {
-		(child->gameObject)->setMaterial(mat);
+void GameObject::collisionEnter(GameObject* other)
+{
+    if (!active || dead) return;
+	for (auto component : componentList)
+	{
+        if (!component->active) continue;
+		component->collisionEnter(other);
 	}
 }
 
-void GameObject::onCollisionEnter(GameObject* other)
+/*
+void GameObject::collisionStay(GameObject* other)
 {
-	for (auto component : componentList)
-	{
-		component->onCollisionEnter(other);
-	}
+    if (!active || dead) return;
+    for (auto component : componentList)
+    {
+        if (!component->active) continue;
+        component->collisionStay(other);
+    }
 }
+
+void GameObject::collisionExit(GameObject* other)
+{
+    if (!active || dead) return;
+    for (auto component : componentList)
+    {
+        if (!component->active) continue;
+        component->collisionExit(other);
+    }
+}
+*/
 
 void GameObject::setName(const std::string& name)
 {

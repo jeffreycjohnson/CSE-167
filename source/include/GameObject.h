@@ -4,15 +4,14 @@
 #include "ForwardDecs.h"
 #include "Transform.h"
 #include "Component.h"
-#include "Material.h"
-#include <list>
+#include <vector>
 #include <map>
 
 class GameObject
 {
 public:
 	Transform transform;
-	bool dead, visible;
+	bool visible, active;
 
     static GameObject SceneRoot;
     static GameObject* FindByName(const std::string& name);
@@ -59,21 +58,21 @@ public:
 	void destroy();
 	void hideAll();
     bool isChildOf(GameObject* go) const;
+    GameObject* findChildByName(const std::string& name);
+    void setName(const std::string& name);
+    std::string getName() const;
 
 	void draw();
 	void debugDraw();
     void update(float deltaTime);
+    void collisionEnter(GameObject* other);
+    //void collisionStay(GameObject* other);
+    //void collisionExit(GameObject* other);
 
 	void extract();
 
-	void setMaterial(Material *mat);
-
-	void onCollisionEnter(GameObject* other);
-
-    void setName(const std::string& name);
-    std::string getName() const;
-
 protected:
+    bool dead, newlyCreated;
     std::vector<Component*> componentList;
     std::string name;
     static std::multimap<std::string, GameObject*> nameMap;

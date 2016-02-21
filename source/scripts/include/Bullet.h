@@ -15,12 +15,10 @@ private:
 public:
 	glm::vec3 startPos, startVel, forward;
 	Bullet(glm::vec3 startPos, glm::vec3 forward, glm::vec3 starVel, float emitterDuration);
-	~Bullet();
 
 	void init();
-	void update(float deltaTime);
-	void onCollisionEnter(GameObject* other);
-	void destroy();
+	void update(float deltaTime) override;
+	void collisionEnter(GameObject* other) override;
 };
 
 #endif
