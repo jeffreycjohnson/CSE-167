@@ -15,17 +15,17 @@ public:
     float constantFalloff = 1, linearFalloff = 0, exponentialFalloff = 1;
 
     virtual void forwardPass(int index) = 0;
-    virtual void deferredPass(bool bind) = 0;
+    virtual void deferredPass() = 0;
 
 protected:
-    void deferredHelper(const std::string& meshName, bool bind = true);
+    void deferredHelper(const std::string& meshName);
 };
 
 class PointLight : public Light
 {
 public:
     void forwardPass(int index) override;
-    void deferredPass(bool bind) override;
+    void deferredPass() override;
 };
 
 class DirectionalLight : public Light
@@ -33,7 +33,7 @@ class DirectionalLight : public Light
 public:
     explicit DirectionalLight(bool shadow = false);
     void forwardPass(int index) override;
-    void deferredPass(bool bind) override;
+    void deferredPass() override;
     void bindShadowMap();
     void update(float) override;
     void setGameObject(GameObject* object) override;
@@ -48,7 +48,7 @@ public:
     float angle = 30, exponent = 5;
 
     void forwardPass(int index) override;
-    void deferredPass(bool bind) override;
+    void deferredPass() override;
 };
 
 #endif

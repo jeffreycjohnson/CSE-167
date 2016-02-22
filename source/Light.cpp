@@ -10,22 +10,21 @@
 
 glm::mat4 DirectionalLight::shadowMatrix = glm::ortho<float>(-25, 25, -25, 25, -50, 50);
 
-void Light::deferredHelper(const std::string& meshName, bool bind)
+void Light::deferredHelper(const std::string& meshName)
 {
     auto& currentEntry = Mesh::meshMap[meshName];
 
-    if (bind) {
-        if (Renderer::gpuData.vaoHandle != currentEntry.vaoHandle) {
-            glBindVertexArray(currentEntry.vaoHandle);
-            Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
-        }
-
-        (*Renderer::currentShader)["uLightFalloff"] = glm::vec3(constantFalloff, linearFalloff, exponentialFalloff);
-        (*Renderer::currentShader)["uLightPosition"] = gameObject->transform.getWorldPosition();
-        (*Renderer::currentShader)["uLightColor"] = color;
-        (*Renderer::currentShader)["uLightSize"] = radius;
-        (*Renderer::currentShader)["uLightDirection"] = glm::vec3(gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, 1, 0));
+    if (Renderer::gpuData.vaoHandle != currentEntry.vaoHandle) {
+        glBindVertexArray(currentEntry.vaoHandle);
+        Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
     }
+
+    (*Renderer::currentShader)["uLightFalloff"] = glm::vec3(constantFalloff, linearFalloff, exponentialFalloff);
+    (*Renderer::currentShader)["uLightPosition"] = gameObject->transform.getWorldPosition();
+    (*Renderer::currentShader)["uLightColor"] = color;
+    (*Renderer::currentShader)["uLightSize"] = radius;
+    (*Renderer::currentShader)["uLightDirection"] = glm::vec3(gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, 1, 0));
+
     glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
     CHECK_ERROR();
 }
@@ -39,16 +38,14 @@ void PointLight::forwardPass(int index)
 	}
 }
 
-void PointLight::deferredPass(bool bind)
+void PointLight::deferredPass()
 {
-    if (bind) {
-        (*Renderer::currentShader)["uLightType"] = 0;
-        auto max = std::max(std::max(color.r, color.g), color.b);
-        float scale = (-linearFalloff + sqrtf(linearFalloff * linearFalloff - 4.0f * (constantFalloff - 256.0f * max) * exponentialFalloff))
-            / (2.0f * exponentialFalloff);
-        (*Renderer::currentShader)["uScale"] = scale;
-    }
-    deferredHelper("Sphere", bind);
+    (*Renderer::currentShader)["uLightType"] = 0;
+    auto max = std::max(std::max(color.r, color.g), color.b);
+    float scale = (-linearFalloff + sqrtf(linearFalloff * linearFalloff - 4.0f * (constantFalloff - 256.0f * max) * exponentialFalloff))
+        / (2.0f * exponentialFalloff);
+    (*Renderer::currentShader)["uScale"] = scale;
+    deferredHelper("Sphere");
 }
 
 DirectionalLight::DirectionalLight(bool shadow)
@@ -70,7 +67,7 @@ void DirectionalLight::forwardPass(int index)
 	}
 }
 
-void DirectionalLight::deferredPass(bool bind)
+void DirectionalLight::deferredPass()
 {
     glDisable(GL_STENCIL_TEST);
     glDisable(GL_DEPTH_TEST);
@@ -111,6 +108,6 @@ void SpotLight::forwardPass(int index)
 {
 }
 
-void SpotLight::deferredPass(bool bind)
+void SpotLight::deferredPass()
 {
 }

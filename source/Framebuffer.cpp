@@ -105,11 +105,11 @@ void Framebuffer::deleteTextures()
 	}
 }
 
-void Framebuffer::bind(int bufferCount, GLuint *buffersToDraw) {
+void Framebuffer::bind(int bufferCount, GLuint *buffersToDraw, bool clear) {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 	glDrawBuffers(bufferCount, buffersToDraw);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	if(clear) glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//TODO use Renderer::resize()?
 	glViewport(0, 0, width, height);

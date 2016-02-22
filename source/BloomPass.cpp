@@ -40,7 +40,8 @@ void BloomPass::render(Camera* camera)
     camera->fbo->bindTexture(0, 3);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
     glGenerateMipmap(GL_TEXTURE_2D);
-    brightPass->bind(1, &buffers[0]);
+    glDisable(GL_DEPTH_TEST);
+    brightPass->bind(1, &buffers[0], false);
     s1->use();
     camera->fbo->draw();
     CHECK_ERROR();
@@ -57,13 +58,13 @@ void BloomPass::render(Camera* camera)
         (*s2)["width"] = (float)(Renderer::getWindowWidth() / pow(2, i + 1));
         (*s2)["height"] = (float)(Renderer::getWindowHeight() / pow(2, i + 1));
         brightPass->bindTexture(0, 0);
-        blurBuffers[i]->bind(1, &buffers[0]);
+        blurBuffers[i]->bind(1, &buffers[0], false);
         (*s2)["direction"] = glm::vec2(1, 0);
         camera->fbo->draw();
 
         (*s2)["level"] = 0.f;
         blurBuffers[i]->bindTexture(0, 0);
-        blurBuffers[i]->bind(1, &buffers[1]);
+        blurBuffers[i]->bind(1, &buffers[1], false);
         (*s2)["direction"] = glm::vec2(0, 1);
         camera->fbo->draw();
     }

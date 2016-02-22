@@ -65,23 +65,11 @@ void LightingPass::render(Camera* camera)
         auto d = dynamic_cast<DirectionalLight*>(light);
         if (!d)
         {
-            glDrawBuffer(GL_NONE);
-            glDisable(GL_CULL_FACE);
-            glEnable(GL_STENCIL_TEST);
-            glEnable(GL_DEPTH_TEST);
-            glClear(GL_STENCIL_BUFFER_BIT);
-            glStencilFunc(GL_ALWAYS, 0, 0);
-
-            light->deferredPass(true);
-
-
-            glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
             glCullFace(GL_FRONT);
         }
         else
         {
             glCullFace(GL_BACK);
-            glDisable(GL_STENCIL_TEST);
             if(d->shadowCaster && d->shadowMap->fbo)
             {
                 d->shadowMap->fbo->bindDepthTexture(3);
@@ -89,6 +77,7 @@ void LightingPass::render(Camera* camera)
             }
         }
 
+        glDisable(GL_STENCIL_TEST);
         glEnable(GL_BLEND);
         glBlendEquation(GL_FUNC_ADD);
         glBlendFunc(GL_ONE, GL_ONE);
@@ -96,7 +85,7 @@ void LightingPass::render(Camera* camera)
         glDisable(GL_DEPTH_TEST);
         glDrawBuffer(GL_COLOR_ATTACHMENT3);
 
-        light->deferredPass(false);
+        light->deferredPass();
     }
     CHECK_ERROR();
     glDisable(GL_STENCIL_TEST);
