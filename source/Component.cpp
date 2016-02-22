@@ -38,7 +38,3 @@ void Component::deactivate()
 void Component::fixedUpdate()
 {
 }
-
-void Component::fixedUpdateApply()
-{
-}

@@ -17,6 +17,7 @@ class Component
         virtual void setGameObject(GameObject* go);
 
         virtual void update(float deltaTime);
+        virtual void fixedUpdate();
 		virtual void draw();
 		virtual void debugDraw();
         virtual void create(); // (called on first update after fully constructed)
@@ -27,8 +28,6 @@ class Component
         virtual void collisionStay(GameObject* other);
         virtual void activate();
         virtual void deactivate();*/
-        virtual void fixedUpdate();
-        virtual void fixedUpdateApply();
 };
 
 #endif

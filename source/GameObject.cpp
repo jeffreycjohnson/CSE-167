@@ -32,6 +32,10 @@ std::vector<GameObject*> GameObject::FindAllByName(const std::string& name)
 extern Scene * scene;
 void GameObject::UpdateScene()
 {
+    while(Timer::nextFixedStep())
+    {
+        SceneRoot.fixedUpdate();
+    }
     SceneRoot.update(Timer::deltaTime());
     scene->loop(); /* This is just temporary - all it does it do translation without having to create temporary components */
 }
@@ -152,6 +156,19 @@ void GameObject::update(float deltaTime)
     for (auto component : componentList)
     {
         if(component->active) component->update(deltaTime);
+    }
+}
+
+void GameObject::fixedUpdate()
+{
+    if (dead || !active) return;
+    for (unsigned int i = 0; i < transform.children.size(); i++)
+    {
+        transform.children[i]->gameObject->fixedUpdate();
+    }
+    for (auto component : componentList)
+    {
+        if (component->active) component->fixedUpdate();
     }
 }
 

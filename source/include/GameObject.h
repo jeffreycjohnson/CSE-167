@@ -65,6 +65,7 @@ public:
 	void draw();
 	void debugDraw();
     void update(float deltaTime);
+    void fixedUpdate();
     void collisionEnter(GameObject* other);
     //void collisionStay(GameObject* other);
     //void collisionExit(GameObject* other);
