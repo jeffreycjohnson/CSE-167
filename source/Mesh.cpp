@@ -9,9 +9,6 @@
 
 #include "Animation.h"
 
-#define INT_SIZE 4
-#define FLOAT_SIZE 4
-
 #define POSITION_COUNT 3
 #define NORMAL_COUNT 3
 #define TANGENT_COUNT 3
@@ -48,7 +45,8 @@ void Mesh::draw() {
 	}
 
 	//TODO move
-	Renderer::setModelMatrix(gameObject->transform.getTransformMatrix());
+	if(gameObject) Renderer::setModelMatrix(gameObject->transform.getTransformMatrix());
+    else Renderer::setModelMatrix(glm::mat4());
 
 	if ((Renderer::currentShader == Renderer::getShader(FORWARD_PBR_SHADER_ANIM) ||
         Renderer::currentShader == Renderer::getShader(DEFERRED_PBR_SHADER_ANIM) ||
@@ -68,16 +66,18 @@ void Mesh::draw() {
 		}
 	}
 
-	glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
+    if(currentEntry.wireframe)
+    {
+        glDrawElements(GL_LINES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
+    }
+    else {
+        glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
+    }
 }
 
 void Mesh::setMaterial(Material *mat) {
 	material = mat;
 }
-
-
-
-
 
 
 bool boneWeightSort(std::pair<int, float> bone1, std::pair<int, float> bone2) {
@@ -95,7 +95,8 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
 		enabledTexCoord[t] = mesh->HasTextureCoords(t);
 	}
 
-	bool hasTangents = mesh->HasTangentsAndBitangents();
+    bool hasTangents = mesh->HasTangentsAndBitangents();
+    bool hasNormals = mesh->HasNormals();
 
 	std::pair<glm::ivec4, glm::vec4> *boneResults;
 
@@ -141,9 +142,11 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
 		for (int p = 0; p < POSITION_COUNT; ++p) {
 			megaArray.push_back(mesh->mVertices[i][p]);
 		}
-		for (int p = 0; p < NORMAL_COUNT; ++p) {
-			megaArray.push_back(mesh->mNormals[i][p]);
-		}
+        if (hasNormals) {
+            for (int p = 0; p < NORMAL_COUNT; ++p) {
+                megaArray.push_back(mesh->mNormals[i][p]);
+            }
+        }
 		if (enabledTexCoord[0]) {
 			for (int p = 0; p < TEX_COORD_COUNT; ++p) {
 				megaArray.push_back(mesh->mTextureCoords[0][i][p]);
@@ -171,7 +174,8 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
 
 
 	for (unsigned int f = 0; f < mesh->mNumFaces; ++f) {
-		for (int p = 0; p < 3; ++p) {
+        unsigned indexCount = mesh->mPrimitiveTypes == aiPrimitiveType_LINE ? 2 : 3;
+		for (int p = 0; p < indexCount; ++p) {
 			indexArray.push_back(mesh->mFaces[f].mIndices[p]);
 		}
 	}
@@ -180,20 +184,6 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
-
-	glEnableVertexAttribArray(VERTEX_ATTRIB_LOCATION);
-	glEnableVertexAttribArray(NORMAL_ATTRIB_LOCATION);
-	if (enabledTexCoord[0]) {
-		glEnableVertexAttribArray(TEX_COORD_0_ATTRIB_LOCATION);
-	}
-	if (hasTangents) {
-		glEnableVertexAttribArray(TANGENT_ATTRIB_LOCATION);
-		glEnableVertexAttribArray(BITANGENT_ATTRIB_LOCATION);
-	}
-	if (mesh->HasBones()) {
-		glEnableVertexAttribArray(BONE_ID_ATTRIB_LOCATION);
-		glEnableVertexAttribArray(BONE_WEIGHT_ATTRIB_LOCATION);
-	}
 
 	GLuint meshBuffer[3];
 	glGenBuffers(3, meshBuffer);
@@ -206,33 +196,44 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexArray.size() * sizeof(int), &(indexArray[0]), GL_STATIC_DRAW);
 
 
-	int stride = FLOAT_SIZE * (POSITION_COUNT + NORMAL_COUNT);
-	if (hasTangents) stride += FLOAT_SIZE * (2 * TANGENT_COUNT);
-	if (enabledTexCoord[0]) stride += FLOAT_SIZE * TEX_COORD_COUNT;
-	if (mesh->HasBones()) stride += FLOAT_SIZE * BONE_WEIGHT_COUNT;
+	int stride = sizeof(float) * POSITION_COUNT;
+    if (hasNormals) stride += sizeof(float) * NORMAL_COUNT;
+	if (hasTangents) stride += sizeof(float) * (2 * TANGENT_COUNT);
+	if (enabledTexCoord[0]) stride += sizeof(float) * TEX_COORD_COUNT;
+	if (mesh->HasBones()) stride += sizeof(float) * BONE_WEIGHT_COUNT;
 
 	uintptr_t currentOffset = 0;
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (FLOAT_SIZE * 3);
-	glVertexAttribPointer(1, 3, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (FLOAT_SIZE * 3);
+    glEnableVertexAttribArray(VERTEX_ATTRIB_LOCATION);
+	glVertexAttribPointer(VERTEX_ATTRIB_LOCATION, 3, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (sizeof(float) * 3);
+    if (hasNormals) {
+        glEnableVertexAttribArray(NORMAL_ATTRIB_LOCATION);
+        glVertexAttribPointer(NORMAL_ATTRIB_LOCATION, 3, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (sizeof(float) * 3);
+    }
 	if (enabledTexCoord[0]) {
-		glVertexAttribPointer(2, 2, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (FLOAT_SIZE * 2);
+        glEnableVertexAttribArray(TEX_COORD_0_ATTRIB_LOCATION);
+		glVertexAttribPointer(TEX_COORD_0_ATTRIB_LOCATION, 2, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (sizeof(float) * 2);
 	}
 	if (hasTangents) {
-		glVertexAttribPointer(3, 3, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (FLOAT_SIZE * 3);
-		glVertexAttribPointer(4, 3, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (FLOAT_SIZE * 3);
+        glEnableVertexAttribArray(TANGENT_ATTRIB_LOCATION);
+        glEnableVertexAttribArray(BITANGENT_ATTRIB_LOCATION);
+		glVertexAttribPointer(TANGENT_ATTRIB_LOCATION, 3, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (sizeof(float) * 3);
+		glVertexAttribPointer(BITANGENT_ATTRIB_LOCATION, 3, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (sizeof(float) * 3);
 	}
 	if (mesh->HasBones()) {
-		glVertexAttribPointer(5, 4, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (FLOAT_SIZE * 4);
+        glEnableVertexAttribArray(BONE_ID_ATTRIB_LOCATION);
+        glEnableVertexAttribArray(BONE_WEIGHT_ATTRIB_LOCATION);
+		glVertexAttribPointer(BONE_WEIGHT_ATTRIB_LOCATION, 4, GL_FLOAT, false, stride, (GLvoid*)currentOffset); currentOffset += (sizeof(float) * 4);
 
 		glBindBuffer(GL_ARRAY_BUFFER, meshBuffer[2]);
 		glBufferData(GL_ARRAY_BUFFER, idArray.size() * sizeof(int), &(idArray[0]), GL_STATIC_DRAW);
-		glVertexAttribIPointer(6, 4, GL_INT, INT_SIZE * 4, (GLvoid*)0);
+		glVertexAttribIPointer(BONE_ID_ATTRIB_LOCATION, 4, GL_INT, sizeof(int) * 4, (GLvoid*)0);
 	}
 
 	MeshData meshData;
 	meshData.vaoHandle = vao;
 	meshData.indexSize = static_cast<GLsizei>(indexArray.size());
+    meshData.wireframe = mesh->mPrimitiveTypes == aiPrimitiveType_LINE;
 
 	Mesh::meshMap[name] = meshData;
 }

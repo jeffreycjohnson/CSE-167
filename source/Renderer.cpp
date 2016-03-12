@@ -1,7 +1,6 @@
 #include "Renderer.h"
 #include "Mesh.h"
 #include "Camera.h"
-#include "Framebuffer.h"
 #include <gtc/matrix_transform.hpp>
 #include "Skybox.h"
 #include "Timer.h"
@@ -15,8 +14,9 @@
 #define VIEW_MATRIX "uV_Matrix"
 
 
-int Renderer::width = 0;
-int Renderer::height = 0;
+int Renderer::windowWidth = 0;
+int Renderer::windowHeight = 0;
+bool Renderer::drawDebug = false;
 
 glm::mat4 Renderer::view, Renderer::perspective;
 
@@ -25,40 +25,28 @@ Shader* shaderList[SHADER_COUNT];
 int Renderer::shaderForwardLightList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM };
 int shaderViewList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER,
     PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING, SKYBOX_SHADER,
-    SHADOW_SHADER, SHADOW_SHADER_ANIM, BASIC_SHADER, FORWARD_UNLIT, FORWARD_EMISSIVE };
+    SHADOW_SHADER, SHADOW_SHADER_ANIM, DEBUG_SHADER, FORWARD_UNLIT, FORWARD_EMISSIVE };
 int shaderCameraPosList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 int shaderEnvironmentList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 int shaderPerspectiveList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER, EMITTER_SHADER,
     EMITTER_BURST_SHADER, PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING,
-    BASIC_SHADER, FORWARD_UNLIT, FORWARD_EMISSIVE };
+    DEBUG_SHADER, FORWARD_UNLIT, FORWARD_EMISSIVE };
 
-Camera* Renderer::camera = new Camera();
-float Renderer::prevFOV = 1;
+Camera* Renderer::mainCamera;
+Camera* Renderer::currentCamera;
+std::list<Camera*> Renderer::cameras;
 
 GPUData Renderer::gpuData;
 
 Renderer::RenderBuffer Renderer::renderBuffer;
 
-double lastTime;
-
-Framebuffer* fboTest;
-Framebuffer* fboBlur;
-
 Scene* scene;
 
 Skybox* skybox;
 
-ShadowPass *shadowPass;
-ForwardPass *regularPass;
-ParticlePass *particlePass;
-DeferredPass *deferredPass;
-BloomPass *bloomPass;
-SkyboxPass *skyboxPass;
-std::vector<RenderPass*> Renderer::passes;
-
 void Renderer::init(int window_width, int window_height) {
-	width = window_width;
-	height = window_height;
+    windowWidth = window_width;
+    windowHeight = window_height;
 
 	gpuData.vaoHandle = -1;
 
@@ -124,7 +112,7 @@ void Renderer::init(int window_width, int window_height) {
     (*shaderList[SHADOW_SHADER])["uP_Matrix"] = DirectionalLight::shadowMatrix;
     (*shaderList[SHADOW_SHADER_ANIM])["uP_Matrix"] = DirectionalLight::shadowMatrix;
 
-	shaderList[BASIC_SHADER] = new Shader(
+	shaderList[DEBUG_SHADER] = new Shader(
 		"source/shaders/simple.vert", "source/shaders/simple.frag"
 		);
 
@@ -157,54 +145,50 @@ void Renderer::init(int window_width, int window_height) {
 	skybox->applyIrradiance();
 	skybox->applyTexture(5);
 
+    mainCamera = new Camera(windowWidth, windowHeight, false);
+    mainCamera->passes.push_back(std::make_unique<GBufferPass>());
+    mainCamera->passes.push_back(std::make_unique<LightingPass>());
+    mainCamera->passes.push_back(std::make_unique<SkyboxPass>(skybox));
+    mainCamera->passes.push_back(std::make_unique<ForwardPass>());
+    mainCamera->passes.push_back(std::make_unique<ParticlePass>());
+    mainCamera->passes.push_back(std::make_unique<DebugPass>());
+    mainCamera->passes.push_back(std::make_unique<BloomPass>());
+
+    resize(windowWidth, windowHeight);
+
 	scene = new GameScene();
-
-	fboTest = new Framebuffer(width, height, 1, false, true);
-	fboBlur = new Framebuffer(width / 2, height / 2, 2, false, true);
-
-	resize(width, height);
-
-	regularPass = new ForwardPass();
-	particlePass = new ParticlePass();
-    shadowPass = new ShadowPass();
-    deferredPass = new DeferredPass();
-    bloomPass = new BloomPass(deferredPass);
-    skyboxPass = new SkyboxPass(skybox);
-
-    passes.push_back(shadowPass);
-    passes.push_back(deferredPass);
-    passes.push_back(skyboxPass);
-    passes.push_back(regularPass);
-    passes.push_back(particlePass);
-    passes.push_back(bloomPass);
-
-	lastTime = glfwGetTime();
 }
 
 void Renderer::loop() {
-    applyPerFrameData();
     extractObjects();
 
-	camera->update(Timer::deltaTime());
-	if (camera->getFOV() != prevFOV)
-	{
-		prevFOV = camera->getFOV();
-	}
+    for(auto camera : cameras)
+    {
+        camera->update(Timer::deltaTime());
+        if (camera == mainCamera) continue;
+        currentCamera = camera;
+        applyPerFrameData(camera);
+        for(auto& pass : camera->passes)
+        {
+            pass->render(camera);
+        }
+    }
+    currentCamera = mainCamera;
+    applyPerFrameData(mainCamera);
+    int i = 0;
+    for (auto& pass : mainCamera->passes)
+    {
+        if (i++ == mainCamera->passes.size() - 1) {
+            auto job = workerPool->createJob(GameObject::UpdateScene)->queue();
+            pass->render(mainCamera);
+            workerPool->wait(job);
+        }
+        else pass->render(mainCamera);
+    }
 
     (*shaderList[SHADOW_SHADER])["uP_Matrix"] = DirectionalLight::shadowMatrix;
     (*shaderList[SHADOW_SHADER_ANIM])["uP_Matrix"] = DirectionalLight::shadowMatrix;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-    for(auto pass : passes)
-    {
-        if (pass == bloomPass) {
-            auto job = workerPool->createJob(GameObject::UpdateScene)->queue();
-            pass->render();
-            workerPool->wait(job);
-        }
-        else pass->render();
-    }
 }
 
 void Renderer::extractObjects() {
@@ -215,13 +199,13 @@ void Renderer::extractObjects() {
 	GameObject::SceneRoot.extract();
 }
 
-void Renderer::applyPerFrameData() {
+void Renderer::applyPerFrameData(Camera* camera) {
     view = camera->getCameraMatrix();
 	for (int shaderId : shaderViewList) {
-		(*Renderer::getShader(shaderId))[VIEW_MATRIX] =view;
+		(*Renderer::getShader(shaderId))[VIEW_MATRIX] = view;
 	}
 	for (int shaderId : shaderCameraPosList) {
-		(*Renderer::getShader(shaderId))["cameraPos"] = Renderer::camera->gameObject->transform.getWorldPosition();
+		(*Renderer::getShader(shaderId))["cameraPos"] = camera->gameObject->transform.getWorldPosition();
 	}
 }
 
@@ -261,11 +245,10 @@ void Renderer::setCurrentShader(Shader* shader) {
 }
 
 void Renderer::switchShader(int shaderId) {
-	currentShader = shaderList[shaderId];
-	currentShader->use();
+	auto shader = shaderList[shaderId];
+    shader->use();
+    currentShader = shader;
 }
-
-
 
 void Renderer::setModelMatrix(const glm::mat4& transform) {
 	(*currentShader)[MODEL_MATRIX] = transform;
@@ -274,9 +257,33 @@ void Renderer::setModelMatrix(const glm::mat4& transform) {
 void Renderer::resize(int width, int height) {
 	glViewport(0, 0, width, height);
 
-	Renderer::width = width;
-	Renderer::height = height;
+	windowWidth = width;
+	windowHeight = height;
 
-	perspective = glm::perspective(camera->getFOV(), width / (float)height, NEAR_DEPTH, FAR_DEPTH);
+	perspective = glm::perspective(mainCamera->getFOV(), width / (float)height, NEAR_DEPTH, FAR_DEPTH);
 	updatePerspective(perspective);
+}
+
+void Renderer::drawSphere(glm::vec3 pos, float radius, const glm::vec4& color, Transform* transform)
+{
+    Mesh m("Sphere_Outline");
+    switchShader(DEBUG_SHADER);
+    glm::vec4 position(pos, 1);
+    if (transform) m.setGameObject(transform->gameObject);
+    (*currentShader)["uPosition"] = position;
+    (*currentShader)["uScale"] = glm::vec4(radius);
+    (*currentShader)["uColor"] = color;
+    m.draw();
+}
+
+void Renderer::drawBox(glm::vec3 pos, const glm::vec3& scale, const glm::vec4& color, Transform* transform)
+{
+    Mesh m("Box_Outline");
+    switchShader(DEBUG_SHADER);
+    glm::vec4 position(pos, 1);
+    if (transform) m.setGameObject(transform->gameObject);
+    (*currentShader)["uPosition"] = position;
+    (*currentShader)["uScale"] = glm::vec4(scale, 1);
+    (*currentShader)["uColor"] = color;
+    m.draw();
 }

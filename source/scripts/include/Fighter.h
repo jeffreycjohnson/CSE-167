@@ -14,10 +14,10 @@ private:
 	bool killed;
 public:
     Component* swarm;
-	Fighter(Sound* explosion);
+	explicit Fighter(Sound* explosion);
 	~Fighter();
 
-	void update(float);
+	void update(float) override;
 	void damage(int damage);
 };
 

@@ -6,25 +6,25 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtc/matrix_inverse.hpp>
 #include "Camera.h"
+#include "RenderPass.h"
 
 glm::mat4 DirectionalLight::shadowMatrix = glm::ortho<float>(-25, 25, -25, 25, -50, 50);
 
-void Light::deferredHelper(const std::string& meshName, bool bind)
+void Light::deferredHelper(const std::string& meshName)
 {
     auto& currentEntry = Mesh::meshMap[meshName];
 
-    if (bind) {
-        if (Renderer::gpuData.vaoHandle != currentEntry.vaoHandle) {
-            glBindVertexArray(currentEntry.vaoHandle);
-            Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
-        }
-
-        (*Renderer::currentShader)["uLightFalloff"] = glm::vec3(constantFalloff, linearFalloff, exponentialFalloff);
-        (*Renderer::currentShader)["uLightPosition"] = gameObject->transform.getWorldPosition();
-        (*Renderer::currentShader)["uLightColor"] = color;
-        (*Renderer::currentShader)["uLightSize"] = radius;
-        (*Renderer::currentShader)["uLightDirection"] = glm::vec3(gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, 1, 0));
+    if (Renderer::gpuData.vaoHandle != currentEntry.vaoHandle) {
+        glBindVertexArray(currentEntry.vaoHandle);
+        Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
     }
+
+    (*Renderer::currentShader)["uLightFalloff"] = glm::vec3(constantFalloff, linearFalloff, exponentialFalloff);
+    (*Renderer::currentShader)["uLightPosition"] = gameObject->transform.getWorldPosition();
+    (*Renderer::currentShader)["uLightColor"] = color;
+    (*Renderer::currentShader)["uLightSize"] = radius;
+    (*Renderer::currentShader)["uLightDirection"] = glm::vec3(gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, 1, 0));
+
     glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
     CHECK_ERROR();
 }
@@ -38,16 +38,22 @@ void PointLight::forwardPass(int index)
 	}
 }
 
-void PointLight::deferredPass(bool bind)
+void PointLight::deferredPass()
 {
-    if (bind) {
-        (*Renderer::currentShader)["uLightType"] = 0;
-        auto max = std::max(std::max(color.r, color.g), color.b);
-        float scale = (-linearFalloff + sqrtf(linearFalloff * linearFalloff - 4.0f * (constantFalloff - 256.0f * max) * exponentialFalloff))
-            / (2.0f * exponentialFalloff);
-        (*Renderer::currentShader)["uScale"] = scale;
-    }
-    deferredHelper("Sphere", bind);
+    (*Renderer::currentShader)["uLightType"] = 0;
+    auto max = std::max(std::max(color.r, color.g), color.b);
+    float scale = (-linearFalloff + sqrtf(linearFalloff * linearFalloff - 4.0f * (constantFalloff - 256.0f * max) * exponentialFalloff))
+        / (2.0f * exponentialFalloff);
+    (*Renderer::currentShader)["uScale"] = scale;
+    deferredHelper("Sphere");
+}
+
+void PointLight::debugDraw()
+{
+    auto max = std::max(std::max(color.r, color.g), color.b);
+    float scale = (-linearFalloff + sqrtf(linearFalloff * linearFalloff - 4.0f * (constantFalloff - 256.0f * max) * exponentialFalloff))
+        / (2.0f * exponentialFalloff);
+    Renderer::drawSphere(glm::vec3(0), scale, glm::vec4(color, 1), &gameObject->transform);
 }
 
 DirectionalLight::DirectionalLight(bool shadow)
@@ -55,13 +61,10 @@ DirectionalLight::DirectionalLight(bool shadow)
     if(shadow)
     {
         shadowCaster = shadow;
-        fbo = new Framebuffer(2048, 2048, 0, true, false);
+        shadowMap = std::make_unique<Camera>(2048, 2048, false, std::vector<GLint>({}));
+        shadowMap->passes.push_back(std::make_unique<ShadowPass>());
+        shadowMap->setGameObject(gameObject);
     }
-}
-
-DirectionalLight::~DirectionalLight()
-{
-    if(fbo) delete fbo;
 }
 
 void DirectionalLight::forwardPass(int index)
@@ -72,7 +75,7 @@ void DirectionalLight::forwardPass(int index)
 	}
 }
 
-void DirectionalLight::deferredPass(bool bind)
+void DirectionalLight::deferredPass()
 {
     glDisable(GL_STENCIL_TEST);
     glDisable(GL_DEPTH_TEST);
@@ -89,9 +92,9 @@ void DirectionalLight::deferredPass(bool bind)
 
 void DirectionalLight::bindShadowMap()
 {
-    if(fbo && shadowCaster)
+    if(shadowMap->fbo && shadowCaster)
     {
-        fbo->bind(0, nullptr);
+        shadowMap->fbo->bind(0, nullptr);
         auto mat = glm::affineInverse(gameObject->transform.getTransformMatrix());
         (*Renderer::getShader(SHADOW_SHADER_ANIM))["uV_Matrix"] = mat;
         (*Renderer::getShader(SHADOW_SHADER))["uV_Matrix"] = mat;
@@ -100,13 +103,19 @@ void DirectionalLight::bindShadowMap()
 
 void DirectionalLight::update(float)
 {
-    gameObject->transform.translate(Renderer::camera->gameObject->transform.getWorldPosition() - gameObject->transform.getWorldPosition());
+    gameObject->transform.translate(Renderer::mainCamera->gameObject->transform.getWorldPosition() - gameObject->transform.getWorldPosition());
+}
+
+void DirectionalLight::setGameObject(GameObject* object)
+{
+    Component::setGameObject(object);
+    if (shadowCaster) shadowMap->setGameObject(object);
 }
 
 void SpotLight::forwardPass(int index)
 {
 }
 
-void SpotLight::deferredPass(bool bind)
+void SpotLight::deferredPass()
 {
 }

@@ -30,7 +30,7 @@ public:
 	void deleteTextures();
 
 	void resize(int w, int h);
-	void bind(int, GLuint*);
+	void bind(int, GLuint*, bool clear = true);
 	void unbind();
 
 	void bindTexture(int slot, int index);

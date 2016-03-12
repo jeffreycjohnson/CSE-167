@@ -22,7 +22,7 @@ public:
 	PlayerController(Sound* gun, Sound* boost);
 	~PlayerController();
 
-	void update(float deltaTime);
+	void update(float deltaTime) override;
 };
 
 #endif

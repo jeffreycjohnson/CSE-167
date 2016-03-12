@@ -11,6 +11,7 @@
 struct MeshData {
 	GLuint vaoHandle;
     GLsizei indexSize;
+    bool wireframe;
 	//BoundingBox boundingBox;
 };
 

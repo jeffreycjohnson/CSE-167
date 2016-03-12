@@ -105,15 +105,15 @@ void Framebuffer::deleteTextures()
 	}
 }
 
-void Framebuffer::bind(int bufferCount, GLuint *buffersToDraw) {
+void Framebuffer::bind(int bufferCount, GLuint *buffersToDraw, bool clear) {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 	glDrawBuffers(bufferCount, buffersToDraw);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	if(clear) glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//TODO use Renderer::resize()?
 	glViewport(0, 0, width, height);
-	glm::mat4 perspective = glm::perspective(Renderer::camera->getFOV(), width / (float)height, NEAR_DEPTH, FAR_DEPTH);
+	glm::mat4 perspective = glm::perspective(Renderer::currentCamera->getFOV(), width / (float)height, NEAR_DEPTH, FAR_DEPTH);
 	Renderer::updatePerspective(perspective);
 }
 
@@ -121,7 +121,7 @@ void Framebuffer::unbind() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glViewport(0, 0, Renderer::getWindowWidth(), Renderer::getWindowHeight());
-	glm::mat4 perspective = glm::perspective(Renderer::camera->getFOV(), Renderer::getWindowWidth() / (float)Renderer::getWindowHeight(), NEAR_DEPTH, FAR_DEPTH);
+	glm::mat4 perspective = glm::perspective(Renderer::currentCamera->getFOV(), Renderer::getWindowWidth() / (float)Renderer::getWindowHeight(), NEAR_DEPTH, FAR_DEPTH);
 	Renderer::updatePerspective(perspective);
 }
 

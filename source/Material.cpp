@@ -33,7 +33,7 @@ Material::UniformSetter Material::operator[](const std::string& name)
 
 void Material::bind()
 {
-    if(shader != Renderer::currentShader) shader->use();
+    shader->use();
     for (auto uniform : uniforms)
     {
         uniform.second->set((*shader)[uniform.first]);

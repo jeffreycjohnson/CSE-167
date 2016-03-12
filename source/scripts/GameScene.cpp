@@ -1,18 +1,11 @@
 #include "GameScene.h"
-#include <SOIL.h>
 #include "GameObject.h"
-#include "Mesh.h"
 #include "Camera.h"
-#include "GPUEmitter.h"
 #include "Input.h"
-#include "Timer.h"
-#include "Skybox.h"
 #include "Renderer.h"
 #include "Texture.h"
 #include "ObjectLoader.h"
 #include "BoxCollider.h"
-#include "Swarm.h"
-#include "Animation.h"
 #include "Light.h"
 #include "ParticleTrail.h"
 #include "Sound.h"
@@ -52,10 +45,10 @@ GameScene::GameScene()
 
 
 	GameObject* camera = loadScene("assets/cockpit.dae");
-	camera->addComponent(Renderer::camera);
+	camera->addComponent(Renderer::mainCamera);
 	camera->transform.setPosition(0, 0, 20);
 	camera->transform.getWorldPosition(); // Force matrix updates to prevent loud initial sounds
-	Renderer::camera->getCameraMatrix();
+	Renderer::mainCamera->getCameraMatrix();
 	camera->update(0);
 
 	GameObject* gunObj = new GameObject();
@@ -98,7 +91,7 @@ void GameScene::loop() {
 	BoxCollider::updateColliders();
 
 	if (Input::getMouseDown("mouse 0"))
-		Renderer::camera->screenShake(0.01, 0.25);
+		Renderer::mainCamera->screenShake(0.01, 0.25);
 //	if (Input::getKeyDown("space"))
 //		emitter->getComponent<GPUEmitter>()->play();
 //	if (Input::getMouseDown("mouse 0"))

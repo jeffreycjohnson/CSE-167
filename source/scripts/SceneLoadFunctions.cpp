@@ -24,10 +24,10 @@ void SceneLoadFunctions::loadPlayer(GameObject* parent) {
 
 	GameObject* camera = loadScene("assets/cockpit.fbx");
 	parent->addChild(camera);
-	camera->addComponent(Renderer::camera);
+	camera->addComponent(Renderer::mainCamera);
 	camera->transform.setPosition(0, 0, 20);
 	camera->transform.getWorldPosition(); // Force matrix updates to prevent loud initial sounds
-	Renderer::camera->getCameraMatrix();
+	Renderer::mainCamera->getCameraMatrix();
 	camera->update(0);
 
 	Sound* camSound = new Sound("cabin", true, true, 0.5f, false);

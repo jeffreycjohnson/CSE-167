@@ -1,7 +1,8 @@
-#version 330 compatibility
+#version 330
 
+uniform vec4 uColor;
 out vec4 fragColor;
 
 void main() {
-    fragColor = gl_Color;
+    fragColor = uColor;
 }

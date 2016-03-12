@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "Transform.h"
 #include "Renderer.h"
+#include "Material.h"
 
 #define FLOAT_SIZE 4
 #define VERTEX_ATTRIB_LOCATION 0

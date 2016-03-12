@@ -12,19 +12,17 @@ private:
 	glm::vec3 transformPoints[8];
 	float xmin, xmax, ymin, ymax, zmin, zmax;
 	bool colliding;
+    glm::vec3 offset, dimensions;
 
 public:
 	bool passive;
 
 	BoxCollider(glm::vec3 offset, glm::vec3 dimensions);
 	~BoxCollider();
-	void remove();
-	void update(float);
-	void draw();
-	void debugDraw();
-	void setGameObject(GameObject* go);
+	void destroy() override;
+	void update(float) override;
+	void debugDraw() override;
 	void onCollisionEnter(GameObject* other);
-	void drawDebugCube(glm::vec3 list[]);
 
 	static void updateColliders();
 	static bool checkCollision(int a, int b);

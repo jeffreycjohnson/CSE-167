@@ -4,4 +4,4 @@
 SkyboxPass::SkyboxPass(Skybox* skybox) : skybox(skybox) {
 }
 
-void SkyboxPass::render() { if (skybox) skybox->draw(); }
+void SkyboxPass::render(Camera*) { if (skybox) skybox->draw(); }

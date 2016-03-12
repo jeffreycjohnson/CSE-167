@@ -4,6 +4,7 @@
 #include "stb_image.h" //note - can get this file from SOIL2 - just put in an include folder in Dependencies for now
 #include "Renderer.h"
 #include "Camera.h"
+#include "Material.h"
 
 #define FLOAT_SIZE 4
 #define POSITION_COUNT 3

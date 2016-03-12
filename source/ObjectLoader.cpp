@@ -3,6 +3,7 @@
 #include "GameObject.h"
 #include "Shader.h"
 #include "Renderer.h"
+#include "Material.h"
 
 #include <assimp/Importer.hpp>      // C++ importer interface
 #include <assimp/scene.h>           // Output data structure
@@ -178,7 +179,7 @@ GameObject* loadScene(const std::string& filename) {
 		aiProcess_Triangulate | aiProcess_GenNormals |
 		aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality |
 		aiProcess_FindInvalidData | aiProcess_GenUVCoords | aiProcess_TransformUVCoords |
-		aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace);
+		aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace | aiProcess_SortByPType);
 
 	if (!scene) {
 		LOG(importer.GetErrorString());

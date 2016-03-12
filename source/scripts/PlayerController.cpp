@@ -18,7 +18,7 @@ PlayerController::PlayerController(Sound* gun, Sound* boost)
 	maxBoost = 0.15f;
 	rotationSensitivity = 2;
 	thrustSensitivity = 1;
-	startFOV = Renderer::camera->fov;
+	startFOV = Renderer::mainCamera->fov;
 }
 
 PlayerController::~PlayerController()
@@ -38,15 +38,15 @@ void PlayerController::update(float deltaTime)
 	{
 		gunSound->play();
 		makeBullet(true);
-		Renderer::camera->screenShake(0.025, 0.2);
+		Renderer::mainCamera->screenShake(0.025, 0.2);
 		startShoot = Timer::time();
 	}
 
 	bool zoom = Input::getButton("aim");
 	if (zoom)
-		Renderer::camera->fov = startFOV - 0.5f;
+		Renderer::mainCamera->fov = startFOV - 0.5f;
 	else
-		Renderer::camera->fov = startFOV;
+		Renderer::mainCamera->fov = startFOV;
 
 	float afterburner = (Input::getAxis("afterburner") - 0.5f) * 2.0f;
 	boostSpeed += afterburner * thrustSensitivity * deltaTime;
@@ -57,7 +57,7 @@ void PlayerController::update(float deltaTime)
 
 	float currentSpeed = speed + boostSpeed;
 	if (afterburner >= 0)
-		Renderer::camera->screenShake(currentSpeed * afterburner / 100, 2);
+		Renderer::mainCamera->screenShake(currentSpeed * afterburner / 100, 2);
 	else
 		afterburner = 0;
 
