@@ -22,7 +22,7 @@
 #define PARTICLE_TRAIL_SHADER 9
 #define SHADOW_SHADER 10
 #define SHADOW_SHADER_ANIM 11
-#define BASIC_SHADER 12
+#define DEBUG_SHADER 12
 #define FORWARD_UNLIT 13
 #define FORWARD_EMISSIVE 14
 #define FBO_BLUR 15
@@ -51,6 +51,7 @@ class Renderer
 		static Camera* currentCamera;
         static std::list<Camera*> cameras;
 		static GPUData gpuData;
+        static bool drawDebug;
 
         static glm::mat4 perspective, view;
 
@@ -76,6 +77,9 @@ class Renderer
 		static int getWindowHeight() { return windowHeight; }
 
 		static void resize(int width, int height);
+
+        static void drawSphere(glm::vec3 pos, float radius, const glm::vec4& color, Transform* transform = nullptr);
+        static void drawBox(glm::vec3 pos, const glm::vec3& scale, const glm::vec4& color, Transform* transform = nullptr);
 
 private:
     static int windowWidth, windowHeight;

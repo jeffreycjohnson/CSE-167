@@ -16,6 +16,7 @@
 
 int Renderer::windowWidth = 0;
 int Renderer::windowHeight = 0;
+bool Renderer::drawDebug = false;
 
 glm::mat4 Renderer::view, Renderer::perspective;
 
@@ -24,12 +25,12 @@ Shader* shaderList[SHADER_COUNT];
 int Renderer::shaderForwardLightList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM };
 int shaderViewList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER,
     PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING, SKYBOX_SHADER,
-    SHADOW_SHADER, SHADOW_SHADER_ANIM, BASIC_SHADER, FORWARD_UNLIT, FORWARD_EMISSIVE };
+    SHADOW_SHADER, SHADOW_SHADER_ANIM, DEBUG_SHADER, FORWARD_UNLIT, FORWARD_EMISSIVE };
 int shaderCameraPosList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 int shaderEnvironmentList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 int shaderPerspectiveList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER, EMITTER_SHADER,
     EMITTER_BURST_SHADER, PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING,
-    BASIC_SHADER, FORWARD_UNLIT, FORWARD_EMISSIVE };
+    DEBUG_SHADER, FORWARD_UNLIT, FORWARD_EMISSIVE };
 
 Camera* Renderer::mainCamera;
 Camera* Renderer::currentCamera;
@@ -111,7 +112,7 @@ void Renderer::init(int window_width, int window_height) {
     (*shaderList[SHADOW_SHADER])["uP_Matrix"] = DirectionalLight::shadowMatrix;
     (*shaderList[SHADOW_SHADER_ANIM])["uP_Matrix"] = DirectionalLight::shadowMatrix;
 
-	shaderList[BASIC_SHADER] = new Shader(
+	shaderList[DEBUG_SHADER] = new Shader(
 		"source/shaders/simple.vert", "source/shaders/simple.frag"
 		);
 
@@ -150,6 +151,7 @@ void Renderer::init(int window_width, int window_height) {
     mainCamera->passes.push_back(std::make_unique<SkyboxPass>(skybox));
     mainCamera->passes.push_back(std::make_unique<ForwardPass>());
     mainCamera->passes.push_back(std::make_unique<ParticlePass>());
+    mainCamera->passes.push_back(std::make_unique<DebugPass>());
     mainCamera->passes.push_back(std::make_unique<BloomPass>());
 
     resize(windowWidth, windowHeight);
@@ -243,8 +245,9 @@ void Renderer::setCurrentShader(Shader* shader) {
 }
 
 void Renderer::switchShader(int shaderId) {
-	currentShader = shaderList[shaderId];
-	currentShader->use();
+	auto shader = shaderList[shaderId];
+    shader->use();
+    currentShader = shader;
 }
 
 void Renderer::setModelMatrix(const glm::mat4& transform) {
@@ -259,4 +262,28 @@ void Renderer::resize(int width, int height) {
 
 	perspective = glm::perspective(mainCamera->getFOV(), width / (float)height, NEAR_DEPTH, FAR_DEPTH);
 	updatePerspective(perspective);
+}
+
+void Renderer::drawSphere(glm::vec3 pos, float radius, const glm::vec4& color, Transform* transform)
+{
+    Mesh m("Sphere_Outline");
+    switchShader(DEBUG_SHADER);
+    glm::vec4 position(pos, 1);
+    if (transform) m.setGameObject(transform->gameObject);
+    (*currentShader)["uPosition"] = position;
+    (*currentShader)["uScale"] = glm::vec4(radius);
+    (*currentShader)["uColor"] = color;
+    m.draw();
+}
+
+void Renderer::drawBox(glm::vec3 pos, const glm::vec3& scale, const glm::vec4& color, Transform* transform)
+{
+    Mesh m("Box_Outline");
+    switchShader(DEBUG_SHADER);
+    glm::vec4 position(pos, 1);
+    if (transform) m.setGameObject(transform->gameObject);
+    (*currentShader)["uPosition"] = position;
+    (*currentShader)["uScale"] = glm::vec4(scale, 1);
+    (*currentShader)["uColor"] = color;
+    m.draw();
 }

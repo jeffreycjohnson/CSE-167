@@ -26,6 +26,7 @@ class PointLight : public Light
 public:
     void forwardPass(int index) override;
     void deferredPass() override;
+    void debugDraw() override;
 };
 
 class DirectionalLight : public Light

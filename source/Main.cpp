@@ -72,6 +72,7 @@ int main()
         Timer::update();
         Input::update();
         workerPool->createJob(Sound::updateFMOD)->queue();
+        Renderer::drawDebug = Input::getKey("escape");
         Renderer::loop();
 	}
 

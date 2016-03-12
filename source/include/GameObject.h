@@ -62,7 +62,6 @@ public:
     void setName(const std::string& name);
     std::string getName() const;
 
-	void draw();
 	void debugDraw();
     void update(float deltaTime);
     void fixedUpdate();

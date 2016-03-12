@@ -9,7 +9,7 @@ class Component
     bool newlyCreated = true;
 
 	public:
-        GameObject* gameObject;
+        GameObject* gameObject = nullptr;
         bool visible = true;
         bool active = true;
 

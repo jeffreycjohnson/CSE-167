@@ -124,13 +124,13 @@ void Swarm::debugDraw()
 {
 	sphere->transform.setPosition(currentTarget);
 	sphere->transform.getScale() = glm::vec3(1, 1, 1);
-	sphere->draw();
+	sphere->debugDraw();
 
 	for (auto obstacle : obstacles)
 	{
 		sphere->transform.setPosition(obstacle->transform->getWorldPosition());
 		sphere->transform.getScale() = obstacle->transform->getWorldScale() * glm::vec3(1, 1, 1);
-		sphere->draw();
+		sphere->debugDraw();
 	}
 }
 

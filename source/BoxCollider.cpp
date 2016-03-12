@@ -5,7 +5,7 @@
 
 std::vector<BoxCollider*> BoxCollider::colliders;
 
-BoxCollider::BoxCollider(glm::vec3 offset, glm::vec3 dimensions)
+BoxCollider::BoxCollider(glm::vec3 offset, glm::vec3 dimensions) : offset(offset), dimensions(dimensions)
 {
 	float halfW = dimensions.x / 2;
 	float halfH = dimensions.y / 2;
@@ -67,17 +67,8 @@ void BoxCollider::update(float)
 
 void BoxCollider::debugDraw()
 {
-	drawDebugCube(transformPoints);
-	glm::vec3 aabb[8];
-	aabb[0] = glm::vec3(xmax, ymax, zmax);
-	aabb[1] = glm::vec3(xmax, ymax, zmin);
-	aabb[2] = glm::vec3(xmax, ymin, zmax);
-	aabb[3] = glm::vec3(xmax, ymin, zmin);
-	aabb[4] = glm::vec3(xmin, ymax, zmax);
-	aabb[5] = glm::vec3(xmin, ymax, zmin);
-	aabb[6] = glm::vec3(xmin, ymin, zmax);
-	aabb[7] = glm::vec3(xmin, ymin, zmin);
-	drawDebugCube(aabb);
+    if(colliding) Renderer::drawBox(offset, dimensions, glm::vec4(0, 0, 1, 1), &gameObject->transform);
+    else Renderer::drawBox(offset, dimensions, glm::vec4(1, 0, 0, 1), &gameObject->transform);
 	colliding = false;
 }
 
@@ -85,48 +76,6 @@ void BoxCollider::onCollisionEnter(GameObject* other)
 {
 	if (!passive)
 		colliding = true;
-}
-
-void BoxCollider::drawDebugCube(glm::vec3 list[])
-{
-	if (colliding)
-		glColor3f(1, 0, 0);
-	else
-		glColor3f(0, 1, 0);
-
-	Renderer::setModelMatrix(glm::mat4());
-	glBegin(GL_LINES);
-	
-	glVertex3f(list[0].x, list[0].y, list[0].z);
-	glVertex3f(list[1].x, list[1].y, list[1].z);
-	glVertex3f(list[0].x, list[0].y, list[0].z);
-	glVertex3f(list[2].x, list[2].y, list[2].z);
-	glVertex3f(list[0].x, list[0].y, list[0].z);
-	glVertex3f(list[4].x, list[4].y, list[4].z);
-	
-	glVertex3f(list[5].x, list[5].y, list[5].z);
-	glVertex3f(list[1].x, list[1].y, list[1].z);
-	glVertex3f(list[5].x, list[5].y, list[5].z);
-	glVertex3f(list[4].x, list[4].y, list[4].z);
-	glVertex3f(list[5].x, list[5].y, list[5].z);
-	glVertex3f(list[7].x, list[7].y, list[7].z);
-	
-	glVertex3f(list[6].x, list[6].y, list[6].z);
-	glVertex3f(list[2].x, list[2].y, list[2].z);
-	glVertex3f(list[6].x, list[6].y, list[6].z);
-	glVertex3f(list[7].x, list[7].y, list[7].z);
-	glVertex3f(list[6].x, list[6].y, list[6].z);
-	glVertex3f(list[4].x, list[4].y, list[4].z);
-	
-	glVertex3f(list[3].x, list[3].y, list[3].z);
-	glVertex3f(list[1].x, list[1].y, list[1].z);
-	glVertex3f(list[3].x, list[3].y, list[3].z);
-	glVertex3f(list[2].x, list[2].y, list[2].z);
-	glVertex3f(list[3].x, list[3].y, list[3].z);
-	glVertex3f(list[7].x, list[7].y, list[7].z);
-	
-	glEnd();
-	
 }
 
 void BoxCollider::destroy()

@@ -50,6 +50,12 @@ public:
     void render(Camera* camera) override;
 };
 
+class DebugPass : public RenderPass
+{
+public:
+    void render(Camera* camera) override;
+};
+
 class BloomPass : public RenderPass
 {
 public:

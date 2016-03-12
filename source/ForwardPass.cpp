@@ -27,6 +27,10 @@ void ParticlePass::render(Camera* camera) {
     }
 }
 
+void DebugPass::render(Camera* camera) {
+    if(Renderer::drawDebug) GameObject::SceneRoot.debugDraw();
+}
+
 void ShadowPass::render(Camera* camera)
 {
     auto l = camera->gameObject->getComponent<DirectionalLight>();
@@ -46,7 +50,7 @@ void ShadowPass::render(Camera* camera)
         Shader* s = nullptr;
         if (mat->shader == Renderer::getShader(DEFERRED_PBR_SHADER_ANIM)) s = Renderer::getShader(SHADOW_SHADER_ANIM);
         else s = Renderer::getShader(SHADOW_SHADER);
-        if (s != Renderer::currentShader) s->use();
+        s->use();
         mesh->draw();
     }
 }

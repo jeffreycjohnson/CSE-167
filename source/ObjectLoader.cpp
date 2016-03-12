@@ -179,7 +179,7 @@ GameObject* loadScene(const std::string& filename) {
 		aiProcess_Triangulate | aiProcess_GenNormals |
 		aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality |
 		aiProcess_FindInvalidData | aiProcess_GenUVCoords | aiProcess_TransformUVCoords |
-		aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace);
+		aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace | aiProcess_SortByPType);
 
 	if (!scene) {
 		LOG(importer.GetErrorString());

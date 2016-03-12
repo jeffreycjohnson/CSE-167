@@ -48,6 +48,14 @@ void PointLight::deferredPass()
     deferredHelper("Sphere");
 }
 
+void PointLight::debugDraw()
+{
+    auto max = std::max(std::max(color.r, color.g), color.b);
+    float scale = (-linearFalloff + sqrtf(linearFalloff * linearFalloff - 4.0f * (constantFalloff - 256.0f * max) * exponentialFalloff))
+        / (2.0f * exponentialFalloff);
+    Renderer::drawSphere(glm::vec3(0), scale, glm::vec4(color, 1), &gameObject->transform);
+}
+
 DirectionalLight::DirectionalLight(bool shadow)
 {
     if(shadow)
